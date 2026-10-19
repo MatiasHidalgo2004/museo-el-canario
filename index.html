@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Museo de la vida rural El Canario</title>
+
+  <!-- Google Fonts (Lora, Montserrat, Lato) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles/styles.css" />
+</head>
+<body>
+  <div class="viewport-fixed">
+
+    <!-- Header fijo -->
+    <header class="site-header" role="banner">
+      <div class="header-inner">
+        <a class="brand" href="#">
+          <img src="assets/svg/Logo.svg" alt="Logo Museo El Canario" class="logo-img" />
+          <span class="brand-text">Museo de la vida rural El Canario</span>
+        </a>
+
+        <nav class="main-nav" aria-label="Navegación principal">
+          <a href="#cronograma" class="nav-link">Cronograma</a>
+          <a href="#imagenes" class="nav-link">Imágenes</a>
+          <a href="#biografia" class="nav-link">Biografía</a>
+          <a href="#contacto" class="nav-link">Contacto</a>
+        </nav>
+
+        <!-- toggle visible solo en móvil: SVG embebido (dos franjas que se cruzan en X) -->
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" type="button">
+          <svg class="menu-icon" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <defs>
+              <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="2" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+
+            <!-- círculo de fondo -->
+            <circle class="menu-circle" cx="24" cy="24" r="20" fill="#c0392b" />
+
+            <!-- barras (centradas) -->
+            <g class="bars" stroke="#fff" stroke-linecap="round" stroke-width="3" stroke-linejoin="round">
+              <line class="bar top" x1="14" y1="18" x2="34" y2="18" />
+              <line class="bar bottom" x1="14" y1="30" x2="34" y2="30" />
+            </g>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Menú flotante (solo móvil) -->
+    <aside class="floating-menu" id="floatingMenu" aria-hidden="true">
+      <div class="floating-inner">
+        <nav class="floating-nav" aria-label="Navegación flotante">
+          <a href="#cronograma">Cronograma</a>
+          <a href="#imagenes">Imágenes</a>
+          <a href="#biografia">Biografía</a>
+          <a href="#contacto">Contacto</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Hero: tarjeta blanca centrada con mismo margen que el header -->
+    <main class="hero" role="main" aria-label="Hero">
+      <div class="hero-overlay" aria-hidden="true"></div>
+
+      <section class="card container" role="region" aria-label="Tarjeta principal">
+        <div class="card-inner">
+          <div class="card-copy">
+            <h1 class="card-title">Museo de la vida rural y campesina El Canario</h1>
+
+            <p class="card-lead">
+              Bienvenidos a la página del museo El Canario, donde podrá saber un poco más de la casa, la historia y sus objetos expuestos.
+            </p>
+
+            <p class="card-lead-2">
+              Pudiendo adentrarse en lo que podrá encontrar en su visita, a través de ilustraciones que le harán recorrer por los objetos que alguna vez fueron parte de nuestra historia.
+            </p>
+
+            <a id="cta-recorrer" class="btn-primary" href="#imagenes" role="button" aria-label="Recorrer">RECORRER</a>
+          </div>
+
+          <figure class="card-media" aria-hidden="false">
+            <img src="assets/images/Imagen-Menu.png" alt="Museo Vista Frontal" />
+            <figcaption class="card-caption">
+              <span class="caption-title">MUSEO: VISTA FRONTAL</span>
+              <time datetime="2026-06-20">20/06/26</time>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+    </main>
+
+  <script>
+    (function(){
+      const toggle = document.getElementById('menuToggle');
+      const menu = document.getElementById('floatingMenu');
+      toggle.addEventListener('click', () => {
+        const open = menu.classList.toggle('open');
+        menu.setAttribute('aria-hidden', String(!open));
+        toggle.setAttribute('aria-expanded', String(open));
+        // activa la animación SVG (clase .open en el botón)
+        toggle.classList.toggle('open', open);
+      });
+      document.getElementById('year').textContent = new Date().getFullYear();
+    })();
+  </script>
+</body>
+</html>
