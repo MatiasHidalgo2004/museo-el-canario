@@ -47,15 +47,19 @@ html,body{
   justify-content:center;
   padding:0;
   border-radius:20px;
-  background: rgba(47,107,79,0.78);
+  /* Vidrio esmerilado oscuro (mismo efecto que la tarjeta de recorrido.html) */
+  background: rgba(14,24,19,0.42);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
   color:var(--paper);
-  box-shadow:0 8px 24px rgba(0,0,0,0.12);
-  border:1px solid rgba(255,255,255,0.12);
+  box-shadow:0 18px 40px rgba(0,0,0,0.30);
+  border:1px solid rgba(255,255,255,0.20);
 }
 .header-inner{width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 var(--edge-padding);height:100%}
 .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
 .logo-img{width:56px;height:56px;object-fit:contain}
-.brand-text{font-family:var(--serif);font-weight:700;font-size:clamp(15px,2vw,22px);text-transform:uppercase}
+.brand-text{font-family:var(--serif);font-weight:700;font-size:clamp(15px,2vw,22px);text-transform:uppercase;transition:color var(--transition)}
+.brand:hover .brand-text{color:var(--accent)}
 
 /* Nav (escritorio visible) */
 .main-nav{display:flex;gap:20px;align-items:center}
@@ -78,9 +82,9 @@ html,body{
   background:#ffffff;
   border:1px solid rgba(0,0,0,0.06);
   box-shadow:0 18px 40px rgba(0,0,0,0.12);
-  z-index:110;opacity:0;transform:translateY(-12px) scale(0.98);pointer-events:none;transition:opacity 220ms ease,transform 220ms ease;
+  z-index:110;opacity:0;visibility:hidden;transform:translateY(-12px) scale(0.98);pointer-events:none;transition:opacity 220ms ease,transform 220ms ease,visibility 220ms;
 }
-.floating-menu.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+.floating-menu.open{opacity:1;visibility:visible;transform:translateY(0) scale(1);pointer-events:auto}
 .floating-inner{padding:6px}
 .floating-nav{display:flex;flex-direction:column;gap:10px}
 .floating-nav a{color:var(--ink);text-decoration:none;padding:10px;border-radius:8px;font-family:var(--light-sans);font-weight:600}
@@ -158,12 +162,24 @@ html,body{
 /* CTA base */
 .btn-primary{
   display:inline-flex;align-items:center;justify-content:center;
-  background: linear-gradient(180deg, rgba(47,107,79,0.92), rgba(47,107,79,0.92));
+  /* background plano (antes un degradado de un solo tono) para que el hover
+     pueda interpolar suavemente el color */
+  background-color: rgba(47,107,79,0.92);
   color:var(--paper);border-radius:12px;font-family:var(--light-sans);font-weight:700;font-size:15px;border:0;
-  box-shadow:0 10px 24px rgba(47,107,79,0.12);transition:transform 160ms ease,background-color 160ms ease;
+  box-shadow:0 10px 24px rgba(47,107,79,0.12);
+  transition:transform 200ms cubic-bezier(.2,.7,.3,1),
+             background-color 260ms ease,
+             box-shadow 260ms ease,
+             filter 200ms ease;
   text-decoration:none;
 }
-.btn-primary:hover{transform:translateY(-2px);background:var(--accent);filter:brightness(1.02)}
+.btn-primary:hover{
+  transform:translateY(-2px);
+  background-color:var(--accent);
+  box-shadow:0 14px 30px rgba(183,98,97,0.30);
+  filter:brightness(1.02);
+}
+.btn-primary:active{transform:translateY(0);transition-duration:80ms}
 
 /* Columna de imagen */
 .card-media{
@@ -201,8 +217,7 @@ html,body{
 .footer-stripe{display:none !important;visibility:hidden !important;height:0 !important;margin:0 !important;padding:0 !important}
 .footer-copy{margin:14px 0 0 0;padding:0;text-align:center;color:rgba(0,0,0,0.6);font-size:11px;line-height:1.2;background:transparent}
 
-/* Accessibility focus */
-a:focus,button:focus{outline:3px solid rgba(247,194,79,0.18);outline-offset:3px;border-radius:8px}
+/* Accessibility focus: el indicador de foco se define más abajo con :focus-visible */
 
 /* ------------------ MOBILE: icono animado, menú desplegable y card invertido ------------------ */
 @media (max-width:1100px) {
@@ -218,32 +233,36 @@ a:focus,button:focus{outline:3px solid rgba(247,194,79,0.18);outline-offset:3px;
 
   /* Menú desplegable: extensión visual del header
      - Alineado exactamente con el header (centro y ancho)
-     - Nace ligeramente por encima del borde inferior para efecto de estiramiento
+     - Cortina: baja con desplazamiento vertical desde arriba (translateY)
      - Sin esquinas superiores redondeadas, solo inferiores */
   .floating-menu {
     display: block !important;
     position: fixed;
     top: calc(var(--header-height) - 6px); /* nace un poco más arriba para "estirarse" */
     left: 50%;
-    transform: translateX(-50%) scaleY(0);
+    transform: translateX(-50%) translateY(calc(-100% - 100px));   /* cortina: fuera de pantalla arriba */
     width: calc(100% - 48px);           /* mismo ancho que el header */
     max-width: var(--container);
-    background: rgba(47,107,79,0.78);   /* mismo color verdoso del header */
+    background: rgba(14,24,19,0.42);   /* vidrio oscuro, igual que el menú fijo */
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
+    border: 1px solid rgba(255,255,255,0.20);
     border-radius: 0 0 var(--radius) var(--radius); /* solo esquinas inferiores redondeadas */
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.30);
     z-index: 110;
     overflow: hidden;
     pointer-events: none;
+    visibility: hidden;                 /* fuera del orden de Tab cuando está cerrado */
     opacity: 0;
-    transform-origin: top center;
-    transition: transform 260ms cubic-bezier(.2,.9,.3,1), opacity 200ms ease;
+    transition: transform 300ms cubic-bezier(.2,.9,.3,1), opacity 220ms ease, visibility 300ms;
   }
 
   /* Estado abierto */
   .floating-menu.open {
     pointer-events: auto;
+    visibility: visible;
     opacity: 1;
-    transform: translateX(-50%) scaleY(1);
+    transform: translateX(-50%) translateY(0);   /* cortina: baja hasta su posición */
   }
 
   /* Inner list styling */
@@ -277,35 +296,41 @@ a:focus,button:focus{outline:3px solid rgba(247,194,79,0.18);outline-offset:3px;
     transform: translateX(6px);
   }
 
-  /* CARD: invertir layout en móvil (imagen arriba, texto abajo) */
+  /* CARD (móvil): se separa en dos bloques redondeados —
+     la imagen arriba y el bloque blanco de texto abajo, con un margen
+     entre ellos y un margen inferior en toda la tarjeta.
+     El escritorio no se ve afectado (esto está dentro del media query móvil). */
   .card {
-    border-radius: var(--radius) var(--radius) 0 0 !important;
-    margin: 18px 0 0 0 !important;
+    border-radius: 0 !important;
+    margin: 18px 0 24px 0 !important;      /* margen inferior */
     width: calc(100% - (var(--edge-padding) * 2)) !important;
     max-width: var(--container);
-    overflow: hidden !important;
-    background: #ffffff !important;
-    box-shadow: 0 18px 40px rgba(0,0,0,0.12) !important;
+    overflow: visible !important;
+    background: transparent !important;
+    box-shadow: none !important;
     position: relative;
   }
 
   .card-inner {
     display: flex !important;
     flex-direction: column !important;
-    gap: 0 !important;
+    gap: 16px !important;                  /* margen entre la imagen y el bloque */
     align-items: stretch !important;
     padding: 0 !important;
   }
 
+  /* Imagen arriba, con esquinas redondeadas */
   .card-media {
+    order: 1 !important;
     width: 100% !important;
     min-width: 0 !important;
-    border-radius: var(--radius) var(--radius) 0 0 !important;
+    border-radius: var(--radius) !important;
     overflow: hidden !important;
     margin: 0 !important;
     padding: 0 !important;
     display: block !important;
     height: auto !important;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.12) !important;
   }
 
   .card-media img {
@@ -314,9 +339,12 @@ a:focus,button:focus{outline:3px solid rgba(247,194,79,0.18);outline-offset:3px;
     max-height: 42vh;
     object-fit: cover !important;
     display: block !important;
+    border-radius: var(--radius) !important;
   }
 
+  /* Bloque blanco de texto debajo de la imagen, con esquinas redondeadas */
   .card-copy {
+    order: 2 !important;
     width: 100% !important;
     padding: 20px 28px 28px 28px !important;
     box-sizing: border-box !important;
@@ -324,7 +352,9 @@ a:focus,button:focus{outline:3px solid rgba(247,194,79,0.18);outline-offset:3px;
     flex-direction: column !important;
     justify-content: flex-end !important;
     gap: 12px;
-    background: transparent !important;
+    background: #ffffff !important;
+    border-radius: var(--radius) !important;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.12) !important;
     align-items: stretch !important;
   }
 
@@ -409,12 +439,14 @@ img:focus,
   box-shadow: none;
 }
 
-/* Mantén un foco visible para usuarios de teclado (accesibilidad) */
+/* Indicador de foco visible para usuarios de teclado (accesibilidad).
+   Se usa un color sólido de alto contraste en lugar del alfa 0.18,
+   que resultaba casi invisible. */
 button:focus-visible,
 a:focus-visible,
 .menu-toggle:focus-visible,
 .brand:focus-visible {
-  outline: 3px solid rgba(247,194,79,0.18);
+  outline: 3px solid #f4c542;
   outline-offset: 3px;
   border-radius: 8px;
 }
@@ -497,6 +529,69 @@ body {
   background-position: center top !important;
   background-repeat: no-repeat !important;
   background-attachment: scroll !important; /* evita fixed en móviles */
+}
+
+/* ---------------- Transiciones sutiles entre ventanas ---------------- */
+/* Como el sitio es estático (cada ventana es un HTML aparte), la "transición"
+   se logra con una animación de entrada al cargar la página: fundido + leve
+   ascenso de la tarjeta, y fundido de opacidad del header. */
+
+@keyframes cardEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes headerFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.card {
+  animation: cardEntrance 520ms cubic-bezier(.2,.7,.3,1) both;
+}
+
+/* El header ya usa translateX(-50%) para centrarse; solo se anima la opacidad
+   para no interferir con su posicionamiento. */
+.site-header {
+  animation: headerFade 480ms ease both;
+}
+
+/* Salida entre páginas: al hacer clic en un enlace interno, la tarjeta y el
+   header se desvanecen antes de navegar (lo dispara scripts/nav-transition.js).
+   Así se enlaza con la animación de entrada de la página siguiente. */
+@keyframes cardLeave {
+  to { opacity: 0; transform: translateY(-6px); }
+}
+@keyframes headerLeave {
+  to { opacity: 0; }
+}
+.card.is-leaving {
+  animation: cardLeave 220ms ease forwards;
+}
+.site-header.is-leaving {
+  animation: headerLeave 200ms ease forwards;
+}
+
+/* Respetar a usuarios que prefieren menos movimiento (accesibilidad) */
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .site-header {
+    animation: none !important;
+  }
+  .btn-primary,
+  .nav-link,
+  .floating-menu,
+  .floating-nav a,
+  .menu-circle,
+  .menu-icon .bar {
+    transition: none !important;
+  }
 }
 
 /* Ajustes específicos para móviles: forzar 100vh y evitar que barras de navegador reduzcan el área visible */
