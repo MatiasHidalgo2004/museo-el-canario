@@ -203,12 +203,20 @@ html,body{
   vertical-align:middle;
 }
 
-/* Pie de imagen */
+/* Pie de imagen: vidrio oscuro con desenfoque de fondo (mismo efecto que el
+   menú fijo), pero con más opacidad para que el texto se lea sobre cualquier imagen */
 .card-caption{
   position:absolute;
   left:0;right:0;bottom:0;
   display:flex;justify-content:space-between;align-items:center;
-  padding:12px 16px;background: rgba(0,0,0,0.28);
+  /* Si el texto no cabe en una sola línea (pies largos) pasa a la línea
+     siguiente en lugar de desbordar o comprimirse */
+  flex-wrap:wrap;gap:6px 14px;
+  padding:12px 16px;
+  background: rgba(14,24,19,0.62);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  border-top: 1px solid rgba(255,255,255,0.20);
   color:var(--paper);font-family:var(--light-sans);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:0.6px;
 }
 
