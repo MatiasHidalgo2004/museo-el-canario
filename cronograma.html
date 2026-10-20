@@ -3,7 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Museo de la vida rural El Canario</title>
+  <title>Cronograma — Museo de la vida rural El Canario</title>
+  <meta name="description" content="Línea del tiempo del museo El Canario: la evolución de la vida rural y agrícola en Chile, contada a través de sus objetos." />
+  <meta name="theme-color" content="#0e1813" />
+  <link rel="icon" href="assets/svg/Logo.svg" type="image/svg+xml" />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -46,6 +49,14 @@
       outline: none;
       scrollbar-width: thin;
       scrollbar-color: rgba(0,0,0,0.18) transparent;
+    }
+
+    /* Foco visible para quien navega con teclado (mismo amarillo del resto del
+       sitio). outline:none anterior solo afecta al foco por puntero, que aquí
+       no interesa resaltar. */
+    .tl-scroll-viewport:focus-visible {
+      outline: 3px solid #f4c542;
+      outline-offset: 3px;
     }
 
     /* Imagen larga que ocupa su ancho natural; se desplaza dentro del viewport */
@@ -179,9 +190,9 @@
           </div>
 
           <!-- Contenedor de la imagen desplazable (línea del tiempo) -->
-          <div class="tl-scroll-wrap" aria-label="Línea del tiempo desplazable">
-            <div class="tl-scroll-viewport" id="tlScrollViewport" tabindex="0" role="region" aria-roledescription="carousel">
-              <img class="tl-scroll-image" src="assets/svg/linea-tl.svg" alt="Línea del tiempo" />
+          <div class="tl-scroll-wrap">
+            <div class="tl-scroll-viewport" id="tlScrollViewport" tabindex="0" role="region" aria-label="Línea del tiempo, contenido desplazable en horizontal">
+              <img class="tl-scroll-image" src="assets/svg/linea-tl.svg" alt="Línea del tiempo de la vida rural y agrícola en Chile" decoding="async" />
             </div>
           </div>
 
@@ -192,46 +203,7 @@
 
   </div>
 
-  <script>
-    (function(){
-      const toggle = document.getElementById('menuToggle');
-      const menu = document.getElementById('floatingMenu');
-
-      toggle.addEventListener('click', () => {
-        const open = menu.classList.toggle('open');
-        menu.setAttribute('aria-hidden', String(!open));
-        toggle.setAttribute('aria-expanded', String(open));
-        toggle.classList.toggle('open', open);
-      });
-
-      // Cerrar menú al tocar fuera
-      document.addEventListener('click', (e) => {
-        const isMobile = window.matchMedia('(max-width:1100px)').matches;
-        if (!isMobile) return;
-        if (!menu.classList.contains('open')) return;
-        if (!menu.contains(e.target) && !toggle.contains(e.target)) {
-          menu.classList.remove('open');
-          menu.setAttribute('aria-hidden', 'true');
-          toggle.classList.remove('open');
-          toggle.setAttribute('aria-expanded', 'false');
-        }
-      });
-
-      // Cerrar menú con Escape
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && menu.classList.contains('open')) {
-          menu.classList.remove('open');
-          menu.setAttribute('aria-hidden', 'true');
-          toggle.classList.remove('open');
-          toggle.setAttribute('aria-expanded', 'false');
-        }
-      });
-
-      // Mantener el año si existe el elemento
-      const yearEl = document.getElementById('year');
-      if (yearEl) yearEl.textContent = new Date().getFullYear();
-    })();
-  </script>
+  <script src="scripts/menu.js"></script>
 
   <!-- Script para arrastrar y asegurar scrollbar en escritorio -->
   <script>
@@ -239,8 +211,9 @@
     const viewport = document.getElementById('tlScrollViewport');
     if (!viewport) return;
 
-    // Hacer que el foco inicial no muestre outline molesto
-    viewport.addEventListener('focus', () => viewport.style.outline = 'none');
+    // El foco se ve por teclado gracias a .tl-scroll-viewport:focus-visible
+    // (antes se anulaba el outline desde JS, con lo que un usuario de teclado
+    // no veía nunca dónde estaba el foco).
 
     // Drag to scroll (mouse)
     let isDown = false;
@@ -300,8 +273,10 @@
     if (img) img.addEventListener('load', ensureScrollable);
     window.addEventListener('resize', ensureScrollable);
 
-    // Pequeña pista de scroll en desktop
+    // Pequeña pista de scroll en desktop (se omite si el usuario pide
+    // menos movimiento)
     function flashHint() {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       if (window.matchMedia('(pointer:fine)').matches) {
         const start = viewport.scrollLeft;
         viewport.scrollBy({ left: 60, behavior: 'smooth' });
