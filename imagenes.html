@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Museo de la vida rural El Canario</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles/styles.css" />
+</head>
+<body>
+  <div class="viewport-fixed">
+
+    <!-- Header fijo -->
+    <header class="site-header" role="banner">
+      <div class="header-inner">
+        <a class="brand" href="index.html">
+          <img src="assets/svg/Logo.svg" alt="Logo Museo El Canario" class="logo-img" />
+          <span class="brand-text">Museo de la vida rural El Canario</span>
+        </a>
+
+        <nav class="main-nav" aria-label="Navegación principal">
+          <a href="cronograma.html" class="nav-link">Cronograma</a>
+          <a href="imagenes.html" class="nav-link">Imágenes</a>
+          <a href="biografia.html" class="nav-link">Biografía</a>
+          <a href="contacto.html" class="nav-link">Contacto</a>
+        </nav>
+
+        <!-- Toggle móvil -->
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" type="button">
+          <svg class="menu-icon" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <circle class="menu-circle" cx="24" cy="24" r="20" fill="#c0392b" />
+            <g class="bars" stroke="#fff" stroke-linecap="round" stroke-width="3" stroke-linejoin="round">
+              <line class="bar top" x1="14" y1="18" x2="34" y2="18" />
+              <line class="bar bottom" x1="14" y1="30" x2="34" y2="30" />
+            </g>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Menú desplegable móvil -->
+    <aside class="floating-menu" id="floatingMenu" aria-hidden="true">
+      <div class="floating-inner">
+        <nav class="floating-nav" aria-label="Navegación flotante">
+          <a href="cronograma.html">Cronograma</a>
+          <a href="imagenes.html">Imágenes</a>
+          <a href="biografia.html">Biografía</a>
+          <a href="contacto.html">Contacto</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Hero -->
+    <main class="hero" role="main" aria-label="Hero">
+      <div class="hero-overlay" aria-hidden="true"></div>
+
+      <section class="card container" role="region" aria-label="Tarjeta principal">
+        <div class="card-inner">
+          <div class="card-copy">
+            <h1 class="card-title">Imágenes
+            </h1>
+            <p class="card-lead">
+              Una pequeña selección de imagenes del lugar.  
+            </p>
+            <a id="cta-recorrer" class="btn-primary" href="index.html" role="button">VOLVER ATRÁS</a>
+          </div>
+
+          <figure class="card-media">
+            <img id="carouselImage" src="assets/images/Imagen-biografia.jpg" alt="Museo Vista Frontal" />
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+    </main>
+
+  <script>
+    (function(){
+      const toggle = document.getElementById('menuToggle');
+      const menu = document.getElementById('floatingMenu');
+
+      toggle.addEventListener('click', () => {
+        const open = menu.classList.toggle('open');
+        menu.setAttribute('aria-hidden', String(!open));
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.classList.toggle('open', open);
+      });
+
+      // Cerrar menú al tocar fuera
+      document.addEventListener('click', (e) => {
+        const isMobile = window.matchMedia('(max-width:1100px)').matches;
+        if (!isMobile) return;
+        if (!menu.classList.contains('open')) return;
+        if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+          menu.classList.remove('open');
+          menu.setAttribute('aria-hidden', 'true');
+          toggle.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      document.getElementById('year').textContent = new Date().getFullYear();
+    })();
+  </script>
+
+  <!-- Carousel script: solo actúa sobre #carouselImage, no modifica nada más -->
+  <script>
+  (function(){
+    // --- Configuración: reemplaza las rutas por tus imágenes reales si lo deseas ---
+    const images = [
+      'assets/images/Imagen-1.png',
+      'assets/images/Imagen-2.png',
+      'assets/images/Imagen-3.png',
+      'assets/images/Imagen-4.png',
+      'assets/images/Imagen-5.png',
+      'assets/images/Imagen-6.png',
+      'assets/images/Imagen-7.png',
+      'assets/images/Imagen-8.png',
+      'assets/images/Imagen-9.png',
+      'assets/images/Imagen-10.png'
+    ];
+
+    const intervalMs = 2000;   // 2 segundos
+    const stepsPerLoop = 10;   // 10 cambios por ciclo
+
+    // Selecciona únicamente el elemento objetivo
+    const imgEl = document.getElementById('carouselImage');
+    if (!imgEl) return; // si no existe, no hace nada
+
+    // Mantener loading lazy por si no está
+    imgEl.setAttribute('loading', 'lazy');
+
+    // Preload para reducir parpadeos
+    const preloaded = [];
+    images.forEach(src => {
+      const i = new Image();
+      i.src = src;
+      preloaded.push(i);
+    });
+
+    let index = 0;
+    let stepCount = 0;
+
+    function showNext() {
+      // Solo actualiza src; no toca clases, estilos ni estructura
+      imgEl.src = images[index];
+
+      index = (index + 1) % images.length;
+      stepCount++;
+
+      if (stepCount >= stepsPerLoop) {
+        stepCount = 0;
+        // opcional: index = 0; // descomenta si quieres reiniciar siempre desde la primera
+      }
+    }
+
+    // Inicializa con la primera imagen del array si es diferente
+    if (images.length > 0 && imgEl.src.indexOf(images[0]) === -1) {
+      imgEl.src = images[0];
+    }
+
+    // Evita duplicar timers si el script se ejecuta más de una vez
+    if (imgEl._carouselTimer) {
+      clearInterval(imgEl._carouselTimer);
+      imgEl._carouselTimer = null;
+    }
+
+    const timer = setInterval(showNext, intervalMs);
+    imgEl._carouselTimer = timer;
+
+    // Opcional: pausa al hover (no modifica nada fuera del img)
+    imgEl.addEventListener('mouseenter', () => {
+      if (imgEl._carouselTimer) {
+        clearInterval(imgEl._carouselTimer);
+        imgEl._carouselTimer = null;
+      }
+    });
+    imgEl.addEventListener('mouseleave', () => {
+      if (!imgEl._carouselTimer) {
+        imgEl._carouselTimer = setInterval(showNext, intervalMs);
+        imgEl._carouselTimer = timer;
+      }
+    });
+
+    // Limpieza al salir de la página
+    window.addEventListener('beforeunload', () => {
+      if (imgEl._carouselTimer) {
+        clearInterval(imgEl._carouselTimer);
+        imgEl._carouselTimer = null;
+      }
+    });
+  })();
+  </script>
+</body>
+</html>
