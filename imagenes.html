@@ -11,6 +11,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles/styles.css" />
+
+  <!-- Escritorio: la tarjeta de Imágenes replica el alto de las demás páginas.
+       En el resto de secciones ese alto lo fija la foto vertical (relación 0.8)
+       que ocupa el 43% derecho; aquí las fotos del carrusel son cuadradas, así
+       que damos a la caja la misma proporción vertical (0.8) para igualar la
+       altura, y enmarcamos la imagen cuadrada con margen uniforme y redondeo
+       en las cuatro esquinas (no pegada a los bordes del card). -->
+  <style>
+    @media (min-width: 1101px) {
+      .card-media {
+        aspect-ratio: 0.8 !important;   /* misma proporción que las fotos del resto */
+        padding: 18px !important;        /* margen: la imagen no toca los bordes */
+        border-radius: 0 !important;     /* el redondeo exterior lo aporta el card */
+      }
+      .card-media img {
+        border-radius: var(--radius) !important;  /* curvatura en las 4 esquinas */
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="viewport-fixed">
@@ -65,18 +84,19 @@
             <h1 class="card-title">Imágenes
             </h1>
             <p class="card-lead">
-              Una pequeña selección de imagenes del lugar.  
+              Una pequeña selección de imagenes del lugar.
             </p>
-            <a id="cta-recorrer" class="btn-primary" href="index.html" role="button">VOLVER ATRÁS</a>
+            <a id="cta-recorrer" class="btn-primary" href="index.html">VOLVER ATRÁS</a>
           </div>
 
           <figure class="card-media">
-            <img id="carouselImage" src="assets/images/Imagen-biografia.jpg" alt="Museo Vista Frontal" />
-            </figcaption>
+            <img id="carouselImage" src="assets/images/Imagen-1.png" alt="Vista del museo El Canario" />
           </figure>
         </div>
       </section>
     </main>
+
+  </div>
 
   <script>
     (function(){
@@ -103,7 +123,19 @@
         }
       });
 
-      document.getElementById('year').textContent = new Date().getFullYear();
+      // Cerrar menú con Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && menu.classList.contains('open')) {
+          menu.classList.remove('open');
+          menu.setAttribute('aria-hidden', 'true');
+          toggle.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      // Mantener el año si existe el elemento
+      const yearEl = document.getElementById('year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
     })();
   </script>
 
@@ -125,7 +157,6 @@
     ];
 
     const intervalMs = 2000;   // 2 segundos
-    const stepsPerLoop = 10;   // 10 cambios por ciclo
 
     // Selecciona únicamente el elemento objetivo
     const imgEl = document.getElementById('carouselImage');
@@ -143,19 +174,11 @@
     });
 
     let index = 0;
-    let stepCount = 0;
 
     function showNext() {
       // Solo actualiza src; no toca clases, estilos ni estructura
       imgEl.src = images[index];
-
       index = (index + 1) % images.length;
-      stepCount++;
-
-      if (stepCount >= stepsPerLoop) {
-        stepCount = 0;
-        // opcional: index = 0; // descomenta si quieres reiniciar siempre desde la primera
-      }
     }
 
     // Inicializa con la primera imagen del array si es diferente
@@ -169,10 +192,9 @@
       imgEl._carouselTimer = null;
     }
 
-    const timer = setInterval(showNext, intervalMs);
-    imgEl._carouselTimer = timer;
+    imgEl._carouselTimer = setInterval(showNext, intervalMs);
 
-    // Opcional: pausa al hover (no modifica nada fuera del img)
+    // Pausa al hover (solo afecta al propio img)
     imgEl.addEventListener('mouseenter', () => {
       if (imgEl._carouselTimer) {
         clearInterval(imgEl._carouselTimer);
@@ -182,7 +204,6 @@
     imgEl.addEventListener('mouseleave', () => {
       if (!imgEl._carouselTimer) {
         imgEl._carouselTimer = setInterval(showNext, intervalMs);
-        imgEl._carouselTimer = timer;
       }
     });
 
@@ -195,5 +216,6 @@
     });
   })();
   </script>
+<script src="scripts/nav-transition.js"></script>
 </body>
 </html>
