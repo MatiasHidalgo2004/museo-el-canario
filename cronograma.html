@@ -12,44 +12,52 @@
 
   <link rel="stylesheet" href="styles/styles.css" />
 
-  <!-- CSS añadido para la imagen desplazable (no modifica el resto del layout) -->
+  <!-- CSS de la imagen desplazable (línea del tiempo) -->
   <style>
-    /* Fuerza una altura fija para toda la tarjeta blanca (texto + imagen) */
-.card {
-  height: 590px;        /* nuevo alto exacto */
-  min-height: 590px;    /* evita que el contenido lo reduzca */
-  box-sizing: border-box;
-}
-    /* Contenedor de la línea del tiempo: no toca el resto del layout */
-    .tl-scroll-wrap {
-      width: 70%;
-      margin-top: 18px;               /* separación respecto al texto; ajusta si hace falta */
-      box-sizing: border-box;
+    /* Escritorio: mantiene la altura fija de la tarjeta (igual que antes) */
+    @media (min-width: 1101px) {
+      .card {
+        height: 590px;
+        min-height: 590px;
+        box-sizing: border-box;
+      }
+      .tl-scroll-wrap {
+        width: 70%;
+        margin-top: 18px;
+        box-sizing: border-box;
+      }
+      .tl-scroll-viewport {
+        width: 92%;
+        height: 550px;
+      }
     }
 
-    /* Viewport con barra visible en escritorio y scroll táctil en móvil */
+    /* Base compartida del viewport desplazable */
+    .tl-scroll-wrap { box-sizing: border-box; }
+
+    /* Viewport con scroll horizontal en escritorio y táctil en móvil */
     .tl-scroll-viewport {
-      width: 92%;
-      height: 550px;                  /* altura visible de la imagen dentro del bloque; ajusta si quieres más */
       overflow-x: auto;
-      overflow-y: center;
+      overflow-y: hidden;           /* 'center' no es un valor válido; se usa hidden */
       -webkit-overflow-scrolling: touch;
       background: transparent;
       border-radius: 8px;
       box-sizing: border-box;
       outline: none;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0,0,0,0.18) transparent;
     }
 
     /* Imagen larga que ocupa su ancho natural; se desplaza dentro del viewport */
     .tl-scroll-image {
       display: block;
       height: 100%;
-      width: auto;                    /* mantiene proporción; si quieres forzar ancho usa width: 11938px; */
-      max-width: none;                /* evita que el CSS global la reduzca */
+      width: auto;
+      max-width: none;
       object-fit: cover;
       user-select: none;
       -webkit-user-drag: none;
-      pointer-events: none;           /* evita interferir con el arrastre del viewport */
+      pointer-events: none;         /* evita interferir con el arrastre del viewport */
     }
 
     /* Scrollbar visible y estilizada (WebKit) */
@@ -58,17 +66,56 @@
     .tl-scroll-viewport::-webkit-scrollbar-thumb {
       background: rgba(0,0,0,0.18);
       border-radius: 8px;
+      transition: background 200ms ease;
     }
-
-    /* Firefox */
-    .tl-scroll-viewport { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.18) transparent; }
+    /* Al poner el cursor encima, el pulgar pasa al verde de la marca
+       (mismo tono del header fijo y del botón) */
+    .tl-scroll-viewport::-webkit-scrollbar-thumb:hover {
+      background: var(--brand-green);
+    }
+    /* Al presionar y arrastrar, un verde más intenso (feedback de "sujeción") */
+    .tl-scroll-viewport::-webkit-scrollbar-thumb:active {
+      background: #24563e;
+    }
 
     /* Evita marcos o sombras al desplazar */
     .tl-scroll-viewport, .tl-scroll-image { box-shadow: none !important; filter: none !important; }
 
-    /* En móvil reduce la altura si quieres */
+    /* Móvil / tablet: la tarjeta toma su altura natural y la línea queda centrada,
+       sin recortes y a ancho completo. Aquí se mantiene UNA sola tarjeta blanca
+       (texto + línea juntos), distinto de las otras páginas que sí separan
+       la foto del bloque de texto. */
+    @media (max-width: 1100px) {
+      .card {
+        height: auto !important;
+        min-height: 0 !important;
+        border-radius: var(--radius) !important;
+        background: #ffffff !important;
+        box-shadow: 0 18px 40px rgba(0,0,0,0.12) !important;
+        overflow: hidden !important;
+      }
+      /* El texto queda arriba y la línea del tiempo debajo, dentro de la tarjeta */
+      .card-copy {
+        order: 1 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+      }
+      .tl-scroll-wrap { order: 2 !important; }
+      .tl-scroll-wrap {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 12px 16px 12px;
+      }
+      .tl-scroll-viewport {
+        width: 100% !important;
+        height: 320px;
+      }
+      .tl-scroll-viewport::-webkit-scrollbar { height: 24px; }
+    }
     @media (max-width: 700px) {
-      .tl-scroll-viewport { height: 300px; }
+      .tl-scroll-viewport { height: 240px; }
+      .tl-scroll-viewport::-webkit-scrollbar { height: 18px; }
     }
   </style>
 </head>
@@ -125,20 +172,18 @@
             <h1 class="card-title">Cronograma
             </h1>
             <p class="card-lead">
-              En la siguiente línea verá la evolución de la vida rural y la agricola en Chile. 
+              En la siguiente línea verá la evolución de la vida rural y agrícola en Chile.
             </p>
 
-            <a id="cta-recorrer" class="btn-primary" href="index.html" role="button">VOLVER ATRÁS</a>
+            <a id="cta-recorrer" class="btn-primary" href="index.html">VOLVER ATRÁS</a>
           </div>
 
-          <!-- INICIO: contenedor de la imagen desplazable (pegado aquí, sin mover el texto ni el botón) -->
+          <!-- Contenedor de la imagen desplazable (línea del tiempo) -->
           <div class="tl-scroll-wrap" aria-label="Línea del tiempo desplazable">
             <div class="tl-scroll-viewport" id="tlScrollViewport" tabindex="0" role="region" aria-roledescription="carousel">
-              <!-- Reemplaza src por la ruta de tu imagen larga si es necesario -->
               <img class="tl-scroll-image" src="assets/svg/linea-tl.svg" alt="Línea del tiempo" />
             </div>
           </div>
-          <!-- FIN: contenedor de la imagen desplazable -->
 
         </div>
       </section>
@@ -172,13 +217,23 @@
         }
       });
 
+      // Cerrar menú con Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && menu.classList.contains('open')) {
+          menu.classList.remove('open');
+          menu.setAttribute('aria-hidden', 'true');
+          toggle.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+
       // Mantener el año si existe el elemento
       const yearEl = document.getElementById('year');
       if (yearEl) yearEl.textContent = new Date().getFullYear();
     })();
   </script>
 
-  <!-- Script añadido para arrastrar y asegurar scrollbar en escritorio -->
+  <!-- Script para arrastrar y asegurar scrollbar en escritorio -->
   <script>
   (function(){
     const viewport = document.getElementById('tlScrollViewport');
@@ -256,116 +311,7 @@
     setTimeout(flashHint, 350);
   })();
   </script>
-  <script>
-(function(){
-  if (!window.matchMedia('(max-width:700px)').matches) return;
 
-  const img = document.querySelector('.card .tl-scroll-image[src$="linea-tl.svg"]');
-  const vp  = document.querySelector('.card .tl-scroll-viewport');
-  if (!img || !vp) return;
-
-  let scale = 1;
-  let lastScale = 1;
-  let startDist = 0;
-  let origin = { x: 0, y: 0 };
-  let pan = { x: 0, y: 0 };
-  let lastPan = { x: 0, y: 0 };
-  let isPanning = false;
-
-  function getDistance(touches){
-    const dx = touches[0].pageX - touches[1].pageX;
-    const dy = touches[0].pageY - touches[1].pageY;
-    return Math.hypot(dx, dy);
-  }
-
-  function getMidpoint(touches){
-    return {
-      x: (touches[0].pageX + touches[1].pageX) / 2,
-      y: (touches[0].pageY + touches[1].pageY) / 2
-    };
-  }
-
-  function applyTransform(){
-    img.style.transform = `translate(${pan.x}px, ${pan.y}px) scale(${scale})`;
-  }
-
-  // Touch handlers
-  img.addEventListener('touchstart', (e) => {
-    if (e.touches.length === 2) {
-      e.preventDefault();
-      startDist = getDistance(e.touches);
-      lastScale = scale;
-      const mid = getMidpoint(e.touches);
-      // calcular origen relativo al centro de la imagen
-      const rect = img.getBoundingClientRect();
-      origin.x = mid.x - rect.left - rect.width / 2;
-      origin.y = mid.y - rect.top - rect.height / 2;
-      img.style.transformOrigin = `${(origin.x + rect.width/2)/rect.width*100}% ${(origin.y + rect.height/2)/rect.height*100}%`;
-    } else if (e.touches.length === 1 && scale > 1) {
-      // iniciar pan
-      isPanning = true;
-      lastPan.x = e.touches[0].pageX - pan.x;
-      lastPan.y = e.touches[0].pageY - pan.y;
-    }
-  }, { passive: false });
-
-  img.addEventListener('touchmove', (e) => {
-    if (e.touches.length === 2) {
-      e.preventDefault();
-      const dist = getDistance(e.touches);
-      const factor = dist / startDist;
-      scale = Math.max(1, Math.min(4, lastScale * factor)); // límites 1x-4x
-      applyTransform();
-    } else if (e.touches.length === 1 && isPanning) {
-      e.preventDefault();
-      pan.x = e.touches[0].pageX - lastPan.x;
-      pan.y = e.touches[0].pageY - lastPan.y;
-      // limitar pan para no mover la imagen fuera de la vista excesivamente
-      const rect = img.getBoundingClientRect();
-      const vpRect = vp.getBoundingClientRect();
-      const maxPanX = Math.max(0, (rect.width * scale - vpRect.width) / 2 + 40);
-      const maxPanY = Math.max(0, (rect.height * scale - vpRect.height) / 2 + 40);
-      pan.x = Math.max(-maxPanX, Math.min(maxPanX, pan.x));
-      pan.y = Math.max(-maxPanY, Math.min(maxPanY, pan.y));
-      applyTransform();
-    }
-  }, { passive: false });
-
-  img.addEventListener('touchend', (e) => {
-    if (e.touches.length < 2) {
-      lastScale = scale;
-    }
-    if (e.touches.length === 0) {
-      isPanning = false;
-    }
-    // si el usuario reduce por debajo de 1, resetear
-    if (scale <= 1.01) {
-      scale = 1;
-      pan = { x: 0, y: 0 };
-      applyTransform();
-    }
-  });
-
-  // Doble toque para resetear (opcional, cómodo)
-  let lastTap = 0;
-  img.addEventListener('touchend', (e) => {
-    const now = Date.now();
-    if (now - lastTap < 300) {
-      // doble tap: alternar entre 1x y 2x centrado
-      if (scale > 1.1) {
-        scale = 1; pan = { x:0, y:0 };
-      } else {
-        scale = 2;
-      }
-      lastScale = scale;
-      applyTransform();
-    }
-    lastTap = now;
-  });
-
-  // Evitar que el gesto de pellizcar haga zoom de la página (si el meta viewport lo permite)
-  // Nota: algunos navegadores ignoran preventDefault en touchmove si no se establece passive:false en el listener (ya aplicado arriba).
-})();
-</script>
-
+<script src="scripts/nav-transition.js"></script>
 </body>
+</html>
