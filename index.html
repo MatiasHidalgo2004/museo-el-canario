@@ -18,7 +18,7 @@
     <!-- Header fijo -->
     <header class="site-header" role="banner">
       <div class="header-inner">
-        <a class="brand" href="#">
+        <a class="brand" href="index.html">
           <img src="assets/svg/Logo.svg" alt="Logo Museo El Canario" class="logo-img" />
           <span class="brand-text">Museo de la vida rural El Canario</span>
         </a>
@@ -69,7 +69,7 @@
             <p class="card-lead-2">
               Pudiendo adentrarse en lo que podrá encontrar en su visita, a través de ilustraciones que le harán recorrer por los objetos que alguna vez fueron parte de nuestra historia.
             </p>
-            <a id="cta-recorrer" class="btn-primary" href="#imagenes" role="button">RECORRER</a>
+            <a id="cta-recorrer" class="btn-primary" href="recorrido.html">RECORRER</a>
           </div>
 
           <figure class="card-media">
@@ -82,6 +82,8 @@
         </div>
       </section>
     </main>
+
+  </div>
 
   <script>
     (function(){
@@ -108,8 +110,21 @@
         }
       });
 
-      document.getElementById('year').textContent = new Date().getFullYear();
+      // Cerrar menú con Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && menu.classList.contains('open')) {
+          menu.classList.remove('open');
+          menu.setAttribute('aria-hidden', 'true');
+          toggle.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      // Mantener el año si existe el elemento
+      const yearEl = document.getElementById('year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
     })();
   </script>
+<script src="scripts/nav-transition.js"></script>
 </body>
 </html>
