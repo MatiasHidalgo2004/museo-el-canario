@@ -3,7 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Museo de la vida rural El Canario</title>
+  <title>Imágenes — Museo de la vida rural El Canario</title>
+  <meta name="description" content="Galería de imágenes del museo El Canario: aguamaniles, vajillas de cerámica, radios, televisores de tubo y otros objetos expuestos." />
+  <meta name="theme-color" content="#0e1813" />
+  <link rel="icon" href="assets/svg/Logo.svg" type="image/svg+xml" />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -108,7 +111,7 @@
           </div>
 
           <figure class="card-media">
-            <img id="carouselImage" src="assets/images/Imagen-1.png" alt="AGUAMANIL/PÉLELAS" />
+            <img id="carouselImage" src="assets/images/Imagen-1.webp" alt="AGUAMANIL/PÉLELAS" fetchpriority="high" decoding="async" />
             <figcaption class="card-caption">
               <span class="caption-title" id="carouselCaption">AGUAMANIL/PÉLELAS</span>
               <span class="caption-counter" id="carouselCounter">1 / 10</span>
@@ -120,63 +123,24 @@
 
   </div>
 
-  <script>
-    (function(){
-      const toggle = document.getElementById('menuToggle');
-      const menu = document.getElementById('floatingMenu');
+  <script src="scripts/menu.js"></script>
 
-      toggle.addEventListener('click', () => {
-        const open = menu.classList.toggle('open');
-        menu.setAttribute('aria-hidden', String(!open));
-        toggle.setAttribute('aria-expanded', String(open));
-        toggle.classList.toggle('open', open);
-      });
-
-      // Cerrar menú al tocar fuera
-      document.addEventListener('click', (e) => {
-        const isMobile = window.matchMedia('(max-width:1100px)').matches;
-        if (!isMobile) return;
-        if (!menu.classList.contains('open')) return;
-        if (!menu.contains(e.target) && !toggle.contains(e.target)) {
-          menu.classList.remove('open');
-          menu.setAttribute('aria-hidden', 'true');
-          toggle.classList.remove('open');
-          toggle.setAttribute('aria-expanded', 'false');
-        }
-      });
-
-      // Cerrar menú con Escape
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && menu.classList.contains('open')) {
-          menu.classList.remove('open');
-          menu.setAttribute('aria-hidden', 'true');
-          toggle.classList.remove('open');
-          toggle.setAttribute('aria-expanded', 'false');
-        }
-      });
-
-      // Mantener el año si existe el elemento
-      const yearEl = document.getElementById('year');
-      if (yearEl) yearEl.textContent = new Date().getFullYear();
-    })();
-  </script>
-
-  <!-- Carousel script: solo actúa sobre #carouselImage y su pie #carouselCaption,
-       no modifica nada más -->
+  <!-- Carousel script: solo actúa sobre #carouselImage, su pie #carouselCaption
+       y su contador #carouselCounter; no modifica nada más -->
   <script>
   (function(){
     // --- Configuración: ruta de la imagen y su pie de foto ---
     const images = [
-      { src:'assets/images/Imagen-1.png',  caption:'AGUAMANIL/PÉLELAS' },
-      { src:'assets/images/Imagen-2.png',  caption:'LATA GALLETAS' },
-      { src:'assets/images/Imagen-3.png',  caption:'VAJILLAS DE CERÁMICA FANALOZA' },
-      { src:'assets/images/Imagen-4.png',  caption:'BIDONES LECHEROS' },
-      { src:'assets/images/Imagen-5.png',  caption:'RADIOS' },
-      { src:'assets/images/Imagen-6.png',  caption:'DAMAJUANAS/GARRAFAS Y CHUICAS' },
-      { src:'assets/images/Imagen-7.png',  caption:'TELEVISORES DE TUBO' },
-      { src:'assets/images/Imagen-8.png',  caption:'BÁSCULA DE COCINA' },
-      { src:'assets/images/Imagen-9.png',  caption:'CUERDA PARA SALTAR Y PELOTA' },
-      { src:'assets/images/Imagen-10.png', caption:'PORUÑAS' }
+      { src:'assets/images/Imagen-1.webp',  caption:'AGUAMANIL/PÉLELAS' },
+      { src:'assets/images/Imagen-2.webp',  caption:'LATA GALLETAS' },
+      { src:'assets/images/Imagen-3.webp',  caption:'VAJILLAS DE CERÁMICA FANALOZA' },
+      { src:'assets/images/Imagen-4.webp',  caption:'BIDONES LECHEROS' },
+      { src:'assets/images/Imagen-5.webp',  caption:'RADIOS' },
+      { src:'assets/images/Imagen-6.webp',  caption:'DAMAJUANAS/GARRAFAS Y CHUICAS' },
+      { src:'assets/images/Imagen-7.webp',  caption:'TELEVISORES DE TUBO' },
+      { src:'assets/images/Imagen-8.webp',  caption:'BÁSCULA DE COCINA' },
+      { src:'assets/images/Imagen-9.webp',  caption:'CUERDA PARA SALTAR Y PELOTA' },
+      { src:'assets/images/Imagen-10.webp', caption:'PORUÑAS' }
     ];
 
     const intervalMs = 2000;   // 2 segundos
@@ -189,24 +153,44 @@
     const capEl = document.getElementById('carouselCaption');
     const cntEl = document.getElementById('carouselCounter');
 
-    // Mantener loading lazy por si no está
-    imgEl.setAttribute('loading', 'lazy');
+    // Precarga "justo antes": la imagen siguiente se pide mientras se muestra
+    // la actual. Antes se lanzaban las 10 peticiones a la vez (~30 MB) al abrir
+    // la página, saturando la conexión justo cuando hay que pintar la primera
+    // pantalla. La 0 ya viene marcada porque la trae el propio <img> del HTML.
+    const requested = images.map((item, i) => i === 0);
 
-    // Preload para reducir parpadeos
-    const preloaded = [];
-    images.forEach(item => {
-      const i = new Image();
-      i.src = item.src;
-      preloaded.push(i);
-    });
+    function preload(position) {
+      const i = ((position % images.length) + images.length) % images.length;
+      if (requested[i]) return;
+      requested[i] = true;
+      const im = new Image();
+      im.decoding = 'async';
+      im.src = images[i].src;
+    }
 
     let index = 0;
 
+    // Reinicia la animación de entrada del texto (styles.css: @captionIn).
+    // Sin esto, al cambiar el textContent la animación ya había terminado y
+    // no se volvería a ejecutar.
+    function replayText(el) {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      el.style.animation = 'none';
+      void el.offsetWidth; // fuerza reflujo: el navegador "olvida" el estado previo
+      el.style.animation = '';
+    }
+
     // Actualiza pie, contador y texto alternativo de la imagen en uso
-    function updateCaption(item, position) {
+    function updateCaption(item, position, animate) {
       imgEl.alt = item.caption;
-      if (capEl) capEl.textContent = item.caption;
-      if (cntEl) cntEl.textContent = (position + 1) + ' / ' + images.length;
+      if (capEl) {
+        capEl.textContent = item.caption;
+        if (animate) replayText(capEl);
+      }
+      if (cntEl) {
+        cntEl.textContent = (position + 1) + ' / ' + images.length;
+        if (animate) replayText(cntEl);
+      }
     }
 
     // Muestra una imagen junto con su pie y su texto alternativo
@@ -214,8 +198,9 @@
       // Solo actualiza src, alt y pie; no toca clases ni estructura
       const item = images[index];
       imgEl.src = item.src;
-      updateCaption(item, index);
+      updateCaption(item, index, true);
       index = (index + 1) % images.length;
+      preload(index); // la próxima imagen, mientras el visitante mira la actual
     }
 
     // Inicializa con la primera entrada del array
@@ -224,41 +209,48 @@
       if (imgEl.src.indexOf(first.src) === -1) {
         imgEl.src = first.src;
       }
-      updateCaption(first, 0);
+      updateCaption(first, 0, false); // la animación inicial ya la hace CSS
+      preload(1);                    // siguiente imagen lista antes de que toque
     }
 
-    // Evita duplicar timers si el script se ejecuta más de una vez
-    if (imgEl._carouselTimer) {
-      clearInterval(imgEl._carouselTimer);
-      imgEl._carouselTimer = null;
+    // Un único gestor del temporizador: centraliza las distintas causas de
+    // pausa y evita duplicarlo si el script se ejecuta más de una vez.
+    let hovered = false;
+
+    function stopTimer() {
+      if (imgEl._carouselTimer) {
+        clearInterval(imgEl._carouselTimer);
+        imgEl._carouselTimer = null;
+      }
+    }
+    function startTimer() {
+      if (imgEl._carouselTimer) return;
+      imgEl._carouselTimer = setInterval(showNext, intervalMs);
     }
 
-    imgEl._carouselTimer = setInterval(showNext, intervalMs);
+    stopTimer();
+    if (!document.hidden) startTimer();
 
     // Zona de pausa: la tarjeta de imagen completa (foto + pie), porque el pie
     // tapa la parte baja de la foto
     const mediaEl = imgEl.closest('figure') || imgEl;
 
-    // Pausa al hover (solo afecta a la tarjeta de imagen)
-    mediaEl.addEventListener('mouseenter', () => {
-      if (imgEl._carouselTimer) {
-        clearInterval(imgEl._carouselTimer);
-        imgEl._carouselTimer = null;
-      }
-    });
-    mediaEl.addEventListener('mouseleave', () => {
-      if (!imgEl._carouselTimer) {
-        imgEl._carouselTimer = setInterval(showNext, intervalMs);
-      }
+    // Pausa al pasar el cursor, solo en dispositivos con hover real: en táctil
+    // el "hover" sintético queda pegado al tocar la foto y el carrusel se
+    // detenía para siempre.
+    if (window.matchMedia('(hover: hover)').matches) {
+      mediaEl.addEventListener('mouseenter', () => { hovered = true; stopTimer(); });
+      mediaEl.addEventListener('mouseleave', () => { hovered = false; startTimer(); });
+    }
+
+    // Con la pestaña oculta no tiene sentido seguir gastando batería y CPU
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stopTimer();
+      else if (!hovered) startTimer();
     });
 
     // Limpieza al salir de la página
-    window.addEventListener('beforeunload', () => {
-      if (imgEl._carouselTimer) {
-        clearInterval(imgEl._carouselTimer);
-        imgEl._carouselTimer = null;
-      }
-    });
+    window.addEventListener('beforeunload', stopTimer);
   })();
   </script>
 <script src="scripts/nav-transition.js"></script>
