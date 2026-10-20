@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Museo de la vida rural El Canario</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles/styles.css" />
+
+  <!-- CSS añadido para la imagen desplazable (no modifica el resto del layout) -->
+  <style>
+    /* Fuerza una altura fija para toda la tarjeta blanca (texto + imagen) */
+.card {
+  height: 590px;        /* nuevo alto exacto */
+  min-height: 590px;    /* evita que el contenido lo reduzca */
+  box-sizing: border-box;
+}
+    /* Contenedor de la línea del tiempo: no toca el resto del layout */
+    .tl-scroll-wrap {
+      width: 70%;
+      margin-top: 18px;               /* separación respecto al texto; ajusta si hace falta */
+      box-sizing: border-box;
+    }
+
+    /* Viewport con barra visible en escritorio y scroll táctil en móvil */
+    .tl-scroll-viewport {
+      width: 92%;
+      height: 550px;                  /* altura visible de la imagen dentro del bloque; ajusta si quieres más */
+      overflow-x: auto;
+      overflow-y: center;
+      -webkit-overflow-scrolling: touch;
+      background: transparent;
+      border-radius: 8px;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    /* Imagen larga que ocupa su ancho natural; se desplaza dentro del viewport */
+    .tl-scroll-image {
+      display: block;
+      height: 100%;
+      width: auto;                    /* mantiene proporción; si quieres forzar ancho usa width: 11938px; */
+      max-width: none;                /* evita que el CSS global la reduzca */
+      object-fit: cover;
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;           /* evita interferir con el arrastre del viewport */
+    }
+
+    /* Scrollbar visible y estilizada (WebKit) */
+    .tl-scroll-viewport::-webkit-scrollbar { height: 60px; }
+    .tl-scroll-viewport::-webkit-scrollbar-track { background: transparent; }
+    .tl-scroll-viewport::-webkit-scrollbar-thumb {
+      background: rgba(0,0,0,0.18);
+      border-radius: 8px;
+    }
+
+    /* Firefox */
+    .tl-scroll-viewport { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.18) transparent; }
+
+    /* Evita marcos o sombras al desplazar */
+    .tl-scroll-viewport, .tl-scroll-image { box-shadow: none !important; filter: none !important; }
+
+    /* En móvil reduce la altura si quieres */
+    @media (max-width: 700px) {
+      .tl-scroll-viewport { height: 300px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="viewport-fixed">
+
+    <!-- Header fijo -->
+    <header class="site-header" role="banner">
+      <div class="header-inner">
+        <a class="brand" href="index.html">
+          <img src="assets/svg/Logo.svg" alt="Logo Museo El Canario" class="logo-img" />
+          <span class="brand-text">Museo de la vida rural El Canario</span>
+        </a>
+
+        <nav class="main-nav" aria-label="Navegación principal">
+          <a href="cronograma.html" class="nav-link">Cronograma</a>
+          <a href="imagenes.html" class="nav-link">Imágenes</a>
+          <a href="biografia.html" class="nav-link">Biografía</a>
+          <a href="contacto.html" class="nav-link">Contacto</a>
+        </nav>
+
+        <!-- Toggle móvil -->
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" type="button">
+          <svg class="menu-icon" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <circle class="menu-circle" cx="24" cy="24" r="20" fill="#c0392b" />
+            <g class="bars" stroke="#fff" stroke-linecap="round" stroke-width="3" stroke-linejoin="round">
+              <line class="bar top" x1="14" y1="18" x2="34" y2="18" />
+              <line class="bar bottom" x1="14" y1="30" x2="34" y2="30" />
+            </g>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Menú desplegable móvil -->
+    <aside class="floating-menu" id="floatingMenu" aria-hidden="true">
+      <div class="floating-inner">
+        <nav class="floating-nav" aria-label="Navegación flotante">
+          <a href="cronograma.html">Cronograma</a>
+          <a href="imagenes.html">Imágenes</a>
+          <a href="biografia.html">Biografía</a>
+          <a href="contacto.html">Contacto</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Hero -->
+    <main class="hero" role="main" aria-label="Hero">
+      <div class="hero-overlay" aria-hidden="true"></div>
+
+      <section class="card container" role="region" aria-label="Tarjeta principal">
+        <div class="card-inner">
+          <div class="card-copy">
+            <h1 class="card-title">Cronograma
+            </h1>
+            <p class="card-lead">
+              En la siguiente línea verá la evolución de la vida rural y la agricola en Chile. 
+            </p>
+
+            <a id="cta-recorrer" class="btn-primary" href="index.html" role="button">VOLVER ATRÁS</a>
+          </div>
+
+          <!-- INICIO: contenedor de la imagen desplazable (pegado aquí, sin mover el texto ni el botón) -->
+          <div class="tl-scroll-wrap" aria-label="Línea del tiempo desplazable">
+            <div class="tl-scroll-viewport" id="tlScrollViewport" tabindex="0" role="region" aria-roledescription="carousel">
+              <!-- Reemplaza src por la ruta de tu imagen larga si es necesario -->
+              <img class="tl-scroll-image" src="assets/svg/linea-tl.svg" alt="Línea del tiempo" />
+            </div>
+          </div>
+          <!-- FIN: contenedor de la imagen desplazable -->
+
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script>
+    (function(){
+      const toggle = document.getElementById('menuToggle');
+      const menu = document.getElementById('floatingMenu');
+
+      toggle.addEventListener('click', () => {
+        const open = menu.classList.toggle('open');
+        menu.setAttribute('aria-hidden', String(!open));
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.classList.toggle('open', open);
+      });
+
+      // Cerrar menú al tocar fuera
+      document.addEventListener('click', (e) => {
+        const isMobile = window.matchMedia('(max-width:1100px)').matches;
+        if (!isMobile) return;
+        if (!menu.classList.contains('open')) return;
+        if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+          menu.classList.remove('open');
+          menu.setAttribute('aria-hidden', 'true');
+          toggle.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      // Mantener el año si existe el elemento
+      const yearEl = document.getElementById('year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+    })();
+  </script>
+
+  <!-- Script añadido para arrastrar y asegurar scrollbar en escritorio -->
+  <script>
+  (function(){
+    const viewport = document.getElementById('tlScrollViewport');
+    if (!viewport) return;
+
+    // Hacer que el foco inicial no muestre outline molesto
+    viewport.addEventListener('focus', () => viewport.style.outline = 'none');
+
+    // Drag to scroll (mouse)
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    viewport.addEventListener('mousedown', (e) => {
+      isDown = true;
+      viewport.classList.add('dragging');
+      startX = e.pageX - viewport.getBoundingClientRect().left;
+      scrollLeft = viewport.scrollLeft;
+      document.body.style.userSelect = 'none';
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDown = false;
+      viewport.classList.remove('dragging');
+      document.body.style.userSelect = '';
+    });
+
+    viewport.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - viewport.getBoundingClientRect().left;
+      const walk = (x - startX) * 1.2; // sensibilidad
+      viewport.scrollLeft = scrollLeft - walk;
+    });
+
+    // Touch support (arrastrar con el dedo)
+    let touchStartX = 0, touchStartScroll = 0;
+    viewport.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].pageX;
+      touchStartScroll = viewport.scrollLeft;
+    }, {passive:true});
+
+    viewport.addEventListener('touchmove', (e) => {
+      const dx = e.touches[0].pageX - touchStartX;
+      viewport.scrollLeft = touchStartScroll - dx;
+    }, {passive:true});
+
+    // Asegurar que la imagen sea más ancha que el viewport para que aparezca la barra
+    const img = viewport.querySelector('.tl-scroll-image');
+    function ensureScrollable() {
+      if (!img) return;
+      const vw = viewport.clientWidth;
+      const naturalW = img.naturalWidth || 0;
+      if (naturalW <= vw) {
+        // forzamos un ancho mayor para que aparezca scroll; ajusta si quieres otro valor
+        img.style.width = (vw + 600) + 'px';
+      } else {
+        img.style.width = 'auto';
+      }
+    }
+
+    // Ejecutar al cargar la imagen y al redimensionar
+    if (img && img.complete) ensureScrollable();
+    if (img) img.addEventListener('load', ensureScrollable);
+    window.addEventListener('resize', ensureScrollable);
+
+    // Pequeña pista de scroll en desktop
+    function flashHint() {
+      if (window.matchMedia('(pointer:fine)').matches) {
+        const start = viewport.scrollLeft;
+        viewport.scrollBy({ left: 60, behavior: 'smooth' });
+        setTimeout(() => viewport.scrollTo({ left: start, behavior: 'smooth' }), 450);
+      }
+    }
+    setTimeout(flashHint, 350);
+  })();
+  </script>
+  <script>
+(function(){
+  if (!window.matchMedia('(max-width:700px)').matches) return;
+
+  const img = document.querySelector('.card .tl-scroll-image[src$="linea-tl.svg"]');
+  const vp  = document.querySelector('.card .tl-scroll-viewport');
+  if (!img || !vp) return;
+
+  let scale = 1;
+  let lastScale = 1;
+  let startDist = 0;
+  let origin = { x: 0, y: 0 };
+  let pan = { x: 0, y: 0 };
+  let lastPan = { x: 0, y: 0 };
+  let isPanning = false;
+
+  function getDistance(touches){
+    const dx = touches[0].pageX - touches[1].pageX;
+    const dy = touches[0].pageY - touches[1].pageY;
+    return Math.hypot(dx, dy);
+  }
+
+  function getMidpoint(touches){
+    return {
+      x: (touches[0].pageX + touches[1].pageX) / 2,
+      y: (touches[0].pageY + touches[1].pageY) / 2
+    };
+  }
+
+  function applyTransform(){
+    img.style.transform = `translate(${pan.x}px, ${pan.y}px) scale(${scale})`;
+  }
+
+  // Touch handlers
+  img.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      startDist = getDistance(e.touches);
+      lastScale = scale;
+      const mid = getMidpoint(e.touches);
+      // calcular origen relativo al centro de la imagen
+      const rect = img.getBoundingClientRect();
+      origin.x = mid.x - rect.left - rect.width / 2;
+      origin.y = mid.y - rect.top - rect.height / 2;
+      img.style.transformOrigin = `${(origin.x + rect.width/2)/rect.width*100}% ${(origin.y + rect.height/2)/rect.height*100}%`;
+    } else if (e.touches.length === 1 && scale > 1) {
+      // iniciar pan
+      isPanning = true;
+      lastPan.x = e.touches[0].pageX - pan.x;
+      lastPan.y = e.touches[0].pageY - pan.y;
+    }
+  }, { passive: false });
+
+  img.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const dist = getDistance(e.touches);
+      const factor = dist / startDist;
+      scale = Math.max(1, Math.min(4, lastScale * factor)); // límites 1x-4x
+      applyTransform();
+    } else if (e.touches.length === 1 && isPanning) {
+      e.preventDefault();
+      pan.x = e.touches[0].pageX - lastPan.x;
+      pan.y = e.touches[0].pageY - lastPan.y;
+      // limitar pan para no mover la imagen fuera de la vista excesivamente
+      const rect = img.getBoundingClientRect();
+      const vpRect = vp.getBoundingClientRect();
+      const maxPanX = Math.max(0, (rect.width * scale - vpRect.width) / 2 + 40);
+      const maxPanY = Math.max(0, (rect.height * scale - vpRect.height) / 2 + 40);
+      pan.x = Math.max(-maxPanX, Math.min(maxPanX, pan.x));
+      pan.y = Math.max(-maxPanY, Math.min(maxPanY, pan.y));
+      applyTransform();
+    }
+  }, { passive: false });
+
+  img.addEventListener('touchend', (e) => {
+    if (e.touches.length < 2) {
+      lastScale = scale;
+    }
+    if (e.touches.length === 0) {
+      isPanning = false;
+    }
+    // si el usuario reduce por debajo de 1, resetear
+    if (scale <= 1.01) {
+      scale = 1;
+      pan = { x: 0, y: 0 };
+      applyTransform();
+    }
+  });
+
+  // Doble toque para resetear (opcional, cómodo)
+  let lastTap = 0;
+  img.addEventListener('touchend', (e) => {
+    const now = Date.now();
+    if (now - lastTap < 300) {
+      // doble tap: alternar entre 1x y 2x centrado
+      if (scale > 1.1) {
+        scale = 1; pan = { x:0, y:0 };
+      } else {
+        scale = 2;
+      }
+      lastScale = scale;
+      applyTransform();
+    }
+    lastTap = now;
+  });
+
+  // Evitar que el gesto de pellizcar haga zoom de la página (si el meta viewport lo permite)
+  // Nota: algunos navegadores ignoran preventDefault en touchmove si no se establece passive:false en el listener (ya aplicado arriba).
+})();
+</script>
+
+</body>
