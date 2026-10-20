@@ -43,15 +43,31 @@
       font-size: 15px;
     }
 
-    /* Enlaces: color negro por defecto, al hover cambian a var(--accent) (rojo) */
+    /* Enlaces: color negro por defecto, al hover cambian a var(--accent) (rojo).
+       Se agrega la misma transición suave de color (260ms) que usa el botón
+       .btn-primary, para que el cambio no sea instantáneo sino con fundido. */
     .contact-link {
       color: #000;
       text-decoration: none;
-      font-weight: 700;
+      font-weight: normal;
       font-family: var(--light-sans);
+      transition: color 260ms ease;
     }
     .contact-link:hover,
     .contact-link:focus {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    /* Dirección: enlace a Google Maps que conserva la apariencia del texto
+       (hereda el color de .contact-text) y al hover pasa a --accent con fundido */
+    .contact-map {
+      color: inherit;
+      text-decoration: none;
+      transition: color 260ms ease;
+    }
+    .contact-map:hover,
+    .contact-map:focus {
       color: var(--accent);
       text-decoration: underline;
     }
@@ -81,12 +97,14 @@
       .card-media img { border-radius: 0 var(--radius) var(--radius) 0 !important; display:block; width:100%; height:100%; object-fit:cover; }
     }
 
-    /* En móvil mantenemos la imagen arriba (como en el resto de páginas) */
+    /* En móvil seguimos el diseño global: imagen arriba (bloque redondeado)
+       y bloque blanco de texto abajo, con el margen entre ambos que define
+       styles.css. Aquí no se fuerza border-radius para no chocar con él. */
     @media (max-width:1100px) {
       .card-inner { display:flex; flex-direction:column; }
       .card-copy { order: 2; }
-      .card-media { order: 1; border-radius: var(--radius) var(--radius) 0 0 !important; }
-      .card-media img { border-radius: var(--radius) var(--radius) 0 0 !important; width:100%; height:auto; object-fit:cover; }
+      .card-media { order: 1; }
+      .card-media img { width:100%; height:auto; object-fit:cover; }
     }
 
     /* Asegura que el botón VOLVER ATRÁS tenga la misma posición que en otras páginas */
@@ -153,7 +171,9 @@
 
             <div class="contact-block">
               <h2 class="contact-heading">Dirección</h2>
-              <p class="contact-text">Unnamed Road, Longaví, Maule.</p>
+              <p class="contact-text">
+                <a class="contact-map" href="https://www.google.com/maps/search/?api=1&amp;query=Unnamed%20Road%2C%20Longav%C3%AD%2C%20Maule%2C%20Chile" target="_blank" rel="noopener noreferrer" aria-label="Ver dirección Unnamed Road, Longaví, Maule en Google Maps">Unnamed Road, Longaví, Maule.</a>
+              </p>
 
               <h2 class="contact-heading">Horario de atención</h2>
               <p class="contact-text">Lunes a domingo: 15:00 – 19:00 hrs</p>
@@ -178,7 +198,7 @@
             </div>
 
             <!-- Botón VOLVER ATRÁS en la misma posición que en las otras ventanas -->
-            <a id="cta-recorrer" class="btn-primary" href="index.html" role="button">VOLVER ATRÁS</a>
+            <a id="cta-recorrer" class="btn-primary" href="index.html">VOLVER ATRÁS</a>
           </div>
 
           <!-- Imagen (en desktop a la derecha, en móvil arriba) -->
@@ -192,6 +212,8 @@
         </div>
       </section>
     </main>
+
+  </div>
 
   <script>
     (function(){
@@ -224,5 +246,6 @@
       if (yearEl) yearEl.textContent = new Date().getFullYear();
     })();
   </script>
+<script src="scripts/nav-transition.js"></script>
 </body>
 </html>
