@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Recorrido — Museo de la vida rural El Canario</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles/styles.css" />
+
+  <!-- Estilos propios de esta página:
+       - fondo con Recorrido-fondo (mismos parámetros que las demás páginas)
+       - tarjeta traslúcido con desenfoque de fondo (vidrio esmerilado),
+         ocupando un poco menos de la mitad izquierda en escritorio -->
+  <style>
+    /* Fondo propio de la página */
+    .hero {
+      background-image: url('assets/images/Recorrido-fondo.png') !important;
+    }
+
+    /* Tarjeta en vidrio esmerilado: traslúcida + desenfoque del fondo.
+       El vidrio vive en .card (y no en .card-copy) para que el
+       backdrop-filter no quede aislado por la animación de entrada. */
+    .card {
+      background: rgba(14, 24, 19, 0.42) !important;
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      backdrop-filter: blur(16px) saturate(140%);
+      border: 1px solid rgba(255, 255, 255, 0.20);
+      border-radius: var(--radius) !important;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.30) !important;
+    }
+
+    /* El bloque de texto no pinta fondo propio: el vidrio es la tarjeta */
+    .card-copy {
+      background: transparent !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+    }
+
+    /* Texto claro para que se lea sobre el vidrio esmerilado */
+    .card-title { color: #ffffff !important; }
+    .card-lead, .card-lead-2 { color: rgba(255, 255, 255, 0.92) !important; }
+
+    /* Escritorio: la tarjeta ocupa un poco menos de la mitad izquierda
+       (en vez de centrarse como en el resto de páginas).
+       - margin-left replica el margen izquierdo real del .card.container de las
+         demás páginas (centrado: max(24px, (100% - container)/2)), para que su
+         borde izquierdo quede alineado con el resto del sitio.
+       - el ancho se limita a un poco menos de la mitad del container para que
+         en pantallas muy anchas no se desborde del área de contenido. */
+    @media (min-width: 1101px) {
+      .card.container {
+        width: min(44%, calc(var(--container) * 0.44)) !important;
+        max-width: none !important;
+        margin-left: max(24px, (100% - var(--container)) / 2) !important;
+        margin-right: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="viewport-fixed">
+
+    <!-- Header fijo -->
+    <header class="site-header" role="banner">
+      <div class="header-inner">
+        <a class="brand" href="index.html">
+          <img src="assets/svg/Logo.svg" alt="Logo Museo El Canario" class="logo-img" />
+          <span class="brand-text">Museo de la vida rural El Canario</span>
+        </a>
+
+        <nav class="main-nav" aria-label="Navegación principal">
+          <a href="cronograma.html" class="nav-link">Cronograma</a>
+          <a href="imagenes.html" class="nav-link">Imágenes</a>
+          <a href="biografia.html" class="nav-link">Biografía</a>
+          <a href="contacto.html" class="nav-link">Contacto</a>
+        </nav>
+
+        <!-- Toggle móvil -->
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" type="button">
+          <svg class="menu-icon" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <circle class="menu-circle" cx="24" cy="24" r="20" fill="#c0392b" />
+            <g class="bars" stroke="#fff" stroke-linecap="round" stroke-width="3" stroke-linejoin="round">
+              <line class="bar top" x1="14" y1="18" x2="34" y2="18" />
+              <line class="bar bottom" x1="14" y1="30" x2="34" y2="30" />
+            </g>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Menú desplegable móvil -->
+    <aside class="floating-menu" id="floatingMenu" aria-hidden="true">
+      <div class="floating-inner">
+        <nav class="floating-nav" aria-label="Navegación flotante">
+          <a href="cronograma.html">Cronograma</a>
+          <a href="imagenes.html">Imágenes</a>
+          <a href="biografia.html">Biografía</a>
+          <a href="contacto.html">Contacto</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Hero -->
+    <main class="hero" role="main" aria-label="Hero">
+      <div class="hero-overlay" aria-hidden="true"></div>
+
+      <section class="card container" role="region" aria-label="Tarjeta recorrido">
+        <div class="card-inner">
+          <div class="card-copy">
+            <h1 class="card-title">Recorrido</h1>
+            <p class="card-lead">
+              Antes de adentrarnos a la casa, sus alrededores nos abren el paisaje a los cerros de la precordillera y la cercanía del río Ancoa.
+            </p>
+            <p class="card-lead-2">
+              Álamos y boldos rodean los caminos, mientras en sus copas las tórtolas, zorzales y queltehues cantan al alba.
+            </p>
+            <a id="cta-recorrer" class="btn-primary" href="index.html">VOLVER ATRÁS</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <script>
+    (function(){
+      const toggle = document.getElementById('menuToggle');
+      const menu = document.getElementById('floatingMenu');
+
+      toggle.addEventListener('click', () => {
+        const open = menu.classList.toggle('open');
+        menu.setAttribute('aria-hidden', String(!open));
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.classList.toggle('open', open);
+      });
+
+      // Cerrar menú al tocar fuera
+      document.addEventListener('click', (e) => {
+        const isMobile = window.matchMedia('(max-width:1100px)').matches;
+        if (!isMobile) return;
+        if (!menu.classList.contains('open')) return;
+        if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+          menu.classList.remove('open');
+          menu.setAttribute('aria-hidden', 'true');
+          toggle.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      // Cerrar menú con Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && menu.classList.contains('open')) {
+          menu.classList.remove('open');
+          menu.setAttribute('aria-hidden', 'true');
+          toggle.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      // Mantener el año si existe el elemento
+      const yearEl = document.getElementById('year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+    })();
+  </script>
+
+  <script src="scripts/nav-transition.js"></script>
+</body>
+</html>
