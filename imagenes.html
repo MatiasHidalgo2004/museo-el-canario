@@ -28,6 +28,24 @@
       .card-media img {
         border-radius: var(--radius) !important;  /* curvatura en las 4 esquinas */
       }
+      /* El pie se coloca sobre la foto, dentro del margen de 18px (no sobre el
+         fondo blanco de la caja), y replica el redondeo inferior de la imagen */
+      .card-caption {
+        left:18px;
+        right:18px;
+        bottom:18px;
+        border-radius: 0 0 var(--radius) var(--radius);
+      }
+    }
+
+    /* El pie del carrusel lleva contador a la derecha: el título puede ocupar
+       dos líneas, pero el contador nunca salta a la línea siguiente */
+    .card-caption {
+      flex-wrap: nowrap;
+    }
+    .card-caption .caption-counter {
+      flex: 0 0 auto;
+      text-align: right;
     }
   </style>
 </head>
@@ -90,7 +108,11 @@
           </div>
 
           <figure class="card-media">
-            <img id="carouselImage" src="assets/images/Imagen-1.png" alt="Vista del museo El Canario" />
+            <img id="carouselImage" src="assets/images/Imagen-1.png" alt="AGUAMANIL/PÉLELAS" />
+            <figcaption class="card-caption">
+              <span class="caption-title" id="carouselCaption">AGUAMANIL/PÉLELAS</span>
+              <span class="caption-counter" id="carouselCounter">1 / 10</span>
+            </figcaption>
           </figure>
         </div>
       </section>
@@ -139,21 +161,22 @@
     })();
   </script>
 
-  <!-- Carousel script: solo actúa sobre #carouselImage, no modifica nada más -->
+  <!-- Carousel script: solo actúa sobre #carouselImage y su pie #carouselCaption,
+       no modifica nada más -->
   <script>
   (function(){
-    // --- Configuración: reemplaza las rutas por tus imágenes reales si lo deseas ---
+    // --- Configuración: ruta de la imagen y su pie de foto ---
     const images = [
-      'assets/images/Imagen-1.png',
-      'assets/images/Imagen-2.png',
-      'assets/images/Imagen-3.png',
-      'assets/images/Imagen-4.png',
-      'assets/images/Imagen-5.png',
-      'assets/images/Imagen-6.png',
-      'assets/images/Imagen-7.png',
-      'assets/images/Imagen-8.png',
-      'assets/images/Imagen-9.png',
-      'assets/images/Imagen-10.png'
+      { src:'assets/images/Imagen-1.png',  caption:'AGUAMANIL/PÉLELAS' },
+      { src:'assets/images/Imagen-2.png',  caption:'LATA GALLETAS' },
+      { src:'assets/images/Imagen-3.png',  caption:'VAJILLAS DE CERÁMICA FANALOZA' },
+      { src:'assets/images/Imagen-4.png',  caption:'BIDONES LECHEROS' },
+      { src:'assets/images/Imagen-5.png',  caption:'RADIOS' },
+      { src:'assets/images/Imagen-6.png',  caption:'DAMAJUANAS/GARRAFAS Y CHUICAS' },
+      { src:'assets/images/Imagen-7.png',  caption:'TELEVISORES DE TUBO' },
+      { src:'assets/images/Imagen-8.png',  caption:'BÁSCULA DE COCINA' },
+      { src:'assets/images/Imagen-9.png',  caption:'CUERDA PARA SALTAR Y PELOTA' },
+      { src:'assets/images/Imagen-10.png', caption:'PORUÑAS' }
     ];
 
     const intervalMs = 2000;   // 2 segundos
@@ -162,28 +185,46 @@
     const imgEl = document.getElementById('carouselImage');
     if (!imgEl) return; // si no existe, no hace nada
 
+    // Pie de foto y contador que acompañan a la imagen mostrada
+    const capEl = document.getElementById('carouselCaption');
+    const cntEl = document.getElementById('carouselCounter');
+
     // Mantener loading lazy por si no está
     imgEl.setAttribute('loading', 'lazy');
 
     // Preload para reducir parpadeos
     const preloaded = [];
-    images.forEach(src => {
+    images.forEach(item => {
       const i = new Image();
-      i.src = src;
+      i.src = item.src;
       preloaded.push(i);
     });
 
     let index = 0;
 
+    // Actualiza pie, contador y texto alternativo de la imagen en uso
+    function updateCaption(item, position) {
+      imgEl.alt = item.caption;
+      if (capEl) capEl.textContent = item.caption;
+      if (cntEl) cntEl.textContent = (position + 1) + ' / ' + images.length;
+    }
+
+    // Muestra una imagen junto con su pie y su texto alternativo
     function showNext() {
-      // Solo actualiza src; no toca clases, estilos ni estructura
-      imgEl.src = images[index];
+      // Solo actualiza src, alt y pie; no toca clases ni estructura
+      const item = images[index];
+      imgEl.src = item.src;
+      updateCaption(item, index);
       index = (index + 1) % images.length;
     }
 
-    // Inicializa con la primera imagen del array si es diferente
-    if (images.length > 0 && imgEl.src.indexOf(images[0]) === -1) {
-      imgEl.src = images[0];
+    // Inicializa con la primera entrada del array
+    if (images.length > 0) {
+      const first = images[0];
+      if (imgEl.src.indexOf(first.src) === -1) {
+        imgEl.src = first.src;
+      }
+      updateCaption(first, 0);
     }
 
     // Evita duplicar timers si el script se ejecuta más de una vez
@@ -194,14 +235,18 @@
 
     imgEl._carouselTimer = setInterval(showNext, intervalMs);
 
-    // Pausa al hover (solo afecta al propio img)
-    imgEl.addEventListener('mouseenter', () => {
+    // Zona de pausa: la tarjeta de imagen completa (foto + pie), porque el pie
+    // tapa la parte baja de la foto
+    const mediaEl = imgEl.closest('figure') || imgEl;
+
+    // Pausa al hover (solo afecta a la tarjeta de imagen)
+    mediaEl.addEventListener('mouseenter', () => {
       if (imgEl._carouselTimer) {
         clearInterval(imgEl._carouselTimer);
         imgEl._carouselTimer = null;
       }
     });
-    imgEl.addEventListener('mouseleave', () => {
+    mediaEl.addEventListener('mouseleave', () => {
       if (!imgEl._carouselTimer) {
         imgEl._carouselTimer = setInterval(showNext, intervalMs);
       }
