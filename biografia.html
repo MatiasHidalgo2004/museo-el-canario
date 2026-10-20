@@ -75,7 +75,7 @@ Desde Garrafones de vino, tocadiscos, hasta televisores de tubo.
             <p class="card-lead-2">
               Puedes venir a visitarnos y poder recorrer un poco de los objetos que nos acompañaron en nuestra historia.  
             </p>
-            <a id="cta-recorrer" class="btn-primary" href="index.html" role="button">VOLVER ATRÁS</a>
+            <a id="cta-recorrer" class="btn-primary" href="index.html">VOLVER ATRÁS</a>
           </div>
 
           <figure class="card-media">
@@ -88,6 +88,8 @@ Desde Garrafones de vino, tocadiscos, hasta televisores de tubo.
         </div>
       </section>
     </main>
+
+  </div>
 
   <script>
     (function(){
@@ -114,8 +116,21 @@ Desde Garrafones de vino, tocadiscos, hasta televisores de tubo.
         }
       });
 
-      document.getElementById('year').textContent = new Date().getFullYear();
+      // Cerrar menú con Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && menu.classList.contains('open')) {
+          menu.classList.remove('open');
+          menu.setAttribute('aria-hidden', 'true');
+          toggle.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      // Mantener el año si existe el elemento
+      const yearEl = document.getElementById('year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
     })();
   </script>
+<script src="scripts/nav-transition.js"></script>
 </body>
 </html>
