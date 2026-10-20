@@ -4,6 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Contacto — Museo de la vida rural El Canario</title>
+  <meta name="description" content="Contacto del museo El Canario: dirección en Longaví, Maule, teléfono, WhatsApp y correo para coordinar tu visita." />
+  <meta name="theme-color" content="#0e1813" />
+  <link rel="icon" href="assets/svg/Logo.svg" type="image/svg+xml" />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -203,7 +206,7 @@
 
           <!-- Imagen (en desktop a la derecha, en móvil arriba) -->
           <figure class="card-media">
-            <img src="assets/images/Imagen-Contacto.jpg" alt="Fachada del museo" loading="lazy" />
+            <img src="assets/images/Imagen-Contacto.webp" alt="Fachada del museo" decoding="async" />
             <figcaption class="card-caption">
               <span class="caption-title">MUSEO: CORREDOR</span>
               <span class="caption-detail">TELÉFONOS FIJOS</span>
@@ -215,37 +218,7 @@
 
   </div>
 
-  <script>
-    (function(){
-      const toggle = document.getElementById('menuToggle');
-      const menu = document.getElementById('floatingMenu');
-
-      toggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const open = menu.classList.toggle('open');
-        menu.setAttribute('aria-hidden', String(!open));
-        toggle.setAttribute('aria-expanded', String(open));
-        toggle.classList.toggle('open', open);
-      });
-
-      // Cerrar menú al tocar fuera (móvil)
-      document.addEventListener('click', (e) => {
-        const isMobile = window.matchMedia('(max-width:1100px)').matches;
-        if (!isMobile) return;
-        if (!menu.classList.contains('open')) return;
-        if (!menu.contains(e.target) && !toggle.contains(e.target)) {
-          menu.classList.remove('open');
-          menu.setAttribute('aria-hidden', 'true');
-          toggle.classList.remove('open');
-          toggle.setAttribute('aria-expanded', 'false');
-        }
-      });
-
-      // Año en footer
-      const yearEl = document.getElementById('year');
-      if (yearEl) yearEl.textContent = new Date().getFullYear();
-    })();
-  </script>
+  <script src="scripts/menu.js"></script>
 <script src="scripts/nav-transition.js"></script>
 </body>
 </html>
