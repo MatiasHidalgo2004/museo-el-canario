@@ -64,9 +64,11 @@ html,body{
 
 /* Toggle (solo móvil) */
 .menu-toggle{display:none;background:transparent;border:0;padding:6px;cursor:pointer}
-.menu-toggle img{width:28px;height:28px}
+.menu-icon{display:block;width:44px;height:44px}
+.menu-circle{transition:fill 220ms ease}
+.menu-icon .bar{transform-origin:50% 50%;transform-box:fill-box;transition:transform 260ms cubic-bezier(.2,.9,.3,1),opacity 200ms ease;will-change:transform;stroke-width:3;stroke-linecap:round}
 
-/* Floating menu (solo móvil) */
+/* Floating menu default (desktop fallback) */
 .floating-menu{
   display:none;
   position:fixed;
@@ -98,7 +100,7 @@ html,body{
   background-size:cover;background-position:center;color:var(--paper);
 }
 
-/* hero-overlay: mantiene el fondo oscuro pero queda detrás del card */
+/* hero-overlay */
 .hero-overlay{
   position:absolute;
   inset:0;
@@ -107,29 +109,28 @@ html,body{
   pointer-events:none;
 }
 
-/* CARD blanco sólido: todas las esquinas redondeadas, sin degradado ni glass */
+/* CARD */
 .card{
-  position:relative;           /* para controlar stacking */
-  z-index:2;                   /* por encima del overlay */
-  background:#ffffff;          /* blanco puro, sólido */
+  position:relative;
+  z-index:2;
+  background:#ffffff;
   border-radius: var(--radius);
   box-shadow: 0 18px 40px rgba(0,0,0,0.12);
   margin-top: 24px;
-  overflow:hidden;             /* importante: para que la imagen quede a ras y las esquinas redondeadas se apliquen */
+  overflow:hidden;
 }
 
-/* Card inner: dos columnas (texto | imagen) sin espacio entre ellas */
+/* Card inner */
 .card-inner{
   display:flex;
   gap:0;
-  align-items:stretch; /* estira la imagen a la altura del card */
+  align-items:stretch;
   padding:0;
   width:100%;
   margin:0 auto;
 }
 
-/* Columna de texto */
-/* --- DESKTOP: mantener el texto en columna flex y empujar el botón al final --- */
+/* Columna de texto - DESKTOP: flex column, botón al final */
 .card-copy{
   padding:40px 48px;
   width:57%;
@@ -142,19 +143,19 @@ html,body{
   align-items: flex-start;
 }
 
-/* Botón RECORRER: en escritorio queda al final de la columna y alineado a la izquierda */
+/* Botón RECORRER en escritorio */
 #cta-recorrer {
-  margin-top: auto;        /* empuja el botón hacia abajo dentro de .card-copy */
-  align-self: flex-start;  /* lo mantiene alineado al borde izquierdo de la columna de texto */
+  margin-top: auto;
+  align-self: flex-start;
   padding: 10px 28px;
   min-width: 0;
 }
 
-/* Tipografía y textos */
+/* Tipografía */
 .card-title{font-family:var(--serif);font-weight:700;font-size:clamp(26px,3.6vw,40px);margin:0 0 12px;color:var(--ink)}
 .card-lead, .card-lead-2{font-family:var(--sans);font-weight:400;color:#333;margin:0 0 14px;line-height:1.6;font-size:16px}
 
-/* CTA: sin subrayado, hover rojo (estilos base) */
+/* CTA base */
 .btn-primary{
   display:inline-flex;align-items:center;justify-content:center;
   background: linear-gradient(180deg, rgba(47,107,79,0.92), rgba(47,107,79,0.92));
@@ -164,8 +165,7 @@ html,body{
 }
 .btn-primary:hover{transform:translateY(-2px);background:var(--accent);filter:brightness(1.02)}
 
-/* Columna de imagen: pegada al borde del card, sin aire; la imagen ocupa 43% y se estira a la altura del card.
-   La imagen queda exactamente a ras del borde derecho del bloque blanco. */
+/* Columna de imagen */
 .card-media{
   width:43%;
   min-width:320px;
@@ -173,11 +173,9 @@ html,body{
   position:relative;
   overflow:hidden;
   margin:0;
-  border-radius: 0 var(--radius) var(--radius) 0; /* redondeo solo en la esquina exterior derecha */
+  border-radius: 0 var(--radius) var(--radius) 0;
   background: transparent;
 }
-
-/* Forzar que la imagen llene la columna y quede a ras */
 .card-media img{
   display:block;
   width:100%;
@@ -189,7 +187,7 @@ html,body{
   vertical-align:middle;
 }
 
-/* Pie de imagen: franja integrada dentro de la propia imagen */
+/* Pie de imagen */
 .card-caption{
   position:absolute;
   left:0;right:0;bottom:0;
@@ -198,138 +196,88 @@ html,body{
   color:var(--paper);font-family:var(--light-sans);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:0.6px;
 }
 
-/* Footer sutil: franja verde eliminada, texto más pequeño y más abajo */
-.footer-inner{
-  position:relative;
-  padding-top:0;
-  padding-bottom:18px; /* empuja el texto hacia abajo */
-}
-
-/* ocultar cualquier franja previa si existe */
-.footer-stripe{
-  display:none !important;
-  visibility:hidden !important;
-  height:0 !important;
-  margin:0 !important;
-  padding:0 !important;
-}
-
-.footer-copy{
-  margin: 14px 0 0 0; /* baja el texto 14px */
-  padding: 0;
-  text-align: center;
-  color: rgba(0,0,0,0.6);
-  font-size: 11px; /* más pequeño */
-  line-height: 1.2;
-  background: transparent;
-}
+/* Footer */
+.footer-inner{position:relative;padding-top:0;padding-bottom:18px}
+.footer-stripe{display:none !important;visibility:hidden !important;height:0 !important;margin:0 !important;padding:0 !important}
+.footer-copy{margin:14px 0 0 0;padding:0;text-align:center;color:rgba(0,0,0,0.6);font-size:11px;line-height:1.2;background:transparent}
 
 /* Accessibility focus */
 a:focus,button:focus{outline:3px solid rgba(247,194,79,0.18);outline-offset:3px;border-radius:8px}
 
-/* Responsive: en móvil el card pasa a columna y permite scroll */
-@media (max-width:1100px){
-  /* mantener card-inner en columna */
-  .card-inner{flex-direction:column}
-  .card-copy{
-    width:100%;
-    padding:28px;
-    /* en móvil queremos que el texto quede abajo dentro del bloque,
-       pero el botón quede centrado horizontalmente */
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end; /* empuja el contenido hacia abajo */
-    align-items: stretch;      /* mantiene el texto alineado a la izquierda */
-  }
-
-  /* botón en móvil: centrado dentro de .card-copy */
-  #cta-recorrer {
-    margin-top: 12px;
-    align-self: center;      /* centra el botón horizontalmente en móvil */
-    padding: 10px 28px;
-    min-width: 0;
-  }
-
-  .card-media{width:100%;min-width:0;border-radius:0 0 var(--radius) var(--radius)}
-  .card-media img{height:auto;max-height:360px;object-fit:contain}
-  html,body{overflow:auto}
-  .menu-toggle{display:block}
-  .main-nav{display:none}
-  .floating-menu{display:block}
-  .floating-menu{right:12px}
-}
-@media (max-width:480px){
-  .card-copy{padding:20px}
-  .card-title{font-size:20px}
-  .card-media img{max-height:220px}
-}
-
-/* --- OVERRIDE FINAL (solo si hay reglas conflictivas en otras hojas) --- */
-.card {
-  background-color: #ffffff !important;
-  background-image: none !important;
-  border-radius: var(--radius) !important;
-  box-shadow: 0 18px 40px rgba(0,0,0,0.12) !important;
-  border: none !important;
-  overflow: hidden !important;
-}
-.card-inner { gap:0 !important; align-items:stretch !important; padding:0 !important; }
-.card-copy { width:57% !important; padding:40px 48px !important; }
-.card-media { width:43% !important; margin:0 !important; padding:0 !important; border-radius:0 var(--radius) var(--radius) 0 !important; overflow:hidden !important; }
-.card-media img { width:100% !important; height:100% !important; object-fit:cover !important; margin:0 !important; padding:0 !important; border:0 !important; }
-.btn-primary { text-decoration:none !important; }
-
-/* ------------------ MOBILE: icono animado y card invertido (solo móvil) ------------------ */
+/* ------------------ MOBILE: icono animado, menú desplegable y card invertido ------------------ */
 @media (max-width:1100px) {
 
-  /* Icono redondo con barras que se cruzan en X */
-  .menu-toggle {
-    display: block !important;
-    background: transparent;
-    border: 0;
-    padding: 6px;
-    cursor: pointer;
-  }
+  /* Mostrar toggle y ocultar nav de escritorio */
+  .menu-toggle{display:block}
+  .main-nav{display:none}
 
-  .menu-icon { display:block; width:44px; height:44px; }
-  .menu-circle { transition: fill 220ms ease; }
-
-  .menu-icon .bar {
-    transform-origin: 50% 50%;
-    transform-box: fill-box;
-    transition: transform 260ms cubic-bezier(.2,.9,.3,1), opacity 200ms ease;
-    will-change: transform;
-    stroke-width: 3;
-    stroke-linecap: round;
-  }
-
+  /* Icon animation: barras a X */
   .menu-toggle.open .menu-circle { fill: #b03a2b; }
-  .menu-toggle.open .bar.top {
-    transform: translateY(6px) rotate(45deg);
-  }
-  .menu-toggle.open .bar.bottom {
-    transform: translateY(-6px) rotate(-45deg);
-  }
+  .menu-toggle.open .bar.top { transform: translateY(6px) rotate(45deg); }
+  .menu-toggle.open .bar.bottom { transform: translateY(-6px) rotate(-45deg); }
 
-  .menu-toggle:focus { outline: none; }
-
-  /* Floating menu: visible in mobile */
+  /* Menú desplegable: extensión visual del header
+     - Alineado exactamente con el header (centro y ancho)
+     - Nace ligeramente por encima del borde inferior para efecto de estiramiento
+     - Sin esquinas superiores redondeadas, solo inferiores */
   .floating-menu {
     display: block !important;
-    right: 12px !important;
-    top: calc(var(--header-height) + 12px) !important;
-    width: 240px !important;
-    border-radius: 14px !important;
-    padding: 12px !important;
-    background: #ffffff !important;
-    box-shadow: 0 18px 40px rgba(0,0,0,0.12) !important;
+    position: fixed;
+    top: calc(var(--header-height) - 6px); /* nace un poco más arriba para "estirarse" */
+    left: 50%;
+    transform: translateX(-50%) scaleY(0);
+    width: calc(100% - 48px);           /* mismo ancho que el header */
+    max-width: var(--container);
+    background: rgba(47,107,79,0.78);   /* mismo color verdoso del header */
+    border-radius: 0 0 var(--radius) var(--radius); /* solo esquinas inferiores redondeadas */
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    z-index: 110;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transform-origin: top center;
+    transition: transform 260ms cubic-bezier(.2,.9,.3,1), opacity 200ms ease;
   }
 
-  /* CARD: invertir layout en móvil (imagen arriba, texto abajo).
-     - Esquinas superiores redondeadas; inferiores cuadradas.
-     - Imagen ocupa todo el ancho del bloque blanco.
-     - Texto y botón quedan en la parte inferior del bloque blanco. */
+  /* Estado abierto */
+  .floating-menu.open {
+    pointer-events: auto;
+    opacity: 1;
+    transform: translateX(-50%) scaleY(1);
+  }
 
+  /* Inner list styling */
+  .floating-inner {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 12px 14px 12px;
+  }
+
+  .floating-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .floating-nav a {
+    color: #fff;                        /* texto blanco sobre fondo verde */
+    text-decoration: none;
+    font-family: var(--light-sans);
+    font-weight: 700;
+    padding: 12px 14px;
+    border-radius: 8px;
+    transition: background 160ms ease, color 160ms ease, transform 120ms ease;
+  }
+
+  .floating-nav a:hover {
+    background: rgba(255,255,255,0.08);
+    color: var(--accent);
+    transform: translateX(6px);
+  }
+
+  /* CARD: invertir layout en móvil (imagen arriba, texto abajo) */
   .card {
     border-radius: var(--radius) var(--radius) 0 0 !important;
     margin: 18px 0 0 0 !important;
@@ -377,20 +325,19 @@ a:focus,button:focus{outline:3px solid rgba(247,194,79,0.18);outline-offset:3px;
     justify-content: flex-end !important;
     gap: 12px;
     background: transparent !important;
-    align-items: stretch !important; /* keep text left-aligned */
+    align-items: stretch !important;
   }
 
-  /* botón centrado en móvil (override) */
+  /* botón centrado en móvil */
   #cta-recorrer {
     margin-top: 12px !important;
-    align-self: center !important; /* centra el botón en móvil */
+    align-self: center !important;
     padding: 10px 28px !important;
     min-width: 0 !important;
   }
 
   html,body { overflow: auto !important; }
-
-} /* fin media query */
+}
 
 /* --- Desktop fixes: ensure image sits flush to right edge without affecting mobile --- */
 @media (min-width: 1101px) {
@@ -447,5 +394,119 @@ a:focus,button:focus{outline:3px solid rgba(247,194,79,0.18);outline-offset:3px;
     margin-right: auto !important;
     max-width: var(--container) !important;
     width: calc(100% - 48px) !important;
+  }
+}
+/* --- Ajustes de foco: quitar recuadro verde al hacer click/tap,
+       pero mantener indicador para navegación por teclado --- */
+
+/* Evita el recuadro por defecto en clicks/taps (puntero) */
+button:focus,
+a:focus,
+img:focus,
+.menu-toggle:focus,
+.brand:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Mantén un foco visible para usuarios de teclado (accesibilidad) */
+button:focus-visible,
+a:focus-visible,
+.menu-toggle:focus-visible,
+.brand:focus-visible {
+  outline: 3px solid rgba(247,194,79,0.18);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+/* Evita el highlight nativo en dispositivos táctiles (Android/Chrome) */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Si algún elemento tiene un borde visual aplicado por el navegador (ej. -webkit-focus-ring),
+   neutralízalo para clicks pero no para focus-visible */
+button::-moz-focus-inner { border: 0; padding: 0; }
+
+/* Opcional: si usas imágenes dentro de enlaces y quieres evitar el recuadro al tocarlas */
+a img { outline: none; }
+
+/* --- Forzar overlay full-viewport en móvil y tablet --- */
+@media (max-width:1100px) {
+  /* Asegura que el contenedor principal permita scroll y que el hero pueda ocupar toda la pantalla */
+  html, body {
+    height: 100%;
+    min-height: 100%;
+    overflow: auto !important;
+  }
+
+  /* Hacemos que el overlay sea fixed y cubra todo el viewport */
+  .hero-overlay {
+    position: fixed !important;
+    inset: 0 !important;               /* top:0; right:0; bottom:0; left:0 */
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 1 !important;             /* por debajo del card (card z-index:2) */
+    pointer-events: none !important;
+    background: linear-gradient(180deg, rgba(0,0,0,0.48), rgba(0,0,0,0.18)) !important;
+  }
+
+  /* Asegura que el hero no reduzca la altura del overlay en landscape */
+  .hero {
+    min-height: 100vh !important;
+    position: relative !important;
+    z-index: 0 !important;
+  }
+
+  /* Mantener el card por encima del overlay */
+  .card {
+    z-index: 2 !important;
+    position: relative !important;
+  }
+
+  /* Si el fondo de la página está en .hero, forzamos que la imagen cubra todo el viewport */
+  .hero {
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+  }
+
+  /* Evita que el header fijo cree un "gap" visual cuando el overlay es fixed */
+  .site-header {
+    z-index: 120 !important;
+    position: fixed !important;
+  }
+}
+
+/* Asegurar que el fondo ocupe toda la pantalla en móvil (aplica a todas las páginas) */
+html, body {
+  height: 100%;
+  min-height: 100%;
+}
+
+/* Si usas un contenedor principal (viewport-fixed), garantizar 100vh */
+.viewport-fixed {
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Si el fondo está en .hero o en body, asegurar cobertura y evitar background-attachment fijo en móvil */
+.hero,
+body {
+  background-size: cover !important;
+  background-position: center top !important;
+  background-repeat: no-repeat !important;
+  background-attachment: scroll !important; /* evita fixed en móviles */
+}
+
+/* Ajustes específicos para móviles: forzar 100vh y evitar que barras de navegador reduzcan el área visible */
+@media (max-width: 900px) {
+  .viewport-fixed,
+  .hero,
+  body {
+    min-height: 100vh;
+    height: auto;
+    /* usar la unidad dinámica para navegadores que soportan safe-area */
+    min-height: calc(var(--vh, 1vh) * 100);
   }
 }
