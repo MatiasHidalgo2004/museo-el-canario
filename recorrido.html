@@ -60,6 +60,16 @@
         margin-right: auto !important;
       }
     }
+
+    /* Móvil (solo esta página): el card vuelve a su posición original (arriba)
+       y se hace más compacto verticalmente para cubrir menos del fondo.
+       Para lograrlo se oculta el segundo párrafo solo en móvil (en escritorio
+       se conserva), lo que reduce la altura del card. */
+    @media (max-width: 1100px) {
+      .card-lead-2 {
+        display: none !important;
+      }
+    }
   </style>
 </head>
 <body>
