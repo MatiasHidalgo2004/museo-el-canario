@@ -25,12 +25,23 @@ html,body{
   background:#a4b682;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
-  overflow:hidden;
 }
+/* Antes había overflow:hidden en html Y body. Eso impedía cualquier
+   desplazamiento en escritorio: si la tarjeta superaba la altura de la ventana
+   (ventana baja, zoom de texto, texto largo) el resto quedaba recortado y era
+   imposible de ver. Ahora el scroll vertical aparece solo cuando algo desborda
+   (en pantallas normales no cambia nada: no se genera barra) y el horizontal
+   sigue bloqueado. body queda en visible para que su contenido sobrante llegue
+   al scroll del documento; si body fuera scrollable tendríamos dos barras
+   independientes y desincronizadas. */
+html{overflow-x:hidden;overflow-y:auto}
+body{overflow:visible}
 .container{max-width:var(--container);margin:0 auto;padding:0 var(--edge-padding)}
 
-/* Viewport wrapper */
-.viewport-fixed{height:100vh;display:flex;flex-direction:column;align-items:stretch;}
+/* Viewport wrapper. Usa min-height (no height) para que el envoltorio crezca
+   con la tarjeta: con height:100vh el contenido que excedía la ventana se
+   pintaba fuera de la caja y quedaba inaccesible. */
+.viewport-fixed{min-height:100vh;display:flex;flex-direction:column;align-items:stretch;}
 
 /* Header */
 .site-header{
@@ -100,7 +111,7 @@ html,body{
   position:relative;
   width:100%;
   min-height: calc(100vh - var(--header-height) - 24px);
-  background-image: url('../assets/images/Menu-fondo.png');
+  background-image: url('../assets/images/Menu-fondo.webp');
   background-size:cover;background-position:center;color:var(--paper);
 }
 
@@ -219,11 +230,6 @@ html,body{
   border-top: 1px solid rgba(255,255,255,0.20);
   color:var(--paper);font-family:var(--light-sans);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:0.6px;
 }
-
-/* Footer */
-.footer-inner{position:relative;padding-top:0;padding-bottom:18px}
-.footer-stripe{display:none !important;visibility:hidden !important;height:0 !important;margin:0 !important;padding:0 !important}
-.footer-copy{margin:14px 0 0 0;padding:0;text-align:center;color:rgba(0,0,0,0.6);font-size:11px;line-height:1.2;background:transparent}
 
 /* Accessibility focus: el indicador de foco se define más abajo con :focus-visible */
 
@@ -560,6 +566,21 @@ body {
   to   { opacity: 1; }
 }
 
+/* Texto del pie de imagen: cuando el carrusel avanza, el rótulo y el contador
+   reaparecen con un fundido y un leve ascenso para que el cambio se perciba.
+   scripts/ (carrusel de imagenes.html) reinicia esta animación en cada imagen.
+   Los elementos son hijos directos de .card-caption (flex), así que el
+   translateY sí les aplica. */
+@keyframes captionIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.card-caption .caption-title,
+.card-caption .caption-detail,
+.card-caption .caption-counter {
+  animation: captionIn 240ms ease both;
+}
+
 .card {
   animation: cardEntrance 520ms cubic-bezier(.2,.7,.3,1) both;
 }
@@ -590,6 +611,11 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .card,
   .site-header {
+    animation: none !important;
+  }
+  .card-caption .caption-title,
+  .card-caption .caption-detail,
+  .card-caption .caption-counter {
     animation: none !important;
   }
   .btn-primary,
