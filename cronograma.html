@@ -116,16 +116,34 @@
       .tl-scroll-wrap {
         width: 100% !important;
         margin: 0 !important;
-        padding: 0 12px 16px 12px;
+        padding: 0 12px 88px 12px;   /* 88px abajo: deja sitio para el botón del pie */
       }
+      /* La línea del tiempo gana altura (y por tanto tamaño en pantalla).
+         Antes tenía 320px y en pantallas chicas 240px, lo que dejaba la
+         ilustración demasiado pequeña para leerla. */
       .tl-scroll-viewport {
         width: 100% !important;
-        height: 320px;
+        height: 440px;
       }
       .tl-scroll-viewport::-webkit-scrollbar { height: 24px; }
+
+      /* El botón "VOLVER ATRÁS" pasa al pie de la tarjeta, bajo la línea del
+         tiempo. Solo en móvil: en escritorio sigue dentro del bloque de texto.
+         La tarjeta es position:relative, así que el botón se ancla a ella; el
+         espacio libre lo deja el padding inferior de .tl-scroll-wrap. Se centra
+         con márgenes automáticos (no con transform) para no pisar el
+         translateY(-2px) del hover de .btn-primary. */
+      #cta-recorrer {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 24px;
+        width: fit-content;
+        margin: 0 auto !important;
+      }
     }
     @media (max-width: 700px) {
-      .tl-scroll-viewport { height: 240px; }
+      .tl-scroll-viewport { height: 360px; }
       .tl-scroll-viewport::-webkit-scrollbar { height: 18px; }
     }
   </style>
