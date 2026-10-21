@@ -41,7 +41,7 @@ body{overflow:visible}
 /* Viewport wrapper. Usa min-height (no height) para que el envoltorio crezca
    con la tarjeta: con height:100vh el contenido que excedía la ventana se
    pintaba fuera de la caja y quedaba inaccesible. */
-.viewport-fixed{min-height:100vh;display:flex;flex-direction:column;align-items:stretch;}
+.viewport-fixed{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:stretch;}
 
 /* Header */
 .site-header{
@@ -492,14 +492,19 @@ a img { outline: none; }
     inset: 0 !important;               /* top:0; right:0; bottom:0; left:0 */
     width: 100vw !important;
     height: 100vh !important;
+    height: 100dvh !important;         /* altura visible real (con barra visible) */
     z-index: 1 !important;             /* por debajo del card (card z-index:2) */
     pointer-events: none !important;
     background: linear-gradient(180deg, rgba(0,0,0,0.48), rgba(0,0,0,0.18)) !important;
   }
 
-  /* Asegura que el hero no reduzca la altura del overlay en landscape */
+  /* Asegura que el hero no reduzca la altura del overlay en landscape.
+     100vh en móvil es la altura CON la barra del navegador oculta, mayor que la
+     pantalla visible: dejaba un tramo de scroll vacío (fondo verde) por debajo
+     del contenido. 100dvh sigue la altura visible en cada momento. */
   .hero {
     min-height: 100vh !important;
+    min-height: 100dvh !important;
     position: relative !important;
     z-index: 0 !important;
   }
@@ -530,9 +535,11 @@ html, body {
   min-height: 100%;
 }
 
-/* Si usas un contenedor principal (viewport-fixed), garantizar 100vh */
+/* Si usas un contenedor principal (viewport-fixed), garantizar la altura del
+   viewport. 100dvh = altura visible real (en escritorio es igual a 100vh). */
 .viewport-fixed {
   min-height: 100vh;
+  min-height: 100dvh;
   box-sizing: border-box;
 }
 
@@ -628,14 +635,18 @@ body {
   }
 }
 
-/* Ajustes específicos para móviles: forzar 100vh y evitar que barras de navegador reduzcan el área visible */
+/* Ajustes específicos para móviles: la altura debe seguir a la pantalla real.
+   100vh equivale a la altura del viewport CON la barra del navegador oculta
+   (más alta que la pantalla visible), así que el contenido quedaba más alto que
+   lo que se veía y permitía seguir desplazando por debajo del final, con el
+   fondo verde del body a la vista. 100dvh usa la altura visible en cada
+   momento, con lo que el scroll termina justo donde acaba el contenido. */
 @media (max-width: 900px) {
   .viewport-fixed,
   .hero,
   body {
-    min-height: 100vh;
     height: auto;
-    /* usar la unidad dinámica para navegadores que soportan safe-area */
-    min-height: calc(var(--vh, 1vh) * 100);
+    min-height: 100vh;   /* respaldo para navegadores antiguos */
+    min-height: 100dvh;
   }
 }
