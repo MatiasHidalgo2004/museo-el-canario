@@ -175,7 +175,7 @@
         content: "";
         position: absolute;
         top: 50%;
-        left: 8%;
+        left: 78%;
         pointer-events: none;
         animation: tlHintSwipe 2s ease-in-out infinite;
       }
@@ -192,24 +192,27 @@
         opacity: 0.5;
       }
 
-      /* el rastro que se desvanece detrás del círculo */
+      /* el rastro: va a la derecha del círculo (detrás, porque el círculo
+         viaja de derecha a izquierda) y se desvanece hacia la derecha */
       .tl-hint::after {
         width: 96px;
         height: 14px;
-        margin: -7px 0 0 -96px;
+        margin: -7px 0 0 -14px;
         border-radius: 999px;
-        background: linear-gradient(90deg, rgba(47,107,79,0), rgba(47,107,79,0.22));
+        background: linear-gradient(90deg, rgba(47,107,79,0.22), rgba(47,107,79,0));
         filter: blur(4px);
         opacity: 0.5;
-        animation-delay: -0.18s;    /* retraso negativo: va justo detrás */
+        animation-delay: 0.18s;      /* va con retardo: queda detrás del círculo */
       }
     }
 
+    /* Recorrido invertido: sale desde la derecha y cruza hacia la izquierda,
+       que es el gesto real con el que se desplaza la línea para ver más */
     @keyframes tlHintSwipe {
-      0%   { left: 8%;  opacity: 0; }
+      0%   { left: 78%; opacity: 0; }
       18%  { opacity: 0.55; }
       78%  { opacity: 0.55; }
-      100% { left: 78%; opacity: 0; }
+      100% { left: 8%;  opacity: 0; }
     }
 
     /* Con "menos movimiento" el indicador no se anima: queda fijo en el inicio,
