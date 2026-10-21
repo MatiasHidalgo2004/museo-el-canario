@@ -114,6 +114,7 @@
       }
       .tl-scroll-wrap { order: 2 !important; }
       .tl-scroll-wrap {
+        position: relative;             /* base de posicionamiento de .tl-hint */
         width: 100% !important;
         margin: 0 !important;
         padding: 0 12px 88px 12px;   /* 88px abajo: deja sitio para el botón del pie */
@@ -145,6 +146,77 @@
     @media (max-width: 700px) {
       .tl-scroll-viewport { height: 360px; }
       .tl-scroll-viewport::-webkit-scrollbar { height: 18px; }
+    }
+
+    /* --- Pista táctil: círculo translúcido que invita a arrastrar la línea ---
+       Vive FUERA del viewport desplazable (es hermano suyo), para que no se
+       vaya de la pantalla cuando el usuario arrastre.
+       Condiciones para verse: dispositivo sin hover (móvil/tablet táctil) y
+       que el contenedor tenga la clase .is-hinting, que añade el script al
+       cargar y elimina para siempre en el primer desplazamiento real. */
+    .tl-hint { display: none; }
+
+    @media (hover: none) {
+      .tl-scroll-wrap.is-hinting .tl-hint {
+        display: block;
+        position: absolute;
+        /* top/bottom delimitan justo el área del visor: el wrap tiene
+           88px de padding inferior reservados para el botón del pie */
+        top: 0;
+        bottom: 88px;
+        left: 0;
+        right: 0;
+        z-index: 2;
+        pointer-events: none;
+      }
+
+      .tl-hint::before,
+      .tl-hint::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 8%;
+        pointer-events: none;
+        animation: tlHintSwipe 2s ease-in-out infinite;
+      }
+
+      /* el círculo (margen negativo para centrarlo sobre left/top) */
+      .tl-hint::before {
+        width: 44px;
+        height: 44px;
+        margin: -22px 0 0 -22px;
+        border-radius: 50%;
+        background: rgba(47,107,79,0.30);
+        border: 2px solid rgba(47,107,79,0.45);
+        box-shadow: 0 0 24px rgba(47,107,79,0.35);
+        opacity: 0.5;
+      }
+
+      /* el rastro que se desvanece detrás del círculo */
+      .tl-hint::after {
+        width: 96px;
+        height: 14px;
+        margin: -7px 0 0 -96px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, rgba(47,107,79,0), rgba(47,107,79,0.22));
+        filter: blur(4px);
+        opacity: 0.5;
+        animation-delay: -0.18s;    /* retraso negativo: va justo detrás */
+      }
+    }
+
+    @keyframes tlHintSwipe {
+      0%   { left: 8%;  opacity: 0; }
+      18%  { opacity: 0.55; }
+      78%  { opacity: 0.55; }
+      100% { left: 78%; opacity: 0; }
+    }
+
+    /* Con "menos movimiento" el indicador no se anima: queda fijo en el inicio,
+       que sigue comunicando "arrastra" sin desplazar nada por la pantalla */
+    @media (prefers-reduced-motion: reduce) {
+      .tl-hint::before,
+      .tl-hint::after { animation: none; }
     }
   </style>
 </head>
@@ -212,6 +284,8 @@
             <div class="tl-scroll-viewport" id="tlScrollViewport" tabindex="0" role="region" aria-label="Línea del tiempo, contenido desplazable en horizontal">
               <img class="tl-scroll-image" src="assets/svg/linea-tl.svg" alt="Línea del tiempo de la vida rural y agrícola en Chile" decoding="async" />
             </div>
+            <!-- Pista visual de arrastre (solo móvil, decorativa) -->
+            <span class="tl-hint" aria-hidden="true"></span>
           </div>
 
         </div>
@@ -302,6 +376,34 @@
       }
     }
     setTimeout(flashHint, 350);
+
+    // Pista táctil: un círculo translúcido en bucle invita a arrastrar la línea
+    // con el dedo. Solo en pantallas sin hover (móvil/tablet táctil) y mientras
+    // la línea sea realmente desplazable. Desaparece para siempre en el primer
+    // scroll real: si se toca sin mover, scrollLeft no cambia y el navegador no
+    // dispara el evento, así que la pista sigue hasta que se arrastra de verdad.
+    const hintWrap = viewport.closest('.tl-scroll-wrap');
+    const hintEl = hintWrap ? hintWrap.querySelector('.tl-hint') : null;
+    if (hintEl && window.matchMedia('(hover: none)').matches) {
+      let hintDismissed = false;
+
+      function hideHint() {
+        if (hintDismissed) return;
+        hintDismissed = true;
+        hintWrap.classList.remove('is-hinting');
+      }
+
+      function syncHint() {
+        if (hintDismissed) return;
+        const scrollable = viewport.scrollWidth > viewport.clientWidth + 1;
+        hintWrap.classList.toggle('is-hinting', scrollable);
+      }
+
+      if (img && img.complete) syncHint();
+      else if (img) img.addEventListener('load', syncHint);
+      window.addEventListener('resize', syncHint);
+      viewport.addEventListener('scroll', hideHint, { passive: true });
+    }
   })();
   </script>
 
