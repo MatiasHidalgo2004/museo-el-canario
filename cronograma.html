@@ -141,6 +141,10 @@
         bottom: 24px;
         width: fit-content;
         margin: 0 auto !important;
+        /* .tl-scroll-wrap es position:relative y va después en el DOM: sin
+           z-index el wrap pintaba por encima y se tragaba el toque, dejando
+           el botón visible pero sin responder en móvil */
+        z-index: 1;
       }
     }
     @media (max-width: 700px) {
