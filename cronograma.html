@@ -1164,11 +1164,11 @@
         }
 
         var t = segT(b, s);
-        // Móvil: con el detalle abierto, cualquier toque sobre la línea lo
-        // cierra; con él cerrado, el toque abre ese hito.
+        // Móvil: con una ventana abierta, tocar otra fila la sustituye (se
+        // cierra la actual y se abre la clickeada); tocar la misma la cierra.
         var row = buildRow(shortOf(s), s.yr, b.color, s.title + ', ' + (s.range || s.yr),
           function () {
-            if (state.seg >= 0) closeDetail();
+            if (state.seg >= 0 && state.seg === idx) closeDetail();
             else selectSeg(idx);
           });
         var gap = prevT === null
@@ -1205,7 +1205,6 @@
        ===================================================================== */
     function selectSeg(si) {
       if (swapping) return;
-      var wasOpen = state.seg >= 0;
       state.seg = si;
       if (!pulsed) { pulsed = true; rail.classList.add('no-pulse'); }
       markSeg();
@@ -1213,18 +1212,22 @@
       syncStage();
       renderCrumb();
       if (isVert()) {
-        if (!wasOpen) animateOpen(); // corredera: se abre despacio
-        if (detail.scrollIntoView) {
-          detail.scrollIntoView({ block: 'nearest', behavior: noMotion() ? 'auto' : 'smooth' });
-        }
+        // Corredera de la ventana nueva y, cuando ya mide su altura final,
+        // scroll automático para que se vea completa sin "rebotes".
+        animateOpen(function () {
+          if (detail.scrollIntoView) {
+            detail.scrollIntoView({ block: 'nearest', behavior: noMotion() ? 'auto' : 'smooth' });
+          }
+        });
       }
     }
 
-    // Abre el detalle animando su altura (corredera vertical suave)
-    function animateOpen() {
-      if (noMotion()) return;
+    // Abre el detalle animando su altura (corredera vertical suave).
+    // `after` se ejecuta cuando la ventana ya mide su altura final.
+    function animateOpen(after) {
+      if (noMotion()) { if (after) after(); return; }
       var target = detail.offsetHeight;
-      if (!target) return;
+      if (!target) { if (after) after(); return; }
       var my = ++animTok;
       detail.style.height = '0px';
       detail.style.overflow = 'hidden';
@@ -1239,6 +1242,7 @@
         detail.style.height = '';
         detail.style.overflow = '';
         detail.style.transition = '';
+        if (after) after(); // altura final: ya se puede hacer scroll
       };
       var backup = setTimeout(done, 420); // respaldo si no llega transitionend
       detail.addEventListener('transitionend', done);
@@ -1327,7 +1331,9 @@
         applyDetail();
         syncStage();
         renderCrumb();
-        if (back && back.focus) back.focus();
+        // El foco vuelve a la fila, pero sin mover la página: así al cerrar
+        // la vista se queda donde estaba (evita el salto hacia atrás).
+        if (back && back.focus) back.focus({ preventScroll: true });
       };
       // En móvil se pliega despacio; en escritorio, directo
       if (isVert() && !noMotion() && detail.offsetHeight > 0) {
