@@ -232,9 +232,8 @@
               Pero antes de llegar ahí, hay que empezar recorriendo desde lo más público: EL CRUCE.
             </p>
             <!-- ADENTRARSE dispara la animación de la maqueta. Al abrirse el
-                 rótulo pasa a "DAR PASO", destinado a la ventana futura
-                 (EL CRUCE): cuando esa página exista, aquí se añade su enlace. -->
-            <!-- TODO: ventana futura (EL CRUCE) -->
+                 rótulo pasa a "DAR PASO", que lleva a la ventana del cruce
+                 (cruce.html) con el mismo fundido de salida del sitio. -->
             <button type="button" id="cta-recorrer" class="btn-primary">ADENTRARSE</button>
           </div>
         </div>
@@ -278,7 +277,16 @@
       };
 
       btn.addEventListener('click', function () {
-        if (hecho) return;
+        // Ya abierto el techo: "DAR PASO" lleva a la ventana del cruce,
+        // con el mismo fundido de salida (220 ms) que nav-transition.js.
+        if (hecho) {
+          if (reduce.matches) { window.location.href = 'cruce.html'; return; }
+          card.classList.add('tarjeta-oculta');
+          var header = document.querySelector('.site-header');
+          if (header) header.classList.add('is-leaving');
+          setTimeout(function () { window.location.href = 'cruce.html'; }, 220);
+          return;
+        }
         hecho = true;
 
         if (reduce.matches) {
