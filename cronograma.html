@@ -854,7 +854,6 @@
        (corrige el recorte del punto de 1492 en el extremo izquierdo). */
     var PAD = 16;
     function posL(t) { return 'calc(' + PAD + 'px + (100% - ' + (PAD * 2) + 'px) * ' + (+t).toFixed(5) + ')'; }
-    function posR(t) { return 'calc(' + PAD + 'px + (100% - ' + (PAD * 2) + 'px) * ' + (1 - +t).toFixed(5) + ')'; }
 
     var mQ = window.matchMedia('(max-width: 700px)');
     function isVert() { return mQ.matches; }
@@ -1017,8 +1016,11 @@
        del carril para que no se solapen (si no cabe, la línea desplaza).
        ===================================================================== */
     function edgePos(node, t) {
+      // Centrado en el punto (con translateX(-50%)); solo el extremo
+      // izquierdo se ancla a la izquierda para no salirse de la línea.
+      // Cerca del borde derecho también se centra: anclado a la derecha,
+      // título y fecha quedaban desfasados a la izquierda de su punto.
       if (t <= 0.05) { node.style.left = posL(t); node.classList.add('ds'); }
-      else if (t >= 0.95) { node.style.right = posR(t); node.classList.add('de'); }
       else { node.style.left = posL(t); node.classList.add('dm'); }
     }
     function assignRows(items, refW) {
@@ -1203,6 +1205,19 @@
     /* =====================================================================
        SELECCIÓN DE UN HITO Y DETALLE
        ===================================================================== */
+    /* Scroll automático hacia la ventana abierta: 'nearest' solo desplaza la
+       pantalla si no cabe entera (si ya se ve completa, no mueve nada).
+       `delay` pospone la medición: en escritorio el escenario sigue creciendo
+       (transición de min-height, 320 ms) y medir antes deja el scroll corto. */
+    function scrollToDetail(delay) {
+      var go = function () {
+        if (detail.scrollIntoView) {
+          detail.scrollIntoView({ block: 'nearest', behavior: noMotion() ? 'auto' : 'smooth' });
+        }
+      };
+      if (delay) { setTimeout(go, delay); } else { go(); }
+    }
+
     function selectSeg(si) {
       if (swapping) return;
       state.seg = si;
@@ -1212,13 +1227,13 @@
       syncStage();
       renderCrumb();
       if (isVert()) {
-        // Corredera de la ventana nueva y, cuando ya mide su altura final,
-        // scroll automático para que se vea completa sin "rebotes".
-        animateOpen(function () {
-          if (detail.scrollIntoView) {
-            detail.scrollIntoView({ block: 'nearest', behavior: noMotion() ? 'auto' : 'smooth' });
-          }
-        });
+        // Corredera: el scroll va cuando la ventana ya mide su altura final
+        animateOpen(scrollToDetail);
+      } else {
+        // Escritorio: la ventana se abre a su tamaño final, pero el escenario
+        // sigue creciendo; se mide cuando asiente para que la pantalla no
+        // quede corta. Con movimiento reducido no hay transición: al instante.
+        scrollToDetail(noMotion() ? 0 : 420);
       }
     }
 
