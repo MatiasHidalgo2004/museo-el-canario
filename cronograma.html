@@ -15,215 +15,534 @@
 
   <link rel="stylesheet" href="styles/styles.css" />
 
-  <!-- CSS de la imagen desplazable (línea del tiempo) -->
+  <!-- CSS de la línea del tiempo: puntos sobre la línea, detalle en cristal -->
   <style>
-    /* Escritorio: mantiene la altura fija de la tarjeta (igual que antes) */
-    @media (min-width: 1101px) {
-      .card {
-        height: 590px;
-        min-height: 590px;
-        box-sizing: border-box;
-      }
-      .tl-scroll-wrap {
-        width: 70%;
-        margin-top: 18px;
-        box-sizing: border-box;
-      }
-      .tl-scroll-viewport {
-        width: 92%;
-        height: 550px;
-      }
-    }
+    /* ---------- Cabecera de la tarjeta: texto a la izquierda, botón a la derecha ---------- */
+    .card-copy.tl-top { gap: 18px; }
+    .tl-top .cc-text { flex: 1 1 auto; min-width: 0; }
+    .tl-top .card-title { margin: 0; }
+    .tl-top .card-lead { margin: 8px 0 0; max-width: 620px; }
 
-    /* Base compartida del viewport desplazable */
-    .tl-scroll-wrap { box-sizing: border-box; }
+    /* La tarjeta nunca queda "a ras": el hero guarda margen inferior aunque
+       el detalle crezca con textos largos (styles.css no define padding-bottom). */
+    .hero { padding-bottom: 32px; }
 
-    /* Viewport con scroll horizontal en escritorio y táctil en móvil */
-    .tl-scroll-viewport {
-      overflow-x: auto;
-      overflow-y: hidden;           /* 'center' no es un valor válido; se usa hidden */
-      -webkit-overflow-scrolling: touch;
-      background: transparent;
-      border-radius: 8px;
-      box-sizing: border-box;
-      outline: none;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(0,0,0,0.18) transparent;
-    }
-
-    /* Foco visible para quien navega con teclado (mismo amarillo del resto del
-       sitio). outline:none anterior solo afecta al foco por puntero, que aquí
-       no interesa resaltar. */
-    .tl-scroll-viewport:focus-visible {
-      outline: 3px solid #f4c542;
-      outline-offset: 3px;
-    }
-
-    /* Imagen larga que ocupa su ancho natural; se desplaza dentro del viewport */
-    .tl-scroll-image {
-      display: block;
-      height: 100%;
-      width: auto;
-      max-width: none;
-      object-fit: cover;
-      user-select: none;
-      -webkit-user-drag: none;
-      pointer-events: none;         /* evita interferir con el arrastre del viewport */
-    }
-
-    /* Scrollbar visible y estilizada (WebKit) */
-    .tl-scroll-viewport::-webkit-scrollbar { height: 60px; }
-    .tl-scroll-viewport::-webkit-scrollbar-track { background: transparent; }
-    .tl-scroll-viewport::-webkit-scrollbar-thumb {
-      background: rgba(0,0,0,0.18);
-      border-radius: 8px;
-      transition: background 200ms ease;
-    }
-    /* Al poner el cursor encima, el pulgar pasa al verde de la marca
-       (mismo tono del header fijo y del botón) */
-    .tl-scroll-viewport::-webkit-scrollbar-thumb:hover {
-      background: var(--brand-green);
-    }
-    /* Al presionar y arrastrar, un verde más intenso (feedback de "sujeción") */
-    .tl-scroll-viewport::-webkit-scrollbar-thumb:active {
-      background: #24563e;
-    }
-
-    /* Evita marcos o sombras al desplazar */
-    .tl-scroll-viewport, .tl-scroll-image { box-shadow: none !important; filter: none !important; }
-
-    /* Móvil / tablet: la tarjeta toma su altura natural y la línea queda centrada,
-       sin recortes y a ancho completo. Aquí se mantiene UNA sola tarjeta blanca
-       (texto + línea juntos), distinto de las otras páginas que sí separan
-       la foto del bloque de texto. */
+    /* Salvaguarda: en tablet y móvil no debe existir scroll horizontal.
+       styles.css fuerza `overflow: auto` bajo 1100px y eso reactiva el eje X. */
     @media (max-width: 1100px) {
-      .card {
-        height: auto !important;
-        min-height: 0 !important;
-        border-radius: var(--radius) !important;
-        background: #ffffff !important;
-        box-shadow: 0 18px 40px rgba(0,0,0,0.12) !important;
-        overflow: hidden !important;
-      }
-      /* El texto queda arriba y la línea del tiempo debajo, dentro de la tarjeta */
-      .card-copy {
-        order: 1 !important;
-        background: transparent !important;
-        box-shadow: none !important;
-        border-radius: 0 !important;
-      }
-      .tl-scroll-wrap { order: 2 !important; }
-      .tl-scroll-wrap {
-        position: relative;             /* base de posicionamiento de .tl-hint */
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 12px 88px 12px;   /* 88px abajo: deja sitio para el botón del pie */
-      }
-      /* La línea del tiempo gana altura (y por tanto tamaño en pantalla).
-         Antes tenía 320px y en pantallas chicas 240px, lo que dejaba la
-         ilustración demasiado pequeña para leerla. */
-      .tl-scroll-viewport {
-        width: 100% !important;
-        height: 440px;
-      }
-      .tl-scroll-viewport::-webkit-scrollbar { height: 24px; }
+      html, body { overflow-x: clip !important; }
+    }
 
-      /* El botón "VOLVER ATRÁS" pasa al pie de la tarjeta, bajo la línea del
-         tiempo. Solo en móvil: en escritorio sigue dentro del bloque de texto.
-         La tarjeta es position:relative, así que el botón se ancla a ella; el
-         espacio libre lo deja el padding inferior de .tl-scroll-wrap. Se centra
-         con márgenes automáticos (no con transform) para no pisar el
-         translateY(-2px) del hover de .btn-primary. */
-      #cta-recorrer {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 24px;
-        width: fit-content;
-        margin: 0 auto !important;
-        /* .tl-scroll-wrap es position:relative y va después en el DOM: sin
-           z-index el wrap pintaba por encima y se tragaba el toque, dejando
-           el botón visible pero sin responder en móvil */
-        z-index: 1;
+    /* En escritorio la cabecera va en fila arriba y la línea usa todo el ancho */
+    @media (min-width: 1101px) {
+      .card-inner { flex-direction: column !important; }
+      .card-copy.tl-top {
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 24px !important;
+        padding: 34px 36px 4px !important;
       }
+      #cta-recorrer { margin-top: 0 !important; align-self: center !important; flex: 0 0 auto; }
+    }
+
+    /* ---------- Área de la línea: todo el ancho de la tarjeta ---------- */
+    .tl-area {
+      flex: 0 0 auto !important;
+      width: 100% !important;
+      min-width: 0;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 18px 30px 26px;
+    }
+
+    /* ---------- Miga de pan (breadcrumb) ---------- */
+    .tl-crumb {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-family: var(--light-sans);
+      font-size: 13px;
+      font-weight: 600;
+      min-height: 24px;
+    }
+    .tl-crumb button {
+      background: none;
+      border: 0;
+      padding: 3px 7px;
+      margin: 0;
+      cursor: pointer;
+      font: inherit;
+      color: var(--brand-green);
+      border-radius: 7px;
+      transition: color var(--transition), background var(--transition);
+    }
+    .tl-crumb button:hover { color: var(--accent); background: rgba(47,107,79,.08); }
+    .tl-crumb .crumb-here { color: var(--ink); padding: 3px 7px; }
+    .tl-crumb .crumb-sep { color: #9aa39a; }
+
+    /* ---------- Escenario: los dos niveles superpuestos ---------- */
+    .tl-stage {
+      position: relative;
+      flex: 1 1 auto;
+      min-height: 430px;
+      transition: min-height 320ms ease;
+    }
+    .tl-level {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      opacity: 0;
+      visibility: hidden;
+    }
+    .tl-level.is-on {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* ---------- Nivel 0: cabecera + línea maestra ---------- */
+    .tl-master { margin-bottom: 16px; }
+    /* ---------- Región desplazable (tablet y escritorios estrechos) ---------- */
+    .tl-scroll {
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 6px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(47,107,79,.4) transparent;
+    }
+    .tl-scroll::-webkit-scrollbar { height: 9px; }
+    .tl-scroll::-webkit-scrollbar-thumb { background: rgba(47,107,79,.4); border-radius: 8px; }
+    .tl-scroll::-webkit-scrollbar-track { background: transparent; }
+    .tl-scroll:focus-visible { outline: 3px solid #f4c542; outline-offset: 3px; }
+
+    /* ---------- Carril: base de posición de todos los elementos ---------- */
+    .tl-rail { position: relative; width: 100%; box-sizing: border-box; }
+
+    /* Transición de nivel: los puntos, títulos, fechas y cintas se esparcen
+       hacia su lado de la línea (onda desde el centro) y luego entran con
+       zoom. La línea (`.tl-rail::after` y los tramos `.tm-seg`) no se mueve.
+       Cada elemento lleva `--tx` (centrado base), `--dx` (esparcerido) y
+       `--dd` (retardo por distancia al centro). */
+    .tl-rail.is-leaving > :not(.tm-seg) {
+      animation: tl-leave 220ms cubic-bezier(.4, 0, .7, .2) both;
+      animation-delay: var(--dd, 0s);
+    }
+    .tl-rail.is-entering > :not(.tm-seg) {
+      animation: tl-enter 420ms cubic-bezier(.2, .7, .3, 1) both;
+      animation-delay: var(--dd, 0s);
+    }
+    @keyframes tl-leave {
+      to { opacity: 0; transform: translateX(calc(var(--tx, 0px) + var(--dx, 0px))) scale(.85); }
+    }
+    @keyframes tl-enter {
+      from { opacity: 0; transform: translateX(calc(var(--tx, 0px) + var(--dx, 0px))) scale(1.25); }
+      to { opacity: 1; transform: translateX(var(--tx, 0px)) scale(1); }
+    }
+
+    /* Horizontal: la línea verde de fondo */
+    .tl-rail.h { height: 250px; }
+    /* 210px: la línea maestra queda a la misma altura que en las épocas
+       (44px de cabecera + 148.5px de carril en los dos niveles) */
+    .tl-rail.h.tm { height: 210px; }
+    .tl-rail.h::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 100px;
+      height: 3px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, rgba(47,107,79,.25), var(--brand-green) 12%, var(--brand-green) 88%, rgba(47,107,79,.25));
+    }
+    /* La línea maestra se dibuja con tramos del color de cada época */
+    .tl-rail.h.tm::after { display: none; }
+    .tm-seg {
+      position: absolute;
+      bottom: 60px;
+      height: 3px;
+      border-radius: 3px;
+    }
+
+    /* ---------- Punto sobre la línea ---------- */
+    .tl-pt {
+      position: absolute;
+      bottom: 93px;
+      width: 17px;
+      height: 17px;
+      padding: 0;
+      border-radius: 50%;
+      background: #fff;
+      border: 4px solid var(--seg-bg, var(--brand-green));
+      box-shadow: 0 2px 6px rgba(0,0,0,.22);
+      --tx: -50%;                    /* centrado base (lo reutiliza la coreografía) */
+      transform: translateX(var(--tx));
+      cursor: pointer;
+      box-sizing: border-box;
+      overflow: visible;             /* el anillo de pulsación sale del botón */
+      z-index: 4;
+      transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+    .tl-rail.tm .tl-pt { bottom: 53px; }
+    .tl-pt:hover { transform: translateX(var(--tx)) scale(1.25); }
+    .tl-pt.is-on {
+      transform: translateX(var(--tx)) scale(1.3);
+      box-shadow: 0 0 0 4px var(--pt-ring, rgba(47,107,79,.3)), 0 3px 8px rgba(0,0,0,.22);
+    }
+    .tl-pt:focus-visible { outline: 3px solid #f4c542; outline-offset: 3px; }
+
+    /* ---------- Título del hito: horizontal, sobre el punto ---------- */
+    .pt-title {
+      position: absolute;
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: 11.5px;
+      color: #3a4a3d;
+      white-space: nowrap;
+      cursor: pointer;
+      z-index: 3;
+    }
+    .pt-title.dm { --tx: -50%; transform: translateX(var(--tx)); }
+    .pt-title:hover, .pt-title.is-on { color: var(--seg-text, var(--seg-bg, var(--brand-green))); }
+    .tl-rail.h .pt-title.t1 { bottom: 116px; }
+    .tl-rail.h .pt-title.t2 { bottom: 138px; }
+    .tl-rail.tm .pt-title.t1 { bottom: 76px; }
+    .tl-rail.tm .pt-title.t2 { bottom: 98px; }
+
+    /* ---------- Fecha bajo el punto ---------- */
+    .pt-date {
+      position: absolute;
+      font-family: var(--light-sans);
+      font-weight: 700;
+      font-size: 10.5px;
+      letter-spacing: .3px;
+      color: #5c665c;
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(47,107,79,.28);
+      padding: 3px 7px;
+      border-radius: 7px;
+      white-space: nowrap;
+      cursor: pointer;
+      box-sizing: border-box;
+      z-index: 4;
+    }
+    .pt-date.dm { --tx: -50%; transform: translateX(var(--tx)); }
+    .pt-date:hover { border-color: var(--brand-green); color: var(--brand-green); }
+    .pt-date.is-on {
+      background: var(--seg-bg, var(--brand-green));
+      border-color: var(--seg-bg, var(--brand-green));
+      color: var(--seg-ink, #fff);
+    }
+    .tl-rail.h .pt-date.d1 { bottom: 72px; }
+    .tl-rail.h .pt-date.d2 { bottom: 48px; }
+    .tl-rail.tm .pt-date.d1 { bottom: 32px; }
+    .tl-rail.tm .pt-date.d2 { bottom: 8px; }
+
+    /* ---------- Cinta: proceso largo, no clicable ---------- */
+    .tl-cinta {
+      position: absolute;
+      bottom: 12px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 0 10px;
+      border-radius: 8px;
+      background: repeating-linear-gradient(-45deg, var(--seg-bg, var(--brand-green)) 0 9px, color-mix(in srgb, var(--seg-bg, var(--brand-green)) 84%, #fff) 9px 18px);
+      color: var(--seg-ink, #fff);
+      font-family: var(--light-sans);
+      font-weight: 700;
+      font-size: 11.5px;
+      letter-spacing: .3px;
+      box-shadow: 0 6px 14px rgba(0,0,0,.14);
+      overflow: hidden;
+      white-space: nowrap;
+      box-sizing: border-box;
+      z-index: 2;
+    }
+    .tl-cinta .cinta-range { font-weight: 400; opacity: .9; font-size: 10.5px; }
+    .tl-cinta::before, .tl-cinta::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 8px;
+      height: 15px;
+      margin-top: -7.5px;
+      background: inherit;
+      clip-path: polygon(0 0, 100% 50%, 0 100%);
+    }
+    .tl-cinta::before { left: -7px; transform: scaleY(.8); }
+    .tl-cinta::after { right: -7px; transform: scaleX(-1) scaleY(.8); }
+
+    /* ---------- Modo vertical (móvil ≤700px): la línea baja en el centro ---------- */
+    .tl-rail.v { height: auto; padding: 14px 4px 18px; }
+    .tl-rail.v::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 14px;
+      bottom: 18px;
+      width: 3px;
+      border-radius: 3px;
+      background: linear-gradient(180deg, rgba(47,107,79,.25), var(--brand-green) 12%, var(--brand-green) 88%, rgba(47,107,79,.25));
+    }
+    .vrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 4px 0;
+      background: none;
+      border: 0;
+      font: inherit;
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
+      box-sizing: border-box;
+      position: relative;
+      z-index: 2;
+    }
+    .vrow .vr-t {
+      flex: 1 1 0;
+      min-width: 0;
+      text-align: right;
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: 13px;
+      line-height: 1.25;
+      color: var(--ink);
+    }
+    .vrow .vr-c { flex: 0 0 34px; display: flex; align-items: center; justify-content: center; }
+    .vrow .vr-y {
+      flex: 1 1 0;
+      min-width: 0;
+      text-align: left;
+      font-family: var(--light-sans);
+      font-weight: 700;
+      font-size: 10.5px;
+      line-height: 1.3;
+      color: #5c665c;
+    }
+    .vrow.vmaster .vr-t { font-size: 14px; }
+    .vr-dot {
+      display: block;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #fff;
+      border: 4px solid var(--seg-bg, var(--brand-green));
+      box-shadow: 0 2px 6px rgba(0,0,0,.2);
+      box-sizing: border-box;
+      transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+    .vrow:hover .vr-dot { transform: scale(1.18); }
+    .vrow.is-on .vr-dot {
+      transform: scale(1.28);
+      box-shadow: 0 0 0 4px var(--pt-ring, rgba(47,107,79,.3)), 0 2px 6px rgba(0,0,0,.2);
+    }
+    .vrow.is-on .vr-t { color: var(--seg-text, var(--seg-bg, var(--brand-green))); }
+    .vrow:focus-visible { outline: 3px solid #f4c542; outline-offset: 2px; border-radius: 8px; }
+    .vcinta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      height: 26px;
+      margin: 10px 0;
+      padding: 0 10px;
+      border-radius: 8px;
+      background: repeating-linear-gradient(-45deg, var(--seg-bg, var(--brand-green)) 0 9px, color-mix(in srgb, var(--seg-bg, var(--brand-green)) 84%, #fff) 9px 18px);
+      color: var(--seg-ink, #fff);
+      font-family: var(--light-sans);
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: .3px;
+      box-shadow: 0 6px 14px rgba(0,0,0,.14);
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Pulsación de los puntos: avisa que son pulsables (móvil y escritorio) */
+    .vr-dot { position: relative; }
+    .vr-dot::after,
+    .tl-pt::after {
+      content: "";
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid var(--seg-bg, var(--brand-green));
+      opacity: 0;
+      animation: tl-pulse 2.2s ease-out infinite;
+      pointer-events: none;
+    }
+    .tl-pt::after { animation-delay: var(--pulse-delay, 0s); }
+    .vrow:nth-child(odd) .vr-dot::after { animation-delay: .5s; }
+    .tl-rail.no-pulse .vr-dot::after,
+    .tl-rail.no-pulse .tl-pt::after { animation: none; opacity: 0; }
+    @keyframes tl-pulse {
+      0% { transform: scale(.7); opacity: .75; }
+      70% { transform: scale(2); opacity: 0; }
+      100% { transform: scale(2); opacity: 0; }
+    }
+    /* ---------- Cabecera de nivel: la línea queda siempre a la misma altura ---------- */
+    .tl-band-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+      height: 44px;                  /* fija: mide lo mismo en nivel 0 y 1 */
+      overflow: hidden;
+      white-space: nowrap;           /* nunca envuelve: no descuadra la línea */
+    }
+    .tl-band-head h2 {
+      font-family: var(--serif);
+      font-size: clamp(18px, 2.4vw, 23px);
+      margin: 0;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tl-band-head .band-range {
+      font-family: var(--light-sans);
+      font-size: 12.5px;
+      color: #5c665c;
+      min-width: 0;
+      flex: 0 1 auto;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ---------- Detalle: tarjeta de color sólido + panel de cristal ---------- */
+    .tl-slot { flex: 0 0 auto; }
+    .tl-detail {
+      display: flex;
+      width: 100%;
+      box-sizing: border-box;
+      border-radius: 18px;
+      overflow: hidden;
+      position: relative;
+      z-index: 5;                /* el detalle tapa la línea en móvil */
+      /* el mismo tipo de fondo que el menú fijo, para que el cristal difumine de verdad */
+      background:
+        linear-gradient(rgba(14, 24, 19, .62), rgba(14, 24, 19, .62)),
+        url('assets/images/Menu-fondo.webp') center 32% / cover no-repeat;
+      scroll-margin-top: calc(var(--header-height) + 18px);
+      scroll-margin-bottom: 24px;     /* al abrir textos largos no queda pegado al borde */
+    }
+    .tl-detail:empty { display: none; }
+    .tl-detail.is-hint { background: none; overflow: visible; border-radius: 0; }
+    .det-card {
+      flex: 0 0 30%;
+      min-width: 220px;
+      box-sizing: border-box;
+      padding: 18px 20px;
+      color: var(--seg-ink, #fff);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+      background: var(--seg-bg, var(--brand-green));
+    }
+    .det-kicker {
+      font-family: var(--light-sans);
+      font-weight: 700;
+      font-size: 10.5px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      opacity: .85;
+    }
+    .det-date { font-family: var(--serif); font-weight: 700; font-size: clamp(24px, 3vw, 34px); line-height: 1; }
+    .det-title { font-family: var(--serif); font-weight: 700; font-size: 16.5px; line-height: 1.25; }
+    .det-glass {
+      position: relative;
+      flex: 1 1 auto;
+      min-width: 0;
+      box-sizing: border-box;
+      padding: 18px 46px 18px 20px;
+      color: #fff;
+      border-radius: 0 18px 18px 0;
+      background: rgba(14, 24, 19, .42);
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      backdrop-filter: blur(16px) saturate(140%);
+      border: 1px solid rgba(255, 255, 255, .20);
+    }
+    .det-text { font-family: var(--light-sans); font-size: 14.5px; line-height: 1.65; }
+    .det-text p { margin: 0 0 10px; }
+    .det-text p:last-child { margin-bottom: 0; }
+    .det-text ul, .det-text ol { margin: 0 0 10px; padding-left: 18px; }
+    .det-text li { margin: 0 0 4px; }
+    .det-x {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.35);
+      background: rgba(255,255,255,.08);
+      color: #fff;
+      font-size: 17px;
+      line-height: 1;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+    .det-x:hover { background: rgba(255,255,255,.2); }
+    .det-x:focus-visible { outline: 3px solid #f4c542; outline-offset: 2px; }
+
+    /* Pista: texto breve y discreto, sin caja (solo en escritorio) */
+    .det-hint {
+      padding: 8px 2px 0;
+      color: #9aa39a;
+      font-family: var(--light-sans);
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: .3px;
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 1100px) {
+      .tl-area {
+        order: 3;                    /* tras .card-copy (order 2): texto arriba, línea abajo */
+        padding: 16px 14px 18px;
+        background: #ffffff;
+        border-radius: var(--radius);
+        box-shadow: 0 18px 40px rgba(0,0,0,.12);
+      }
+      .tl-rail.h { height: 260px; }
+      /* misma regla de igualdad: línea a 158.5px del carril en los dos niveles */
+      .tl-rail.h.tm { height: 220px; }
+      .tl-detail { flex-direction: column; }
+      .det-card { flex: 0 0 auto; min-width: 0; }
+      .det-glass { padding: 16px 44px 16px 18px; border-radius: 0 0 18px 18px; }
     }
     @media (max-width: 700px) {
-      .tl-scroll-viewport { height: 360px; }
-      .tl-scroll-viewport::-webkit-scrollbar { height: 18px; }
+      .tl-scroll { overflow: visible; padding-bottom: 0; }
+      .tl-area { padding: 14px 12px 16px; }
+      .tl-band-head h2 { font-size: 19px; }
+      .vrow .vr-t { font-size: 12.5px; }
+      .vrow.vmaster .vr-t { font-size: 13.5px; }
+      .det-card { padding: 16px 18px; }
     }
 
-    /* --- Pista táctil: círculo translúcido que invita a arrastrar la línea ---
-       Vive FUERA del viewport desplazable (es hermano suyo), para que no se
-       vaya de la pantalla cuando el usuario arrastre.
-       Condiciones para verse: dispositivo sin hover (móvil/tablet táctil) y
-       que el contenedor tenga la clase .is-hinting, que añade el script al
-       cargar y elimina para siempre en el primer desplazamiento real. */
-    .tl-hint { display: none; }
-
-    @media (hover: none) {
-      .tl-scroll-wrap.is-hinting .tl-hint {
-        display: block;
-        position: absolute;
-        /* top/bottom delimitan justo el área del visor: el wrap tiene
-           88px de padding inferior reservados para el botón del pie */
-        top: 0;
-        bottom: 88px;
-        left: 0;
-        right: 0;
-        z-index: 2;
-        pointer-events: none;
-      }
-
-      .tl-hint::before,
-      .tl-hint::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 78%;
-        pointer-events: none;
-        animation: tlHintSwipe 2s ease-in-out infinite;
-      }
-
-      /* el círculo (margen negativo para centrarlo sobre left/top) */
-      .tl-hint::before {
-        width: 44px;
-        height: 44px;
-        margin: -22px 0 0 -22px;
-        border-radius: 50%;
-        background: rgba(47,107,79,0.30);
-        border: 2px solid rgba(47,107,79,0.45);
-        box-shadow: 0 0 24px rgba(47,107,79,0.35);
-        opacity: 0.5;
-      }
-
-      /* el rastro: va a la derecha del círculo (detrás, porque el círculo
-         viaja de derecha a izquierda) y se desvanece hacia la derecha */
-      .tl-hint::after {
-        width: 96px;
-        height: 14px;
-        margin: -7px 0 0 -14px;
-        border-radius: 999px;
-        background: linear-gradient(90deg, rgba(47,107,79,0.22), rgba(47,107,79,0));
-        filter: blur(4px);
-        opacity: 0.5;
-        animation-delay: 0.18s;      /* va con retardo: queda detrás del círculo */
-      }
-    }
-
-    /* Recorrido invertido: sale desde la derecha y cruza hacia la izquierda,
-       que es el gesto real con el que se desplaza la línea para ver más */
-    @keyframes tlHintSwipe {
-      0%   { left: 78%; opacity: 0; }
-      18%  { opacity: 0.55; }
-      78%  { opacity: 0.55; }
-      100% { left: 8%;  opacity: 0; }
-    }
-
-    /* Con "menos movimiento" el indicador no se anima: queda fijo en el inicio,
-       que sigue comunicando "arrastra" sin desplazar nada por la pantalla */
+    /* ---------- Menos movimiento: cambios instantáneos ---------- */
     @media (prefers-reduced-motion: reduce) {
-      .tl-hint::before,
-      .tl-hint::after { animation: none; }
+      .tl-stage { transition: none; }
+      .tl-pt, .vr-dot { transition: none; }
+      .tl-pt:hover, .tl-pt.is-on { transform: translateX(var(--tx, -50%)) scale(1.25); }
+      .vrow:hover .vr-dot, .vrow.is-on .vr-dot { transform: scale(1.28); }
+      .vr-dot::after, .tl-pt::after { animation: none; opacity: 0; }
+      .tl-rail.is-leaving > *, .tl-rail.is-entering > * { animation: none !important; }
     }
   </style>
 </head>
@@ -276,23 +595,46 @@
 
       <section class="card container" role="region" aria-label="Tarjeta principal">
         <div class="card-inner">
-          <div class="card-copy">
-            <h1 class="card-title">Cronograma
-            </h1>
-            <p class="card-lead">
-              En la siguiente línea verá la evolución de la vida rural y agrícola en Chile.
-            </p>
+          <!-- Cabecera: texto a la izquierda, botón a la derecha (en escritorio) -->
+          <div class="card-copy tl-top">
+            <div class="cc-text">
+              <h1 class="card-title">Cronograma</h1>
+              <p class="card-lead">
+                En la siguiente línea verá la evolución de la vida rural y agrícola en Chile.
+              </p>
+            </div>
 
             <a id="cta-recorrer" class="btn-primary" href="index.html">VOLVER ATRÁS</a>
           </div>
 
-          <!-- Contenedor de la imagen desplazable (línea del tiempo) -->
-          <div class="tl-scroll-wrap">
-            <div class="tl-scroll-viewport" id="tlScrollViewport" tabindex="0" role="region" aria-label="Línea del tiempo, contenido desplazable en horizontal">
-              <img class="tl-scroll-image" src="assets/svg/linea-tl.svg" alt="Línea del tiempo de la vida rural y agrícola en Chile" decoding="async" />
+          <!-- Área de la línea del tiempo: ocupa todo el ancho de la tarjeta -->
+          <div class="tl-area">
+            <!-- Miga de pan: Épocas › época › hito -->
+            <nav class="tl-crumb" id="tlCrumb" aria-label="Ruta de la línea del tiempo"></nav>
+
+            <!-- Escenario con los dos niveles superpuestos -->
+            <div class="tl-stage" id="tlStage">
+              <!-- Nivel 0: cabecera "Épocas" + línea maestra de las 5 épocas -->
+              <div class="tl-level is-on" id="lvl0" data-level="0">
+                <div class="tl-band-head"><h2>Épocas</h2></div>
+                <div class="tl-master" id="tlMaster"></div>
+              </div>
+
+              <!-- Nivel 1: la línea de una época con sus hitos -->
+              <div class="tl-level" id="lvl1" data-level="1" aria-hidden="true">
+                <div class="tl-band-head">
+                  <h2 id="bandTitle"></h2>
+                  <span class="band-range" id="bandRange"></span>
+                </div>
+                <div class="tl-scroll" id="tlScroll" tabindex="0" role="region" aria-label="Línea de la época, desplazable en horizontal">
+                  <div class="tl-rail" id="tlRail"></div>
+                </div>
+                <div class="tl-slot" id="tlSlot">
+                  <!-- Detalle del hito: tarjeta de color sólido + panel de cristal -->
+                  <div class="tl-detail" id="tlDetail" aria-live="polite"></div>
+                </div>
+              </div>
             </div>
-            <!-- Pista visual de arrastre (solo móvil, decorativa) -->
-            <span class="tl-hint" aria-hidden="true"></span>
           </div>
 
         </div>
@@ -304,116 +646,855 @@
 
   <script src="scripts/menu.js"></script>
 
-  <!-- Script para arrastrar y asegurar scrollbar en escritorio -->
+  <!-- Controlador de la línea del tiempo: datos + navegación por puntos -->
   <script>
-  (function(){
-    const viewport = document.getElementById('tlScrollViewport');
-    if (!viewport) return;
+  (function () {
+    'use strict';
+    /* =====================================================================
+       DATOS
+       Cada banda (época) tiene: nombre, año inicio/fin (negativo = a.C.),
+       color y sus hitos. Tipos de hito:
+         'span'  → rango de años (el punto va al centro del rango)
+         'event' → año exacto (el punto va en ese año)
+         'cinta' → proceso largo (cinta no clicable)
+       ===================================================================== */
+    var BANDS = [
+      {
+        id: 'prehistoria',
+        name: 'Prehistoria andina',
+        from: -14500, to: -1000,
+        color: '#6A5544',
+        segs: [
+          { type: 'span', from: -14500, to: -14300, yr: '14.500 a.C.', name: 'Monte Verde',
+            title: 'Monte Verde',
+            body: '<p>Asentamiento humano más antiguo de Chile y de toda América. Su hallazgo en el sur del país demostró que los primeros pobladores llegaron hace más de 14.000 años.</p>' },
+          { type: 'span', from: -12000, to: -10000, yr: '12.000 – 10.000 a.C.', name: 'Nomadismo',
+            title: 'Nomadismo',
+            body: '<p>Los grupos humanos se desplazan siguiendo a los animales y a las estaciones. Fabrican herramientas de piedra para la caza y la recolección, sin asentarse en un solo lugar.</p>' },
+          { type: 'span', from: -8000, to: -5000, yr: '8.000 – 5.000 a.C.', name: 'Sedentarismo',
+            title: 'Sedentarismo',
+            body: '<p>Comienzan a establecerse en lugares fijos. Aparecen los primeros instrumentos de trabajo, como el mortero y las manos de piedra, para procesar alimentos.</p>' }
+        ]
+      },
+      {
+        id: 'pueblos',
+        name: 'Pueblos Originarios',
+        from: -1000, to: 1490,
+        color: '#FCBF49',
+        segs: [
+          { type: 'span', from: -1000, to: 400, yr: '1.000 a.C. – 400', name: 'Sedentarismo andino',
+            title: 'Sedentarismo andino',
+            body: '<p>Los pueblos que habitan el territorio se asientan de forma estable y desarrollan la agricultura. Se cultiva maíz, papas y porotos, base de la alimentación andina.</p>' },
+          { type: 'span', from: 400, to: 1000, yr: '400 – 1000', name: 'Alfarería y tejido',
+            title: 'Alfarería y tejido',
+            body: '<p>Se consolida la alfarería y el tejido. Las comunidades perfeccionan sus técnicas de cerámica y textiles, que trascienden como oficios hasta hoy.</p>' },
+          { type: 'span', from: 1000, to: 1490, yr: '1000 – 1490', name: 'Mapuches y Diaguitas',
+            title: 'Mapuches y Diaguitas',
+            body: '<p>Se consolidan los primeros pueblos originarios del país:</p><ul><li><strong>Mapuches</strong>, en el sur y centro, cosechan maíz, papas y porotos.</li><li><strong>Diaguitas</strong>, en el norte, destacan por la domesticación de llamas y su cerámica.</li></ul>' }
+        ]
+      },
+      {
+        id: 'conquista',
+        name: 'Conquista y Colonia',
+        from: 1492, to: 1799,
+        color: '#B6615C',
+        segs: [
+          { type: 'event', at: 1492, yr: '1492', label: 'Colón llega a América',
+            title: 'Colón llega a América',
+            range: '1492',
+            body: '<p>Cristóbal Colón llega a América, hecho que abre el proceso de conquista del continente y marca el inicio de la colonización europea.</p>' },
+          { type: 'event', at: 1541, yr: '1541', label: 'Fundación de Santiago',
+            title: 'Fundación de Santiago',
+            range: '1540 – 1541',
+            body: '<p>Pedro de Valdivia llega a Chile en 1540 y funda Santiago en 1541. Con la conquista se instala el régimen de encomienda y la agricultura se orienta al abastecimiento de la nueva ciudad.</p>' },
+          { type: 'span', from: 1550, to: 1700, yr: '1550 – 1700', name: 'Guerras de Arauco',
+            title: 'Guerras de Arauco',
+            body: '<p>Durante casi 160 años, el pueblo mapuche resiste la expansión española en el sur. El conflicto, conocido como Guerras de Arauco, marca profundamente la historia colonial.</p>' },
+          { type: 'span', from: 1600, to: 1750, yr: '1600 – 1750', name: 'Introducción europea',
+            title: 'Introducción europea',
+            body: '<p>Los europeos introducen nuevas especies y herramientas que transforman la agricultura:</p><ul><li><strong>Cultivos:</strong> trigo, vid, olivo y cebada.</li><li><strong>Animales:</strong> caballos y cabras.</li><li><strong>Herramientas:</strong> el arado de mancera y el yugo.</li></ul>' },
+          { type: 'event', at: 1778, yr: '1778', label: 'Libre Comercio de Burgos',
+            title: 'Libre Comercio de Burgos',
+            range: '1778',
+            body: '<p>La Real Cédula de 1778 abre el libre comercio entre España y sus colonias. Chile puede exportar libremente, lo que dinamiza la producción agrícola y minera.</p>' }
+        ]
+      },
+      {
+        id: 'siglo19',
+        name: 'Siglo XIX',
+        from: 1800, to: 1899,
+        color: '#8D5C6C',
+        segs: [
+          { type: 'span', from: 1810, to: 1830, yr: '1810 – 1830', name: 'Independencia',
+            title: 'Independencia y República temprana',
+            body: '<p>Chile inicia su proceso independentista y consolida sus primeras instituciones republicanas. La economía sigue siendo agraria, con latifundios y haciendas coloniales.</p>' },
+          { type: 'span', from: 1830, to: 1870, yr: '1830 – 1870', name: 'Consolidación republicana',
+            title: 'Consolidación republicana',
+            body: '<p>La República se organiza y crece la producción agrícola para el mercado interno. El trigo y la ganadería se consolidan como rubros centrales del campo chileno.</p>' },
+          { type: 'cinta', from: 1849, to: 1880, yr: '1849 – 1880', name: 'Colonización del sur',
+            range: '1849 – 1880',
+            note: 'Proceso de ocupación y distribución de tierras en el sur del país.' },
+          { type: 'event', at: 1875, yr: '1875', label: 'Exposición Agrícola',
+            title: 'Primera Exposición Agrícola',
+            range: '1875',
+            body: '<p>Se realiza la Primera Exposición Agrícola en Santiago, una muestra del avance del rubro y del interés del Estado por modernizar la producción del campo.</p>' },
+          { type: 'span', from: 1870, to: 1899, yr: '1870 – 1899', name: 'Ferrocarriles y vino',
+            title: 'Ferrocarriles y auge del trigo y del vino',
+            body: '<p>El ferrocarril conecta los campos con los puertos y crece la exportación. El trigo y el vino se convierten en los grandes rubros de la agricultura chilena de fines del siglo.</p>' }
+        ]
+      },
+      {
+        id: 'siglo20',
+        name: 'Siglo XX',
+        from: 1900, to: 2000,
+        color: '#5B8C5A',
+        segs: [
+          { type: 'span', from: 1900, to: 1910, yr: '1900 – 1910', name: 'Reforma liberal',
+            title: 'Reforma liberal',
+            body: '<p>El gobierno de Germán Riesco Errázuriz (1901) impulsa reformas y crece la economía de exportación. La agricultura se moderniza parcialmente con nuevos instrumentos.</p>' },
+          { type: 'span', from: 1914, to: 1919, yr: '1914 – 1919', name: 'Primera Guerra Mundial',
+            title: 'Primera Guerra Mundial',
+            body: '<p>La guerra en Europa afecta el comercio y encarece los productos. Chile atraviesa una crisis económica que golpea a los pequeños productores del campo.</p>' },
+          { type: 'span', from: 1922, to: 1929, yr: '1922 – 1929', name: 'Auge y crisis',
+            title: 'Auge y crisis',
+            body: '<p>Los años veinte traen un breve auge seguido de la Gran Depresión de 1929, que hunde los precios de las materias primas y sume al sector rural en la dificultad.</p>' },
+          { type: 'span', from: 1930, to: 1938, yr: '1930 – 1938', name: 'Depresión',
+            title: 'Depresión y recuperación',
+            body: '<p>La crisis de 1929 se prolonga en la década del treinta. El Estado comienza a intervenir en la economía para sostener la producción y el empleo.</p>' },
+          { type: 'span', from: 1939, to: 1945, yr: '1939 – 1945', name: 'CORFO',
+            title: 'CORFO e industrialización',
+            body: '<p>En 1939 se crea la Corporación de Fomento de la Producción (CORFO), que impulsa la industrialización y la modernización de la agricultura durante las décadas siguientes.</p>' },
+          { type: 'span', from: 1949, to: 1959, yr: '1949 – 1959', name: 'Reforma agraria previa',
+            title: 'Agricultura en transformación',
+            body: '<p>La mecanización avanza y crece la producción. Al mismo tiempo, la concentración de la tierra genera tensiones que desembocarán en la Reforma Agraria.</p>' },
+          { type: 'cinta', from: 1950, to: 1970, yr: '1950 – 1970', name: 'Éxodo rural',
+            range: '1950 – 1970',
+            note: 'Migración masiva del campo a las ciudades.' },
+          { type: 'span', from: 1960, to: 1967, yr: '1960 – 1967', name: 'Reforma Agraria',
+            title: 'Reforma Agraria',
+            body: '<p>Se pone en marcha la Reforma Agraria (1960 – 1967), que redistribuye la tierra y cambia la estructura de la propiedad rural, uno de los cambios más profundos del campo chileno.</p>' },
+          { type: 'span', from: 1973, to: 1989, yr: '1973 – 1989', name: 'Dictadura',
+            title: 'Dictadura militar',
+            body: '<p>El golpe de Estado de 1973 abre una larga dictadura. La economía se abre al mercado y muchos productores rurales enfrentan la competencia y la concentración de la tierra.</p>' },
+          { type: 'span', from: 1990, to: 2000, yr: '1990 – 2000', name: 'Agroexportación',
+            title: 'Retorno a la democracia y agroexportación',
+            body: '<p>Con el retorno a la democracia, la agricultura chilena se transforma: la agroexportación de fruta de calidad conquista los mercados internacionales y dinamiza el campo.</p>' }
+        ]
+      }
+    ];
 
-    // El foco se ve por teclado gracias a .tl-scroll-viewport:focus-visible
-    // (antes se anulaba el outline desde JS, con lo que un usuario de teclado
-    // no veía nunca dónde estaba el foco).
+    /* =====================================================================
+       UTILIDADES
+       ===================================================================== */
+    var $ = function (id) { return document.getElementById(id); };
 
-    // Drag to scroll (mouse)
-    let isDown = false;
-    let startX;
-    let scrollLeft;
+    // Formato de año: negativo → a.C.
+    function yr(n) {
+      if (n < 0) return Math.abs(n).toLocaleString('es-CL') + ' a.C.';
+      return String(n);
+    }
+    function el(tag, cls, txt) {
+      var e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (txt != null) e.textContent = txt;
+      return e;
+    }
+    function clamp01(x) { return x < 0 ? 0 : (x > 1 ? 1 : x); }
+    // '#2F6B4F' → 'rgba(47,107,79,.3)' (anillo del punto activo)
+    function hexA(hex, a) {
+      var h = String(hex).replace('#', '');
+      if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+      var n = parseInt(h, 16);
+      return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+    }
+    // Nombre corto del hito para la etiqueta sobre el punto
+    function shortOf(s) { return s.label || s.name || s.title || s.yr; }
 
-    viewport.addEventListener('mousedown', (e) => {
-      isDown = true;
-      viewport.classList.add('dragging');
-      startX = e.pageX - viewport.getBoundingClientRect().left;
-      scrollLeft = viewport.scrollLeft;
-      document.body.style.userSelect = 'none';
-    });
+    /* =====================================================================
+       CONTRASTE POR COLOR DE ÉPOCA
+       lumOf: luminancia relativa (WCAG). inkOf: color de texto sobre el
+       color de la época (blanco, o tinta oscura si el color es claro).
+       textOnWhite: el color de la época como texto sobre blanco (se
+       oscurece hasta los 4.5:1 para hover/selección legibles).
+       ===================================================================== */
+    function hexRgb(hex) {
+      var h = String(hex).replace('#', '');
+      if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+      return [parseInt(h.substr(0, 2), 16), parseInt(h.substr(2, 2), 16), parseInt(h.substr(4, 2), 16)];
+    }
+    function lumRgb(c) {
+      var v = c.map(function (x) {
+        x = x / 255;
+        return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2];
+    }
+    function lumOf(hex) { return lumRgb(hexRgb(hex)); }
+    function inkOf(hex) { return lumOf(hex) > 0.2 ? '#101a12' : '#ffffff'; }
+    function textOnWhite(hex) {
+      var c = hexRgb(hex), guard = 0;
+      while (lumRgb(c) > 0.183 && guard++ < 50) {
+        c = c.map(function (x) { return x * 0.93; });
+      }
+      return '#' + c.map(function (x) {
+        var h = Math.round(Math.max(0, Math.min(255, x))).toString(16);
+        return h.length < 2 ? '0' + h : h;
+      }).join('');
+    }
 
-    window.addEventListener('mouseup', () => {
-      isDown = false;
-      viewport.classList.remove('dragging');
-      document.body.style.userSelect = '';
-    });
+    /* Coreografía de cambio de nivel: cada elemento lleva su dirección de
+       esparcerido (--dx, hacia su lado de la línea) y su retardo por
+       distancia al centro (--dd, la onda). */
+    function choreo(node, t) {
+      node.style.setProperty('--dx', ((t - 0.5) * 180).toFixed(1) + 'px');
+      node.style.setProperty('--dd', (Math.abs(t - 0.5) * 0.16).toFixed(3) + 's');
+    }
 
-    viewport.addEventListener('mousemove', (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - viewport.getBoundingClientRect().left;
-      const walk = (x - startX) * 1.2; // sensibilidad
-      viewport.scrollLeft = scrollLeft - walk;
-    });
+    /* Margen interior del carril: ningún punto ni etiqueta toca el borde
+       (corrige el recorte del punto de 1492 en el extremo izquierdo). */
+    var PAD = 16;
+    function posL(t) { return 'calc(' + PAD + 'px + (100% - ' + (PAD * 2) + 'px) * ' + (+t).toFixed(5) + ')'; }
+    function posR(t) { return 'calc(' + PAD + 'px + (100% - ' + (PAD * 2) + 'px) * ' + (1 - +t).toFixed(5) + ')'; }
 
-    // Touch support (arrastrar con el dedo)
-    let touchStartX = 0, touchStartScroll = 0;
-    viewport.addEventListener('touchstart', (e) => {
-      touchStartX = e.touches[0].pageX;
-      touchStartScroll = viewport.scrollLeft;
-    }, {passive:true});
+    var mQ = window.matchMedia('(max-width: 700px)');
+    function isVert() { return mQ.matches; }
+    var reduceMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+    function noMotion() { return reduceMQ.matches; }
 
-    viewport.addEventListener('touchmove', (e) => {
-      const dx = e.touches[0].pageX - touchStartX;
-      viewport.scrollLeft = touchStartScroll - dx;
-    }, {passive:true});
+    /* Tramos de la línea maestra: proporcionales a la duración de cada
+       época, con un mínimo del 8% para que las épocas cortas no se fundan
+       en el extremo derecho. No es matemáticamente perfecto: basta con
+       que se note la distancia entre épocas. */
+    var MIN_TRAMO = 8;
+    var TRAMOS = (function () {
+      var durs = BANDS.map(function (b) { return Math.max(1, b.to - b.from); });
+      var total = durs.reduce(function (a, c) { return a + c; }, 0);
+      var w = durs.map(function (d) { return (d / total) * 100; });
+      var deficit = 0, pool = 0;
+      w.forEach(function (v) { if (v < MIN_TRAMO) deficit += MIN_TRAMO - v; });
+      w.forEach(function (v) { if (v > MIN_TRAMO) pool += v; });
+      if (pool > 0) {
+        w = w.map(function (v) { return v > MIN_TRAMO ? v - deficit * (v / pool) : MIN_TRAMO; });
+      }
+      var acc = 0;
+      return w.map(function (v) {
+        var tr = { start: acc / 100, frac: v / 100 };
+        acc += v;
+        return tr;
+      });
+    })();
 
-    // Asegurar que la imagen sea más ancha que el viewport para que aparezca la barra
-    const img = viewport.querySelector('.tl-scroll-image');
-    function ensureScrollable() {
-      if (!img) return;
-      const vw = viewport.clientWidth;
-      const naturalW = img.naturalWidth || 0;
-      if (naturalW <= vw) {
-        // forzamos un ancho mayor para que aparezca scroll; ajusta si quieres otro valor
-        img.style.width = (vw + 600) + 'px';
+    // Posición (0–1) del hito dentro de su época
+    function segT(b, s) {
+      var span = b.to - b.from;
+      if (s.type === 'event') return clamp01((s.at - b.from) / span);
+      return clamp01((((s.from + s.to) / 2) - b.from) / span);
+    }
+    /* =====================================================================
+       ELEMENTOS Y ESTADO
+       ===================================================================== */
+    var crumb = $('tlCrumb'),
+        lvl = [$('lvl0'), $('lvl1')],
+        masterBox = $('tlMaster'),
+        rail = $('tlRail'),
+        scroll = $('tlScroll'),
+        bandTitle = $('bandTitle'),
+        bandRange = $('bandRange'),
+        detail = $('tlDetail'),
+        slot = $('tlSlot'),
+        stage = $('tlStage');
+
+    var state = { level: 0, band: -1, seg: -1 };
+    var rowEls = [];   // filas verticales por índice de hito
+    var ptEls = [];    // punto + título + fecha (modo horizontal) por índice
+    var pulsed = false; // tras el primer toque, la pulsación no vuelve
+    var animTok = 0;    // testigo: solo la corredera más reciente manda
+    var swapping = false; // cambio de nivel en curso (bloquea navegación)
+
+    /* =====================================================================
+       NIVEL 0 — línea maestra de las 5 épocas
+       ===================================================================== */
+    function renderMaster() {
+      masterBox.innerHTML = '';
+
+      // Móvil: la línea maestra baja en vertical
+      if (isVert()) {
+        var vr = el('div', 'tl-rail v tm' + (pulsed ? ' no-pulse' : ''));
+        var VH = 500, prevT = null;
+        BANDS.forEach(function (b, i) {
+          var t = TRAMOS[i].start + TRAMOS[i].frac / 2;
+          var range = yr(b.from) + ' — ' + yr(b.to);
+          var row = buildRow(b.name, range, b.color, b.name + ', ' + range,
+            function () { goBand(i); });
+          row.classList.add('vmaster');
+          choreo(row, t);
+          var gap = prevT === null
+            ? Math.round(t * VH - 23)
+            : Math.round((t - prevT) * VH - 46);
+          row.style.marginTop = Math.max(6, gap) + 'px';
+          prevT = t;
+          vr.appendChild(row);
+        });
+        masterBox.appendChild(vr);
+        return;
+      }
+
+      // Escritorio: tramos de color proporcionales con los 5 puntos
+      var sc = el('div', 'tl-scroll');
+      sc.tabIndex = 0;
+      sc.setAttribute('role', 'region');
+      sc.setAttribute('aria-label', 'Línea general de épocas, desplazable en horizontal');
+      var r = el('div', 'tl-rail h tm' + (pulsed ? ' no-pulse' : ''));
+
+      // Antes de dibujar: tamaños y filas escalonadas de títulos y fechas
+      var titles = [], dates = [];
+      TRAMOS.forEach(function (tr, i) {
+        var b = BANDS[i];
+        titles.push({ t: tr.start + tr.frac / 2, f: b.name.length * 6.3 });
+        dates.push({
+          t: tr.start + tr.frac / 2,
+          f: (yr(b.from) + ' — ' + yr(b.to)).length * 6 + 16
+        });
+      });
+      var refW = masterBox.clientWidth || scroll.clientWidth || 1000;
+      var tRows = assignRows(titles, refW);
+      var dRows = assignRows(dates, refW);
+
+      TRAMOS.forEach(function (tr, i) {
+        var b = BANDS[i];
+        var range = yr(b.from) + ' — ' + yr(b.to);
+        var t = tr.start + tr.frac / 2;
+
+        var seg = el('div', 'tm-seg');
+        seg.style.background = b.color;
+        seg.style.left = posL(tr.start);
+        seg.style.width = 'calc((100% - ' + (PAD * 2) + 'px) * ' + tr.frac.toFixed(5) + ' - 2px)';
+        r.appendChild(seg);
+
+        var pick = function () { goBand(i); };
+
+        var dot = el('button', 'tl-pt');
+        dot.type = 'button';
+        dot.style.left = posL(t);
+        dot.style.setProperty('--seg-bg', b.color);
+        dot.style.setProperty('--pt-ring', hexA(b.color, .3));
+        dot.style.setProperty('--pulse-delay', i % 2 ? '.5s' : '0s');
+        dot.setAttribute('aria-label', b.name + ', ' + range);
+        dot.addEventListener('click', pick);
+        choreo(dot, t);
+        r.appendChild(dot);
+
+        // Nombre de la época sobre el punto, escalonado donde choca
+        var tt = el('span', 'pt-title t' + (tRows[i] + 1));
+        tt.style.setProperty('--seg-bg', b.color);
+        tt.style.setProperty('--seg-text', textOnWhite(b.color));
+        tt.textContent = b.name;
+        edgePos(tt, t);
+        tt.addEventListener('click', pick);
+        choreo(tt, t);
+        r.appendChild(tt);
+
+        // Fechas debajo de la línea
+        var dd = el('span', 'pt-date d' + (dRows[i] + 1));
+        dd.style.setProperty('--seg-bg', b.color);
+        dd.textContent = range;
+        edgePos(dd, t);
+        dd.addEventListener('click', pick);
+        choreo(dd, t);
+        r.appendChild(dd);
+      });
+
+      r.style.minWidth = railWidth(titles, tRows, dates, dRows) + 'px';
+      sc.appendChild(r);
+      masterBox.appendChild(sc);
+    }
+
+    /* =====================================================================
+       ETIQUETAS EN HORIZONTAL: POSICIÓN Y FILAS ESCALONADAS
+       Títulos y fechas van horizontales sobre el punto. Cada etiqueta ocupa
+       la fila más cercana a la línea; si chocaría con la anterior, sube a la
+       segunda fila. Con las filas ya asignadas se calcula el ancho mínimo
+       del carril para que no se solapen (si no cabe, la línea desplaza).
+       ===================================================================== */
+    function edgePos(node, t) {
+      if (t <= 0.05) { node.style.left = posL(t); node.classList.add('ds'); }
+      else if (t >= 0.95) { node.style.right = posR(t); node.classList.add('de'); }
+      else { node.style.left = posL(t); node.classList.add('dm'); }
+    }
+    function assignRows(items, refW) {
+      var ends = [-1, -1];        // extremo derecho (en t) de cada fila
+      var margin = 12 / refW;     // 12 px de aire mínimo entre etiquetas
+      return items.map(function (p) {
+        var fw = p.f / refW;
+        var L = (p.t <= 0.05) ? 0 : (p.t >= 0.95 ? fw : fw / 2);
+        var R = (p.t <= 0.05) ? fw : (p.t >= 0.95 ? 0 : fw / 2);
+        var row = (p.t - L < ends[0] + margin) ? 1 : 0;
+        ends[row] = Math.max(ends[row], p.t + R);
+        return row;
+      });
+    }
+    function rowsNeed(items, rows) {
+      var need = 0;
+      [0, 1].forEach(function (r) {
+        var idxs = [];
+        items.forEach(function (_, i) { if (rows[i] === r) idxs.push(i); });
+        for (var k = 1; k < idxs.length; k++) {
+          var a = items[idxs[k - 1]], b = items[idxs[k]];
+          var gap = b.t - a.t;
+          if (gap < 0.004) gap = 0.004;
+          var aR = a.t >= 0.95 ? 0 : (a.t <= 0.05 ? a.f : a.f / 2);
+          var bL = b.t <= 0.05 ? 0 : (b.t >= 0.95 ? b.f : b.f / 2);
+          need = Math.max(need, (aR + bL + 16) / gap);
+        }
+      });
+      return need;
+    }
+    function railWidth(titles, tRows, dates, dRows) {
+      var w = Math.max(rowsNeed(titles, tRows), rowsNeed(dates, dRows));
+      return Math.max(700, Math.min(Math.ceil(w), 1780));
+    }
+
+    /* =====================================================================
+       NIVEL 1 — línea de una época con sus hitos
+       ===================================================================== */
+    function renderBand(i) {
+      var b = BANDS[i];
+      bandTitle.textContent = b.name;
+      bandRange.textContent = yr(b.from) + ' — ' + yr(b.to);
+      rowEls = [];
+      ptEls = [];
+      rail.innerHTML = '';
+      rail.style.minWidth = '';
+      rail.className = 'tl-rail ' + (isVert() ? 'v' : 'h') + (pulsed ? ' no-pulse' : '');
+      rail.style.setProperty('--seg-bg', b.color);
+      rail.style.setProperty('--seg-ink', inkOf(b.color));
+      rail.style.setProperty('--seg-text', textOnWhite(b.color));
+      if (isVert()) renderBandV(b);
+      else renderBandH(b);
+      scroll.scrollLeft = 0;
+    }
+
+    // Escritorio/tablet: todo en horizontal sobre la línea
+    function renderBandH(b) {
+      var span = b.to - b.from;
+
+      // Los hitos (no las cintas) primero, para medirlos y escalonarlos
+      var pts = [];
+      b.segs.forEach(function (s, idx) {
+        if (s.type === 'cinta') return;
+        pts.push({ s: s, idx: idx, t: segT(b, s) });
+      });
+
+      // Tamaños y filas escalonadas de títulos y fechas
+      var titles = pts.map(function (p) { return { t: p.t, f: shortOf(p.s).length * 6.3 }; });
+      var dates = pts.map(function (p) { return { t: p.t, f: p.s.yr.length * 6 + 16 }; });
+      var refW = scroll.clientWidth || 1000;
+      var tRows = assignRows(titles, refW);
+      var dRows = assignRows(dates, refW);
+      var tOf = {}, dOf = {};
+      pts.forEach(function (p, k) { tOf[p.idx] = tRows[k]; dOf[p.idx] = dRows[k]; });
+
+      var kn = 0; // alterna el retardo de pulsación de los puntos
+      b.segs.forEach(function (s, idx) {
+        if (s.type === 'cinta') {
+          var c = el('div', 'tl-cinta');
+          c.style.setProperty('--seg-bg', s.color || b.color);
+          c.style.left = posL(clamp01((s.from - b.from) / span));
+          c.style.width = 'calc((100% - ' + (PAD * 2) + 'px) * ' + ((s.to - s.from) / span).toFixed(5) + ')';
+          c.title = s.name + ' (' + s.range + '). ' + s.note;
+          c.appendChild(el('span', null, s.name));
+          c.appendChild(el('span', 'cinta-range', s.range));
+          choreo(c, clamp01((((s.from + s.to) / 2) - b.from) / span));
+          rail.appendChild(c);
+          return; // la cinta no es clicable
+        }
+
+        var t = segT(b, s);
+        var pick = function () { selectSeg(idx); };
+        var aria = s.title + ', ' + (s.range || s.yr);
+
+        var dot = el('button', 'tl-pt');
+        dot.type = 'button';
+        dot.style.left = posL(t);
+        dot.style.setProperty('--seg-bg', b.color);
+        dot.style.setProperty('--pt-ring', hexA(b.color, .3));
+        dot.style.setProperty('--pulse-delay', kn++ % 2 ? '.5s' : '0s');
+        dot.setAttribute('aria-label', aria);
+        dot.addEventListener('click', pick);
+        choreo(dot, t);
+        rail.appendChild(dot);
+
+        var tt = el('span', 'pt-title t' + (tOf[idx] + 1));
+        tt.style.setProperty('--seg-bg', b.color);
+        tt.textContent = shortOf(s);
+        edgePos(tt, t);
+        tt.addEventListener('click', pick);
+        choreo(tt, t);
+        rail.appendChild(tt);
+
+        var dd = el('span', 'pt-date d' + (dOf[idx] + 1));
+        dd.style.setProperty('--seg-bg', b.color);
+        dd.textContent = s.yr;
+        edgePos(dd, t);
+        dd.addEventListener('click', pick);
+        choreo(dd, t);
+        rail.appendChild(dd);
+
+        ptEls[idx] = { dot: dot, title: tt, date: dd };
+      });
+
+      rail.style.minWidth = railWidth(titles, tRows, dates, dRows) + 'px';
+    }
+
+    // Móvil: la línea baja en el centro; título a la izquierda y fecha a la derecha
+    function renderBandV(b) {
+      var span = b.to - b.from;
+      var VH = 640, prevT = null;
+
+      b.segs.forEach(function (s, idx) {
+        if (s.type === 'cinta') {
+          var c = el('div', 'vcinta');
+          c.style.setProperty('--seg-bg', s.color || b.color);
+          c.title = s.name + ' (' + s.range + '). ' + s.note;
+          c.appendChild(el('span', null, s.name));
+          c.appendChild(el('span', 'cinta-range', s.range));
+          choreo(c, clamp01((((s.from + s.to) / 2) - b.from) / span));
+          rail.appendChild(c);
+          return;
+        }
+
+        var t = segT(b, s);
+        // Móvil: con el detalle abierto, cualquier toque sobre la línea lo
+        // cierra; con él cerrado, el toque abre ese hito.
+        var row = buildRow(shortOf(s), s.yr, b.color, s.title + ', ' + (s.range || s.yr),
+          function () {
+            if (state.seg >= 0) closeDetail();
+            else selectSeg(idx);
+          });
+        var gap = prevT === null
+          ? Math.round(t * VH - 23)
+          : Math.round((t - prevT) * VH - 46);
+        row.style.marginTop = Math.max(6, gap) + 'px';
+        prevT = t;
+        choreo(row, t);
+        rail.appendChild(row);
+        rowEls[idx] = row;
+      });
+
+      rail.style.minWidth = '';
+    }
+
+    // Fila del modo vertical: título · punto · fecha
+    function buildRow(title, dateTxt, color, ariaLabel, onPick) {
+      var row = el('button', 'vrow');
+      row.type = 'button';
+      row.style.setProperty('--seg-bg', color);
+      row.style.setProperty('--seg-text', textOnWhite(color));
+      row.style.setProperty('--pt-ring', hexA(color, .3));
+      row.setAttribute('aria-label', ariaLabel);
+      row.appendChild(el('span', 'vr-t', title));
+      var c = el('span', 'vr-c');
+      c.appendChild(el('span', 'vr-dot'));
+      row.appendChild(c);
+      row.appendChild(el('span', 'vr-y', dateTxt));
+      row.addEventListener('click', onPick);
+      return row;
+    }
+    /* =====================================================================
+       SELECCIÓN DE UN HITO Y DETALLE
+       ===================================================================== */
+    function selectSeg(si) {
+      if (swapping) return;
+      var wasOpen = state.seg >= 0;
+      state.seg = si;
+      if (!pulsed) { pulsed = true; rail.classList.add('no-pulse'); }
+      markSeg();
+      applyDetail();
+      syncStage();
+      renderCrumb();
+      if (isVert()) {
+        if (!wasOpen) animateOpen(); // corredera: se abre despacio
+        if (detail.scrollIntoView) {
+          detail.scrollIntoView({ block: 'nearest', behavior: noMotion() ? 'auto' : 'smooth' });
+        }
+      }
+    }
+
+    // Abre el detalle animando su altura (corredera vertical suave)
+    function animateOpen() {
+      if (noMotion()) return;
+      var target = detail.offsetHeight;
+      if (!target) return;
+      var my = ++animTok;
+      detail.style.height = '0px';
+      detail.style.overflow = 'hidden';
+      void detail.offsetHeight; // reflow: partir de 0
+      detail.style.transition = 'height 320ms ease';
+      detail.style.height = target + 'px';
+      var done = function (e) {
+        if (e && e.propertyName && e.propertyName !== 'height') return;
+        detail.removeEventListener('transitionend', done);
+        clearTimeout(backup);
+        if (my !== animTok) return; // una animación más reciente mandó
+        detail.style.height = '';
+        detail.style.overflow = '';
+        detail.style.transition = '';
+      };
+      var backup = setTimeout(done, 420); // respaldo si no llega transitionend
+      detail.addEventListener('transitionend', done);
+    }
+
+    function markSeg() {
+      var i, on;
+      for (i = 0; i < ptEls.length; i++) {
+        if (!ptEls[i]) continue;
+        on = (i === state.seg);
+        ptEls[i].dot.classList.toggle('is-on', on);
+        ptEls[i].dot.setAttribute('aria-expanded', on ? 'true' : 'false');
+        ptEls[i].title.classList.toggle('is-on', on);
+        ptEls[i].date.classList.toggle('is-on', on);
+      }
+      for (i = 0; i < rowEls.length; i++) {
+        if (!rowEls[i]) continue;
+        on = (i === state.seg);
+        rowEls[i].classList.toggle('is-on', on);
+        rowEls[i].setAttribute('aria-expanded', on ? 'true' : 'false');
+      }
+    }
+
+    // Tarjeta de color sólido (fecha + título) + panel de cristal (texto)
+    function applyDetail() {
+      animTok++; // anula cualquier corredera en curso (su cierre ya no actúa)
+      if (state.seg < 0) {
+        detail.style.removeProperty('--seg-bg');
+        detail.style.removeProperty('--seg-ink');
+        if (isVert()) {
+          // En móvil no hay pista de texto: los puntos pulsan hasta el primer toque
+          detail.className = 'tl-detail';
+          detail.innerHTML = '';
+        } else {
+          detail.className = 'tl-detail is-hint';
+          detail.innerHTML = '<div class="det-hint">Toca un punto de la línea</div>';
+        }
       } else {
-        img.style.width = 'auto';
+        var b = BANDS[state.band], s = b.segs[state.seg];
+        detail.className = 'tl-detail';
+        detail.style.height = '';
+        detail.style.overflow = '';
+        detail.style.transition = '';
+        detail.style.setProperty('--seg-bg', b.color);
+        detail.style.setProperty('--seg-ink', inkOf(b.color));
+        detail.innerHTML =
+          '<div class="det-card">' +
+            '<span class="det-kicker">' + b.name + '</span>' +
+            '<span class="det-date">' + (s.range || s.yr) + '</span>' +
+            '<span class="det-title">' + s.title + '</span>' +
+          '</div>' +
+          '<div class="det-glass">' +
+            '<button type="button" class="det-x" aria-label="Cerrar el detalle">×</button>' +
+            '<div class="det-text">' + s.body + '</div>' +
+          '</div>';
+        var x = detail.querySelector('.det-x');
+        if (x) x.addEventListener('click', closeDetail);
+      }
+      placeDetail();
+    }
+
+    // En escritorio el detalle queda bajo la línea; en móvil se despliega
+    // justo debajo del punto tocado y la línea continúa.
+    function placeDetail() {
+      if (isVert() && state.level === 1) {
+        if (state.seg >= 0 && rowEls[state.seg]) {
+          var row = rowEls[state.seg];
+          row.parentNode.insertBefore(detail, row.nextSibling);
+        } else {
+          rail.appendChild(detail); // la pista queda al final de la línea
+        }
+      } else if (detail.parentNode !== slot) {
+        slot.appendChild(detail);
       }
     }
 
-    // Ejecutar al cargar la imagen y al redimensionar
-    if (img && img.complete) ensureScrollable();
-    if (img) img.addEventListener('load', ensureScrollable);
-    window.addEventListener('resize', ensureScrollable);
-
-    // Pequeña pista de scroll en desktop (se omite si el usuario pide
-    // menos movimiento)
-    function flashHint() {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      if (window.matchMedia('(pointer:fine)').matches) {
-        const start = viewport.scrollLeft;
-        viewport.scrollBy({ left: 60, behavior: 'smooth' });
-        setTimeout(() => viewport.scrollTo({ left: start, behavior: 'smooth' }), 450);
+    function closeDetail() {
+      var closing = state.seg;
+      var back = null;
+      if (state.seg >= 0) {
+        back = ptEls[state.seg] ? ptEls[state.seg].dot : rowEls[state.seg];
+      }
+      var finish = function () {
+        state.seg = -1;
+        markSeg();
+        applyDetail();
+        syncStage();
+        renderCrumb();
+        if (back && back.focus) back.focus();
+      };
+      // En móvil se pliega despacio; en escritorio, directo
+      if (isVert() && !noMotion() && detail.offsetHeight > 0) {
+        var my = ++animTok;
+        detail.style.height = detail.offsetHeight + 'px';
+        detail.style.overflow = 'hidden';
+        void detail.offsetHeight;
+        detail.style.transition = 'height 280ms ease';
+        detail.style.height = '0px';
+        var done = function (e) {
+          if (e && e.propertyName && e.propertyName !== 'height') return;
+          detail.removeEventListener('transitionend', done);
+          clearTimeout(backup);
+          if (my !== animTok) return; // otra animación más reciente mandó
+          detail.style.height = '';
+          detail.style.overflow = '';
+          detail.style.transition = '';
+          if (state.seg === closing) finish();
+        };
+        var backup = setTimeout(done, 400); // respaldo si no llega transitionend
+        detail.addEventListener('transitionend', done);
+      } else {
+        finish();
       }
     }
-    setTimeout(flashHint, 350);
 
-    // Pista táctil: un círculo translúcido en bucle invita a arrastrar la línea
-    // con el dedo. Solo en pantallas sin hover (móvil/tablet táctil) y mientras
-    // la línea sea realmente desplazable. Desaparece para siempre en el primer
-    // scroll real: si se toca sin mover, scrollLeft no cambia y el navegador no
-    // dispara el evento, así que la pista sigue hasta que se arrastra de verdad.
-    const hintWrap = viewport.closest('.tl-scroll-wrap');
-    const hintEl = hintWrap ? hintWrap.querySelector('.tl-hint') : null;
-    if (hintEl && window.matchMedia('(hover: none)').matches) {
-      let hintDismissed = false;
+    // El escenario mide el contenido visible para que nada quede cortado
+    function syncStage() {
+      var act = lvl[state.level];
+      if (act) stage.style.minHeight = act.offsetHeight + 'px';
+    }
 
-      function hideHint() {
-        if (hintDismissed) return;
-        hintDismissed = true;
-        hintWrap.classList.remove('is-hinting');
-      }
+    /* =====================================================================
+       MIGA DE PAN
+       ===================================================================== */
+    function crumbBtn(text, cb) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = text;
+      b.addEventListener('click', cb);
+      return b;
+    }
+    function sep() {
+      var s = document.createElement('span');
+      s.className = 'crumb-sep';
+      s.textContent = '›';
+      s.setAttribute('aria-hidden', 'true');
+      return s;
+    }
+    function here(text) {
+      var s = document.createElement('span');
+      s.className = 'crumb-here';
+      s.textContent = text;
+      s.setAttribute('aria-current', 'page');
+      return s;
+    }
+    function renderCrumb() {
+      crumb.innerHTML = '';
+      // En nivel 0 la cabecera del escenario ya dice "Épocas": no se duplica
+      if (state.level === 0) return;
+      var b = BANDS[state.band];
+      crumb.appendChild(crumbBtn('Épocas', function () { goRoot(); }));
+      crumb.appendChild(sep());
+      if (state.seg < 0) { crumb.appendChild(here(b.name)); return; }
+      crumb.appendChild(crumbBtn(b.name, function () { goBand(state.band); }));
+      crumb.appendChild(sep());
+      crumb.appendChild(here(b.segs[state.seg].title));
+    }
 
-      function syncHint() {
-        if (hintDismissed) return;
-        const scrollable = viewport.scrollWidth > viewport.clientWidth + 1;
-        hintWrap.classList.toggle('is-hinting', scrollable);
-      }
+    /* =====================================================================
+       TRANSICIÓN DE NIVEL: esparcer + zoom (la línea nunca se mueve)
+       ===================================================================== */
+    function currentRail() {
+      var box = lvl[state.level];
+      return box ? box.querySelector('.tl-rail') : null;
+    }
+    // Ejecuta `mutate` (re-render + cambio de nivel) entre la salida y la
+    // entrada, con guardas para no solapar dos transiciones.
+    function swapLevels(mutate) {
+      if (swapping) return;
+      if (noMotion()) { mutate(); return; } // movimiento reducido: instantáneo
+      var out = currentRail();
+      swapping = true;
+      if (out) out.classList.add('is-leaving');
+      setTimeout(function () {
+        if (out) out.classList.remove('is-leaving');
+        mutate();
+        var inn = currentRail();
+        if (inn) {
+          inn.classList.add('is-entering');
+          setTimeout(function () {
+            inn.classList.remove('is-entering');
+            swapping = false;
+          }, 560);
+        } else {
+          swapping = false;
+        }
+      }, 300);
+    }
+    function show(level) {
+      state.level = level;
+      lvl.forEach(function (box, i) {
+        var on = (i === level);
+        box.classList.toggle('is-on', on);
+        box.setAttribute('aria-hidden', on ? 'false' : 'true');
+      });
+      renderCrumb();
+    }
+    function goRoot() {
+      if (swapping) return;
+      swapLevels(function () {
+        state.band = -1; state.seg = -1;
+        renderMaster();   // siempre con la orientación correcta
+        show(0);
+        syncStage();
+      });
+    }
+    function goBand(i) {
+      if (swapping) return;
+      swapLevels(function () {
+        state.band = i; state.seg = -1;
+        renderBand(i);
+        show(1);
+        markSeg();
+        applyDetail();  // pista: "Toca un punto…"
+        syncStage();
+      });
+    }
 
-      if (img && img.complete) syncHint();
-      else if (img) img.addEventListener('load', syncHint);
-      window.addEventListener('resize', syncHint);
-      viewport.addEventListener('scroll', hideHint, { passive: true });
+    /* =====================================================================
+       ARRANQUE
+       ===================================================================== */
+    renderMaster();
+    renderCrumb();
+    syncStage();
+
+    // Cambio entre línea vertical (≤700px) y horizontal
+    var onModeChange = function () {
+      if (swapping) { setTimeout(onModeChange, 700); return; } // esperar a la transición
+      if (state.level === 0) renderMaster();
+      else { renderBand(state.band); markSeg(); applyDetail(); }
+      syncStage();
+    };
+    if (mQ.addEventListener) mQ.addEventListener('change', onModeChange);
+    else if (mQ.addListener) mQ.addListener(onModeChange);
+
+    // En móvil, tocar fuera del detalle (línea, cabecera…) también lo cierra
+    lvl[1].addEventListener('click', function (e) {
+      if (!isVert() || state.seg < 0) return;
+      if (e.target.closest && e.target.closest('.tl-detail, .vrow')) return;
+      closeDetail();
+    });
+
+    // El texto puede envolver al cambiar el ancho: recalcular la altura
+    var rt = null;
+    window.addEventListener('resize', function () {
+      if (rt) clearTimeout(rt);
+      rt = setTimeout(syncStage, 120);
+    });
+
+    // Las fuentes se cargan después: ajustar la altura del escenario
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(syncStage);
     }
   })();
   </script>
 
-<script src="scripts/nav-transition.js"></script>
+  <script src="scripts/nav-transition.js"></script>
 </body>
 </html>
