@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Contacto — Museo de la vida rural El Canario</title>
+  <meta name="description" content="Contacto del museo El Canario: dirección en Longaví, Maule, teléfono, WhatsApp y correo para coordinar tu visita." />
+  <meta name="theme-color" content="#0e1813" />
+  <link rel="icon" href="assets/svg/Logo.svg" type="image/svg+xml" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles/styles.css" />
+
+  <!-- Estilos mínimos y específicos para la página de Contacto
+       No tocan el layout general; solo ajustan tipografía, enlaces y bordes de la media -->
+  <style>
+    /* Mantener la apariencia del card original; solo estilos internos */
+    .contact-block { width:100%; display:block; }
+
+    .contact-heading {
+      font-weight: 700;
+      margin: 14px 0 6px 0;
+      font-size: 16px;
+      color: var(--ink);
+      font-family: var(--light-sans);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .contact-text {
+      margin: 0 0 8px 0;
+      line-height: 1.6;
+      color: #111;
+      font-family: var(--sans);
+      font-size: 15px;
+    }
+
+    .contact-note {
+      margin: 0 0 12px 0;
+      font-style: italic;
+      color: #444;
+      font-size: 15px;
+    }
+
+    /* Enlaces: color negro por defecto, al hover cambian a var(--accent) (rojo).
+       Se agrega la misma transición suave de color (260ms) que usa el botón
+       .btn-primary, para que el cambio no sea instantáneo sino con fundido. */
+    .contact-link {
+      color: #000;
+      text-decoration: none;
+      font-weight: normal;
+      font-family: var(--light-sans);
+      transition: color 260ms ease;
+    }
+    .contact-link:hover,
+    .contact-link:focus {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    /* Dirección: enlace a Google Maps que conserva la apariencia del texto
+       (hereda el color de .contact-text) y al hover pasa a --accent con fundido */
+    .contact-map {
+      color: inherit;
+      text-decoration: none;
+      transition: color 260ms ease;
+    }
+    .contact-map:hover,
+    .contact-map:focus {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    .ingreso {
+      margin-top: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--ink);
+      font-family: var(--light-sans);
+      font-size: 15px;
+    }
+
+    /* Asegura que en móvil el contenido mantenga el padding del card-copy */
+    @media (max-width:1100px) {
+      .contact-heading { font-size: 14px; margin-top: 10px; }
+      .contact-text, .contact-note, .ingreso { font-size: 14px; }
+    }
+
+    /* Forzar que la imagen quede en el lado derecho en desktop
+       y que las esquinas internas (lado que toca el card) sean rectas */
+    @media (min-width:1101px) {
+      .card-inner { display:flex; flex-direction:row; }
+      .card-copy { order: 1; }
+      .card-media { order: 2; border-radius: 0 var(--radius) var(--radius) 0 !important; }
+      .card-media img { border-radius: 0 var(--radius) var(--radius) 0 !important; display:block; width:100%; height:100%; object-fit:cover; }
+    }
+
+    /* En móvil seguimos el diseño global: imagen arriba (bloque redondeado)
+       y bloque blanco de texto abajo, con el margen entre ambos que define
+       styles.css. Aquí no se fuerza border-radius para no chocar con él. */
+    @media (max-width:1100px) {
+      .card-inner { display:flex; flex-direction:column; }
+      .card-copy { order: 2; }
+      .card-media { order: 1; }
+      .card-media img { width:100%; height:auto; object-fit:cover; }
+    }
+
+    /* Asegura que el botón VOLVER ATRÁS tenga la misma posición que en otras páginas */
+    .card-copy { display:flex; flex-direction:column; }
+    #cta-recorrer { margin-top: auto; align-self: flex-start; padding: 10px 28px; min-width: 0; }
+    @media (max-width:1100px) {
+      #cta-recorrer { align-self: center; margin-top: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="viewport-fixed">
+
+    <!-- Header fijo -->
+    <header class="site-header" role="banner">
+      <div class="header-inner">
+        <a class="brand" href="index.html">
+          <img src="assets/svg/Logo.svg" alt="Logo Museo El Canario" class="logo-img" />
+          <span class="brand-text">Museo de la vida rural El Canario</span>
+        </a>
+
+        <nav class="main-nav" aria-label="Navegación principal">
+          <a href="cronograma.html" class="nav-link">Cronograma</a>
+          <a href="imagenes.html" class="nav-link">Imágenes</a>
+          <a href="biografia.html" class="nav-link">Biografía</a>
+          <a href="contacto.html" class="nav-link">Contacto</a>
+        </nav>
+
+        <!-- Toggle móvil -->
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" type="button">
+          <svg class="menu-icon" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <circle class="menu-circle" cx="24" cy="24" r="20" fill="#c0392b" />
+            <g class="bars" stroke="#fff" stroke-linecap="round" stroke-width="3" stroke-linejoin="round">
+              <line class="bar top" x1="14" y1="18" x2="34" y2="18" />
+              <line class="bar bottom" x1="14" y1="30" x2="34" y2="30" />
+            </g>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Menú desplegable móvil -->
+    <aside class="floating-menu" id="floatingMenu" aria-hidden="true">
+      <div class="floating-inner">
+        <nav class="floating-nav" aria-label="Navegación flotante">
+          <a href="cronograma.html">Cronograma</a>
+          <a href="imagenes.html">Imágenes</a>
+          <a href="biografia.html">Biografía</a>
+          <a href="contacto.html">Contacto</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Hero -->
+    <main class="hero" role="main" aria-label="Hero">
+      <div class="hero-overlay" aria-hidden="true"></div>
+
+      <!-- Card: mantenemos la misma estructura que en index.html -->
+      <section class="card container" role="region" aria-label="Tarjeta contacto">
+        <div class="card-inner">
+          <!-- Texto primero para que en desktop la imagen quede a la derecha -->
+          <div class="card-copy">
+            <h1 class="card-title">Contacto</h1>
+
+            <div class="contact-block">
+              <h2 class="contact-heading">Dirección</h2>
+              <p class="contact-text">
+                <a class="contact-map" href="https://maps.app.goo.gl/WtrgEW9ySnVT7Usp7" target="_blank" rel="noopener noreferrer" aria-label="Ver dirección Unnamed Road, Longaví, Maule en Google Maps">Unnamed Road, Longaví, Maule.</a>
+              </p>
+
+              <h2 class="contact-heading">Horario de atención</h2>
+              <p class="contact-text">Lunes a domingo: 15:00 – 19:00 hrs</p>
+              <p class="contact-note"><em>(Cerrado días festivos y Viernes Santo)</em></p>
+
+              <h2 class="contact-heading">Teléfono</h2>
+              <p class="contact-text">
+                <a class="contact-link" href="tel:+56988330547" aria-label="Llamar al +56 9 8833 0547">+56 9 8833 0547</a>
+              </p>
+
+              <h2 class="contact-heading">WhatsApp</h2>
+              <p class="contact-text">
+                <a class="contact-link" href="https://wa.me/56988330547" target="_blank" rel="noopener noreferrer" aria-label="Abrir chat de WhatsApp con +56 9 8833 0547">+56 9 8833 0547</a>
+              </p>
+
+              <h2 class="contact-heading">Correo</h2>
+              <p class="contact-text">
+                <a class="contact-link" href="mailto:gladis.minerva.67@gmail.com" aria-label="Enviar correo a gladis.minerva.67@gmail.com">gladis.minerva.67@gmail.com</a>
+              </p>
+
+              <p class="ingreso">INGRESO GRATUITO</p>
+            </div>
+
+            <!-- Botón VOLVER ATRÁS en la misma posición que en las otras ventanas -->
+            <a id="cta-recorrer" class="btn-primary" href="index.html">VOLVER ATRÁS</a>
+          </div>
+
+          <!-- Imagen (en desktop a la derecha, en móvil arriba) -->
+          <figure class="card-media">
+            <img src="assets/images/Imagen-Contacto.webp" alt="Fachada del museo" decoding="async" />
+            <figcaption class="card-caption">
+              <span class="caption-title">MUSEO: CORREDOR</span>
+              <span class="caption-detail">TELÉFONOS FIJOS</span>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <script src="scripts/menu.js"></script>
+<script src="scripts/nav-transition.js"></script>
+</body>
+</html>
