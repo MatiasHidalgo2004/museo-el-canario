@@ -47,6 +47,15 @@
       height: 100%;
       display: block;
     }
+    /* La capa nítida se marca con la clase .cr-capa-int y los puntos van
+       dentro de .cruce-puntos. En ESCRITORIO ambos mantienen exactamente
+       la geometría del lienzo, como siempre: el +5% del intermedio y el
+       reubico de los puntos son exclusivos del bloque de móvil (≤700px),
+       más abajo. */
+    .cruce-puntos {
+      position: absolute;
+      inset: 0;               /* en escritorio: la caja del lienzo */
+    }
 
     /* ---------- Card blanco a la izquierda (como el del home) ----------
        Va sobre recorrido-cruce-fondo.png y termina a un minúsculo margen
@@ -235,8 +244,8 @@
     }
 
     /* Móvil: un solo card blanco — el texto, la escena enmarcada dentro del
-       card y los botones al final de todo; la ventana de las fichas queda
-       fija abajo, en columna. */
+       card y los botones al final de todo; la ventana de las fichas cubre
+       exactamente la imagen de la escena. */
     @media (max-width: 700px) {
       .cruce {
         display: flex;
@@ -276,18 +285,38 @@
         height: 20px;
         margin: -10px 0 0 -10px;
       }
-      /* La ventana de las fichas conserva el anclaje de escritorio: se
-         posiciona en la esquina superior derecha de la imagen (la escena,
-         ahora enmarcada dentro del card) y se desplaza con ella; nunca
-         tapa los botones, que quedan al final del card. Para que quepa
-         entera dentro de la imagen se reduce (icono y textos compactos),
-         con tope de alto por si la pantalla es muy estrecha. */
-      .cr-det { max-height: calc(100% - 30px); }
-      .cr-det-card { padding: 8px; }
-      .cr-icono { max-width: 56px; }
-      .cr-det-glass { padding: 8px 10px; overflow-y: auto; }
-      .cr-titulo { font-size: 14px; line-height: 1.25; margin: 0 20px 4px 0; }
-      .cr-text { font-size: 11.5px; line-height: 1.45; }
+      /* Sólo en móvil: el intermedio crece un 5% justificado a la esquina
+         inferior derecha del fondo —borde derecho y base intactos, el
+         exceso se recorta por arriba y a la izquierda— y los puntos lo
+         siguen desde un contenedor del 105% anclado a la misma esquina:
+         se reubican, pero su marcador no crece. */
+      .cr-capa-int {
+        inset: auto 0 0 auto;
+        width: 105%;
+        height: auto;
+      }
+      .cruce-puntos {
+        inset: auto 0 0 auto;
+        width: 105%;
+        height: 105%;
+      }
+      /* La ventana de las fichas ocupa exactamente la imagen de la escena:
+         mismo alto y ancho que recorrido-cruce-fondo.png y en la misma
+         posición sobre todas las capas (radio igual que el marco). Al
+         tapar todos los puntos, se cierra con la × o tocando fuera de la
+         ventana. */
+      .cr-det {
+        inset: 0;
+        width: auto;
+        border-radius: 14px;
+        box-shadow: none;
+      }
+      /* Si la pantalla es muy estrecha, el texto baja con scroll dentro
+         del cristal en vez de salirse de la ventana */
+      .cr-det-glass { overflow-y: auto; min-height: 0; }
+      .cr-titulo { margin-right: 40px; }   /* aire para la × */
+      /* × de cierre cómoda al tacto: en móvil es el cierre principal */
+      .cr-x { width: 40px; height: 40px; font-size: 26px; }
     }
 
     /* Movimiento reducido: todo al instante */
@@ -367,18 +396,23 @@
 
         <div class="cruce-lienzo">
           <img class="cruce-capa" src="assets/images/recorrido-cruce-fondo.png" alt="" decoding="async" />
-          <img class="cruce-capa" src="assets/images/recorrido-cruce-intermedio.png" alt="Vista del cruce: camino de tierra, alambrado y objetos de la vida rural" decoding="async" />
+          <img class="cruce-capa cr-capa-int" src="assets/images/recorrido-cruce-intermedio.png" alt="Vista del cruce: camino de tierra, alambrado y objetos de la vida rural" decoding="async" />
 
-          <button class="cruce-pt" type="button" style="--x:1079; --y:523; --pulse-delay:0s" aria-label="Punto 1 de la escena" aria-expanded="false"></button>
-          <button class="cruce-pt" type="button" style="--x:825; --y:540; --pulse-delay:.3s" aria-label="Punto 2 de la escena" aria-expanded="false"></button>
-          <button class="cruce-pt" type="button" style="--x:905; --y:540; --pulse-delay:.6s" aria-label="Punto 3 de la escena" aria-expanded="false"></button>
-          <button class="cruce-pt" type="button" style="--x:905; --y:464; --pulse-delay:.9s" aria-label="Punto 4 de la escena" aria-expanded="false"></button>
-          <button class="cruce-pt" type="button" style="--x:714; --y:650; --pulse-delay:1.2s" aria-label="Punto 5 de la escena" aria-expanded="false"></button>
-          <button class="cruce-pt" type="button" style="--x:1201; --y:835; --pulse-delay:1.5s" aria-label="Punto 6 de la escena" aria-expanded="false"></button>
-          <button class="cruce-pt" type="button" style="--x:1302; --y:466; --pulse-delay:1.8s" aria-label="Punto 7 de la escena" aria-expanded="false"></button>
-          <button class="cruce-pt" type="button" style="--x:1044; --y:605; --pulse-delay:.15s" aria-label="Punto 8 de la escena" aria-expanded="false"></button>
-          <button class="cruce-pt" type="button" style="--x:1195; --y:543; --pulse-delay:.45s" aria-label="Punto 9 de la escena" aria-expanded="false"></button>
-          <button class="cruce-pt" type="button" style="--x:1297; --y:724; --pulse-delay:.75s" aria-label="Punto 10 de la escena" aria-expanded="false"></button>
+          <!-- Los puntos van en un contenedor que en móvil crece un 105%
+               anclado abajo a la derecha (siguen el intermedio agrandado);
+               en escritorio es la caja del lienzo, sin cambios -->
+          <div class="cruce-puntos">
+            <button class="cruce-pt" type="button" style="--x:1079; --y:523; --pulse-delay:0s" aria-label="Punto 1 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:825; --y:540; --pulse-delay:.3s" aria-label="Punto 2 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:905; --y:540; --pulse-delay:.6s" aria-label="Punto 3 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:905; --y:464; --pulse-delay:.9s" aria-label="Punto 4 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:714; --y:650; --pulse-delay:1.2s" aria-label="Punto 5 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:1201; --y:835; --pulse-delay:1.5s" aria-label="Punto 6 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:1302; --y:466; --pulse-delay:1.8s" aria-label="Punto 7 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:1044; --y:605; --pulse-delay:.15s" aria-label="Punto 8 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:1195; --y:543; --pulse-delay:.45s" aria-label="Punto 9 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:1297; --y:724; --pulse-delay:.75s" aria-label="Punto 10 de la escena" aria-expanded="false"></button>
+          </div><!-- /.cruce-puntos -->
 
           <!-- Ventana de la ficha: icono del objeto + título y descripción -->
           <div class="cr-det" id="crDet" hidden aria-live="polite">
