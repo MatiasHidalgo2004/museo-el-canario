@@ -273,7 +273,16 @@
         margin-top: 20px;
       }
       /* Puntos algo más pequeños: los grupos #2/#3/#4 quedan más separados */
-      .cruce-pt { width: 32px; height: 32px; }
+      .cruce-pt {
+        width: 32px;
+        height: 32px;
+        /* En móvil la escena es muy pequeña y los puntos se apelotonan:
+         * cada uno se corre desde su posición (--mx/--my, en coordenadas
+         * del lienzo 1440x1024) para que no queden pegados. En escritorio
+         * no se aplica: manda la posición base --x/--y. */
+        left: calc((var(--x) + var(--mx, 0)) * 100% / 1440);
+        top: calc((var(--y) + var(--my, 0)) * 100% / 1024);
+      }
       .cruce-pt::before {
         width: 14px;
         height: 14px;
@@ -335,7 +344,7 @@
       <div class="header-inner">
         <a class="brand" href="index.html">
           <img src="assets/svg/Logo.svg" alt="Logo Museo El Canario" class="logo-img" />
-          <span class="brand-text">Museo de la vida rural El Canario</span>
+          <span class="brand-text"><span class="brand-tag">Museo de la vida rural<br></span>El Canario</span>
         </a>
 
         <nav class="main-nav" aria-label="Navegación principal">
@@ -343,6 +352,7 @@
           <a href="imagenes.html" class="nav-link">Imágenes</a>
           <a href="biografia.html" class="nav-link">Biografía</a>
           <a href="contacto.html" class="nav-link">Contacto</a>
+          <a href="catalogo.html" class="nav-link">Catálogo</a>
         </nav>
 
         <!-- Toggle móvil -->
@@ -366,6 +376,7 @@
           <a href="imagenes.html">Imágenes</a>
           <a href="biografia.html">Biografía</a>
           <a href="contacto.html">Contacto</a>
+          <a href="catalogo.html">Catálogo</a>
         </nav>
       </div>
     </aside>
@@ -389,8 +400,7 @@
           <p class="card-lead"><strong>Personas a caballo sobre sus monturas</strong>, apoyando sus pies en los estribos, bueyes tirando de las carrozas y algunos vehículos motorizados como camionetas y autos recién apareciendo a mediados de siglo por estas zonas, debido a la masificación del traslado de productos para el abastecimiento de las bodegas locales.</p>
           <div class="cruce-acciones">
             <a href="recorrido.html" class="btn-primary cr-back" aria-label="Volver a la página anterior"> < </a>
-            <!-- DAR PASO: sin funcionalidad por ahora (lleva al siguiente paso cuando exista) -->
-            <button type="button" class="btn-primary">DAR PASO</button>
+            <a id="cta-recorrer" class="btn-primary" href="bodega.html">DAR PASO</a>
           </div>
         </div>
 
@@ -402,16 +412,16 @@
                anclado abajo a la derecha (siguen el intermedio agrandado);
                en escritorio es la caja del lienzo, sin cambios -->
           <div class="cruce-puntos">
-            <button class="cruce-pt" type="button" style="--x:1079; --y:523; --pulse-delay:0s" aria-label="Punto 1 de la escena" aria-expanded="false"></button>
-            <button class="cruce-pt" type="button" style="--x:825; --y:540; --pulse-delay:.3s" aria-label="Punto 2 de la escena" aria-expanded="false"></button>
-            <button class="cruce-pt" type="button" style="--x:905; --y:540; --pulse-delay:.6s" aria-label="Punto 3 de la escena" aria-expanded="false"></button>
-            <button class="cruce-pt" type="button" style="--x:905; --y:464; --pulse-delay:.9s" aria-label="Punto 4 de la escena" aria-expanded="false"></button>
-            <button class="cruce-pt" type="button" style="--x:714; --y:650; --pulse-delay:1.2s" aria-label="Punto 5 de la escena" aria-expanded="false"></button>
-            <button class="cruce-pt" type="button" style="--x:1201; --y:835; --pulse-delay:1.5s" aria-label="Punto 6 de la escena" aria-expanded="false"></button>
-            <button class="cruce-pt" type="button" style="--x:1302; --y:466; --pulse-delay:1.8s" aria-label="Punto 7 de la escena" aria-expanded="false"></button>
-            <button class="cruce-pt" type="button" style="--x:1044; --y:605; --pulse-delay:.15s" aria-label="Punto 8 de la escena" aria-expanded="false"></button>
-            <button class="cruce-pt" type="button" style="--x:1195; --y:543; --pulse-delay:.45s" aria-label="Punto 9 de la escena" aria-expanded="false"></button>
-            <button class="cruce-pt" type="button" style="--x:1297; --y:724; --pulse-delay:.75s" aria-label="Punto 10 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:1079; --y:523; --mx:6; --my:-28; --pulse-delay:0s" aria-label="Punto 1 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:825; --y:540; --mx:-30; --my:15; --pulse-delay:.3s" aria-label="Punto 2 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:905; --y:540; --mx:30; --my:35; --pulse-delay:.6s" aria-label="Punto 3 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:905; --y:464; --mx:0; --my:0; --pulse-delay:.9s" aria-label="Punto 4 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:714; --y:650; --mx:0; --my:0; --pulse-delay:1.2s" aria-label="Punto 5 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:1201; --y:835; --mx:0; --my:0; --pulse-delay:1.5s" aria-label="Punto 6 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:1302; --y:466; --mx:0; --my:0; --pulse-delay:1.8s" aria-label="Punto 7 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:1044; --y:605; --mx:31; --my:35; --pulse-delay:.15s" aria-label="Punto 8 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:1195; --y:543; --mx:0; --my:0; --pulse-delay:.45s" aria-label="Punto 9 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:1297; --y:724; --mx:0; --my:0; --pulse-delay:.75s" aria-label="Punto 10 de la escena" aria-expanded="false"></button>
           </div><!-- /.cruce-puntos -->
 
           <!-- Ventana de la ficha: icono del objeto + título y descripción -->
