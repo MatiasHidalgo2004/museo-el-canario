@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Catálogo — Museo de la vida rural El Canario</title>
+  <meta name="description" content="Catálogo completo de objetos del museo El Canario: todas las fichas de las escenas del recorrido, en una lista para recorrer con scroll." />
+  <meta name="theme-color" content="#0e1813" />
+  <link rel="icon" href="assets/svg/Logo.svg" type="image/svg+xml" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles/styles.css" />
+
+  <!-- Catálogo: todas las ventanas emergentes del recorrido, pero fijas a la
+       vista y apiladas en una lista con scroll vertical. Cada ficha conserva
+       el color de la escena a la que pertenece (variable --c). -->
+  <style>
+    /* --- Fondo fijo al viewport -------------------------------------------
+       El catálogo mide miles de px de alto: con background-size:cover sobre
+       toda la altura, Menu-fondo.webp se estira ~7,4x y el filete negro de
+       1px que trae su borde superior se veía como una franja de ~11px justo
+       bajo el header. Pintándolo en un ::before fijo, la imagen se calcula
+       contra la ventana (igual que en el resto de páginas): sin magnificar
+       y cubriendo siempre desde y=0. */
+    .hero { background-image: none !important; }
+    .hero::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: url('assets/images/Menu-fondo.webp') center top / cover no-repeat;
+      pointer-events: none;
+    }
+
+    .cat-wrap {
+      position: relative;
+      z-index: 2;
+      width: calc(100% - 48px);          /* igual que .site-header y .container */
+      max-width: var(--container);
+      margin: 0 auto;
+      /* Sin padding horizontal: el bloque ocupa 170..1270, igual que las
+         tarjetas .card del resto del sitio. El TEXTO va a 48px (28 en
+         <=1100px) vía .cat-titulo/.cat-sub, igual que .card-copy. */
+      padding: 40px 0 64px;
+      box-sizing: border-box;
+    }
+
+    .cat-titulo {
+      padding-left: 48px;   /* mismo margen de texto que .card-copy */
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.1;
+      color: #fff;
+      margin: 0 0 6px;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, .45);
+    }
+    .cat-bajada {
+      padding-left: 48px;   /* alineado con el título (mismo margen que .card-copy) */
+      font-family: var(--sans);
+      font-size: 17px;
+      line-height: 1.55;
+      color: rgba(255, 255, 255, .92);
+      margin: 0;
+      max-width: 72ch;
+      text-shadow: 0 1px 10px rgba(0, 0, 0, .45);
+    }
+    /* Índice de categorías: chips con salto por ancla (scroll suave global) */
+    .cat-indice {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0 6px;
+      padding-left: 48px;   /* alineado con el título */
+    }
+    .cat-indice a {
+      font-family: var(--light-sans);
+      font-weight: 600;
+      font-size: 14px;
+      color: rgba(255, 255, 255, .92);
+      text-decoration: none;
+      padding: 8px 15px;
+      border: 1px solid rgba(255, 255, 255, .35);
+      border-radius: 999px;
+      background: rgba(14, 24, 19, .35);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      transition: background-color 200ms ease, border-color 200ms ease,
+                  color 200ms ease, transform 200ms ease;
+    }
+    .cat-indice a:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+    .cat-indice a:focus-visible { outline: 3px solid #f4c542; outline-offset: 3px; }
+
+    /* Volver arriba: flotante abajo a la derecha, aparece al desplazar */
+    .cat-top {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 130;
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, .25);
+      border-radius: 50%;
+      background: rgba(14, 24, 19, .75);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      color: #fff;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(14px);
+      transition: opacity 220ms ease, transform 220ms ease, visibility 220ms,
+                  background-color 200ms ease;
+    }
+    .cat-top.is-on { opacity: 1; visibility: visible; transform: translateY(0); }
+    .cat-top:hover { background: var(--accent); border-color: var(--accent); }
+    .cat-top:focus-visible { outline: 3px solid #f4c542; outline-offset: 3px; }
+
+    .cat-escena { margin-top: 40px; }
+    .cat-sub {
+      padding-left: 48px;   /* mismo margen de texto que .card-copy */
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: clamp(20px, 2.4vw, 26px);
+      color: #fff;
+      margin: 0 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid rgba(255, 255, 255, .35);
+      text-shadow: 0 2px 12px rgba(0, 0, 0, .45);
+      display: flex;
+      align-items: flex-end;   /* título abajo, no centrado */
+      gap: 12px;
+    }
+    /* Llama decorativa junto al título de cada categoría
+       (recorrido-(escena)-sobre.svg) */
+    .cat-flama {
+      width: 125px;
+      height: 125px;
+      flex: 0 0 auto;
+      object-fit: contain;
+    }
+    .cat-lista { display: flex; flex-direction: column; gap: 14px; }
+
+    /* Ficha: mismo dibujo que la ventana emergente (.cr-det), sólo que
+       siempre visible y apilada. Panel de color a la izquierda con el icono
+       en blanco + panel de cristal con título y texto. */
+    .cat-ficha {
+      display: flex;
+      align-items: stretch;
+      border-radius: 18px;
+      overflow: hidden;
+      background: rgba(14, 24, 19, 0.42);
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      backdrop-filter: blur(16px) saturate(140%);
+      border: 1px solid rgba(255, 255, 255, 0.20);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.30);
+      transition: opacity 420ms ease, translate 420ms cubic-bezier(.2,.7,.3,1),
+                  transform 220ms cubic-bezier(.2,.7,.3,1), box-shadow 220ms ease;
+    }
+
+    /* Entrada escalonada al llegar con el scroll: el retardo es el --d de
+       cada ficha. Se anima la propiedad "translate" (independiente de transform) para
+       que el hover pueda seguir elevando la ficha sin pisarse. */
+    .cat-ficha.reveal { opacity: 0; translate: 0 18px; }
+    .cat-ficha.reveal.visible { opacity: 1; translate: 0 0; }
+    @media (hover: hover) {
+      .cat-ficha:hover { transform: translateY(-3px); box-shadow: 0 26px 54px rgba(0, 0, 0, .40); }
+    }
+    .cat-icono {
+      flex: 0 0 132px;
+      box-sizing: border-box;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--c, #b76261);
+    }
+    .cat-icono img {
+      width: 100%;
+      max-width: 100px;
+      height: auto;
+      /* los SVG del museo son rojos sobre transparente: se pasan a blanco */
+      filter: brightness(0) invert(1);
+    }
+    .cat-cuerpo { flex: 1 1 auto; min-width: 0; padding: 16px 20px; }
+    .cat-nombre {
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: 18px;
+      line-height: 1.25;
+      color: #fff;
+      margin: 0 0 6px;
+    }
+    .cat-texto {
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, .92);
+      margin: 0;
+    }
+
+    /* Mismo margen de texto que .card-copy en tablet/móvil (28px) */
+    @media (max-width: 1100px) {
+      .cat-titulo, .cat-sub, .cat-bajada, .cat-indice { padding-left: 28px; }
+    }
+
+    /* Teléfono: ficha más angosta, icono arriba */
+    @media (max-width: 700px) {
+      .cat-ficha { flex-direction: column; }
+      .cat-icono { flex: 0 0 auto; padding: 14px; }
+      .cat-icono img { max-width: 76px; }
+      .cat-cuerpo { padding: 14px 16px; }
+      .cat-nombre { font-size: 17px; }
+      .cat-texto { font-size: 14.5px; }
+      .cat-flama { width: 94px; height: 94px; }
+    }
+
+    /* Con "menos movimiento": nada de desenfoques ni sombras marcadas y
+       las fichas aparecen de inmediato (sin entrada escalonada) */
+    @media (prefers-reduced-motion: reduce) {
+      .cat-ficha { transition: none; }
+      .cat-ficha.reveal { opacity: 1; translate: none; }
+      .cat-ficha:hover { transform: none; }
+      .cat-indice a { transition: none; }
+      .cat-indice a:hover { transform: none; }
+      .cat-top { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="viewport-fixed">
+
+<header class="site-header" role="banner">
+      <div class="header-inner">
+        <a class="brand" href="index.html">
+          <img src="assets/svg/Logo.svg" alt="Logo Museo El Canario" class="logo-img" />
+          <span class="brand-text"><span class="brand-tag">Museo de la vida rural<br></span>El Canario</span>
+        </a>
+
+        <nav class="main-nav" aria-label="Navegación principal">
+          <a href="cronograma.html" class="nav-link">Cronograma</a>
+          <a href="imagenes.html" class="nav-link">Imágenes</a>
+          <a href="biografia.html" class="nav-link">Biografía</a>
+          <a href="contacto.html" class="nav-link">Contacto</a>
+          <a href="catalogo.html" class="nav-link">Catálogo</a>
+        </nav>
+
+        <!-- Toggle móvil -->
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" type="button">
+          <svg class="menu-icon" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <circle class="menu-circle" cx="24" cy="24" r="20" fill="#c0392b" />
+            <g class="bars" stroke="#fff" stroke-linecap="round" stroke-width="3" stroke-linejoin="round">
+              <line class="bar top" x1="14" y1="18" x2="34" y2="18" />
+              <line class="bar bottom" x1="14" y1="30" x2="34" y2="30" />
+            </g>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Menú desplegable móvil -->
+<aside class="floating-menu" id="floatingMenu" aria-hidden="true">
+      <div class="floating-inner">
+        <nav class="floating-nav" aria-label="Navegación flotante">
+          <a href="cronograma.html">Cronograma</a>
+          <a href="imagenes.html">Imágenes</a>
+          <a href="biografia.html">Biografía</a>
+          <a href="contacto.html">Contacto</a>
+          <a href="catalogo.html">Catálogo</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Catálogo -->
+    <main class="hero" role="main" aria-label="Catálogo de objetos">
+      <div class="hero-overlay" aria-hidden="true"></div>
+
+      <div class="cat-wrap">
+        <h1 class="cat-titulo">Catálogo de objetos</h1>
+        <p class="cat-bajada">Aquí podra ver una selección de 70 piezas que forman parte del recorrido en nuestro museo representativa de cada estancia de la casa y sus alrededores.</p>
+
+        <!-- Índice: salto directo a cada categoría (anclas esc-*) -->
+        <nav class="cat-indice" aria-label="Categorías del catálogo">
+            <a href="#esc-cruce">El Cruce</a>
+            <a href="#esc-bodega">La bodega</a>
+            <a href="#esc-local">El local</a>
+            <a href="#esc-comedor">El comedor</a>
+            <a href="#esc-cancha">La cancha</a>
+            <a href="#esc-corredor">Patio y corredores</a>
+            <a href="#esc-dormitorio">Baño y dormitorios</a>
+        </nav>
+
+        <section class="cat-escena" aria-labelledby="esc-cruce">
+          <h2 class="cat-sub" id="esc-cruce"><img class="cat-flama" src="assets/svg/llamas/recorrido-cruce-sobre.png" alt="" width="125" height="125" loading="lazy" decoding="async" />El Cruce</h2>
+          <div class="cat-lista">
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:0ms">
+              <div class="cat-icono"><img src="assets/svg/estribo.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Estribo de madera huaso</h3>
+                <p class="cat-texto">Pieza de madera en forma de pantufla para apoyar el pie al montar y dar estabilidad.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:70ms">
+              <div class="cat-icono"><img src="assets/svg/yugo.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Yugo de madera</h3>
+                <p class="cat-texto">Arco de madera que unía dos animales de tiro, para transportar cargas o arar la tierra.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:140ms">
+              <div class="cat-icono"><img src="assets/svg/bicicleta.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Bicicleta para recado</h3>
+                <p class="cat-texto">Medio de transporte económico, usado para llevar recados y productos entre localidades.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:210ms">
+              <div class="cat-icono"><img src="assets/svg/radio-portatil.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Radio portátil</h3>
+                <p class="cat-texto">Radio a pilas de la década del 60, pequeña y ligera para poder llevarla en movimiento.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:280ms">
+              <div class="cat-icono"><img src="assets/svg/carreta.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Carreta</h3>
+                <p class="cat-texto">Vehículo de madera tirado por animales, para transportar productos agrícolas.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:350ms">
+              <div class="cat-icono"><img src="assets/svg/carreton.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Carretón</h3>
+                <p class="cat-texto">Versión más pequeña de la carreta, para cargas menores o desplazamientos cortos.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/carruaje.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Carruaje</h3>
+                <p class="cat-texto">Vehículo de mayor tamaño para trasladar personas y cargas en trayectos largos.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/silla-montar.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Silla de montar</h3>
+                <p class="cat-texto">Para comodidad del jinete a la hora de montar. De laminado de álamo, al ser firme y ligero.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/horcate.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Horcate</h3>
+                <p class="cat-texto">Arnés colocado en animales de tiro para distribuir el peso de la carga.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/herradura.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Herradura</h3>
+                <p class="cat-texto">Pieza metálica fijada a las patas de los caballos para protegerlas y mejorar su rendimiento.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="cat-escena" aria-labelledby="esc-bodega">
+          <h2 class="cat-sub" id="esc-bodega"><img class="cat-flama" src="assets/svg/llamas/recorrido-bodega-sobre.png" alt="" width="125" height="125" loading="lazy" decoding="async" />La bodega</h2>
+          <div class="cat-lista">
+            <article class="cat-ficha reveal" style="--c:#5B8C5A; --d:0ms">
+              <div class="cat-icono"><img src="assets/svg/bidon.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Bidón lechero</h3>
+                <p class="cat-texto">Tarro de hierro galvanizado para contener leche de entre 20 a 40 litros. Popularizado tras el 70, con la masificación del consumo lácteo tras el programa “Medio Litro de Leche”.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#5B8C5A; --d:70ms">
+              <div class="cat-icono"><img src="assets/svg/saco.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Saco de legumbres</h3>
+                <p class="cat-texto">Costales de yute, elaborados en arpillera resistente y transpirable, ideales para el almacenamiento de granos y legumbres, con un almacenamiento de entre 50 a 100 kilos.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#5B8C5A; --d:140ms">
+              <div class="cat-icono"><img src="assets/svg/cajon.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Cajón envuelto</h3>
+                <p class="cat-texto">Caja de madera envuelta en tela arpillera para el traslado de productos más delicados como botellas de vidrio, conservas enlatadas o frutas. </p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#5B8C5A; --d:210ms">
+              <div class="cat-icono"><img src="assets/svg/chuica.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Chuica</h3>
+                <p class="cat-texto">Botella de vidrio envuelta en mimbre con mango y corcho para contener licor de 10 litros.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#5B8C5A; --d:280ms">
+              <div class="cat-icono"><img src="assets/svg/conservas.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Conservas enlatadas</h3>
+                <p class="cat-texto">Latas de hojalata para la conservación de sardinas, jurel, durazno en almíbar o arvejas entre otros productos.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#5B8C5A; --d:350ms">
+              <div class="cat-icono"><img src="assets/svg/garrafa-mediana.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Garrafa mediana</h3>
+                <p class="cat-texto">Botella de vidrio con corcho para contener licor de 8 litros.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#5B8C5A; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/damajuana.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Damajuana</h3>
+                <p class="cat-texto">Botella de vidrio envuelta en mimbre con mango y corcho para contener licor de 15 litros.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#5B8C5A; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/barril.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Barril</h3>
+                <p class="cat-texto">Barril más mediano para la venta directa, conservando productos como el vinagre, la chicha o otros licores.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#5B8C5A; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/garrafa-pequeña.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Garrafa pequeña</h3>
+                <p class="cat-texto">Botella de vidrio con corcho para contener licor de 5 litros.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#5B8C5A; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/tonel.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Tonel de vino</h3>
+                <p class="cat-texto">Barril grande para el almacenamiento y fermentación del vino. Siendo una más económica para el mercado nacional, con formatos más pequeños para la creciente exportación.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="cat-escena" aria-labelledby="esc-local">
+          <h2 class="cat-sub" id="esc-local"><img class="cat-flama" src="assets/svg/llamas/recorrido-loca-sobre.png" alt="" width="125" height="125" loading="lazy" decoding="async" />El local</h2>
+          <div class="cat-lista">
+            <article class="cat-ficha reveal" style="--c:#8D5C6C; --d:0ms">
+              <div class="cat-icono"><img src="assets/svg/esmiral.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Esmeril de banco</h3>
+                <p class="cat-texto">Herramienta de taller, usada para afilar por medio de una piedra u hoja metálica giratoria.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#8D5C6C; --d:70ms">
+              <div class="cat-icono"><img src="assets/svg/balanza.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Balanza abanico</h3>
+                <p class="cat-texto">Usada para el pesaje de alimentos como legumbres o harina. Con un diseño en abanico, que permitía ver con claridad el peso, asegurando una venta transparente al comprador.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#8D5C6C; --d:140ms">
+              <div class="cat-icono"><img src="assets/svg/poruña.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Poruña</h3>
+                <p class="cat-texto">Un modo de surtir los alimentos como grano, legumbre o azúcar, de su contenedor de origen a los sacos de los clientes.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#8D5C6C; --d:210ms">
+              <div class="cat-icono"><img src="assets/svg/bascula.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Báscula de cocina</h3>
+                <p class="cat-texto">Instrumento doméstico para el pesaje de porciones menores, como azúcar o café. Ideal para aquellos que iban a comprar diariamente en menor cantidad para su desayuno u once.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#8D5C6C; --d:280ms">
+              <div class="cat-icono"><img src="assets/svg/chanchito.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Chanchito de greda</h3>
+                <p class="cat-texto">Alcancía de barro originario de Pomaire, usado para guardar monedas. Mismas que se sacaban rompiendo el recipiente, o por debajo a través de un tapón.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#8D5C6C; --d:350ms">
+              <div class="cat-icono"><img src="assets/svg/lampara.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Lampara de kerosene</h3>
+                <p class="cat-texto">Lámpara transportable que iluminaba utilizando queroseno, un líquido inflamable y económico. Usadas en la primera mitad del siglo, antes de la masificación de la electricidad.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#8D5C6C; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/maquina.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Máquina de escribir mecánica</h3>
+                <p class="cat-texto">Se usaba para redactar documentos y llevar cuentas con mayor formalidad. Funcionaba por la transferencia de tinta a través de los impactos de caracteres metálicos sobre el papel.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#8D5C6C; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/tocadiscos.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Tocadiscos portátil</h3>
+                <p class="cat-texto">Reproductor de vinilos de diseño compacto. Llegando a las áreas rurales de Chile durante la segunda mitad del siglo XX.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#8D5C6C; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/frasco.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Frasco de confitería</h3>
+                <p class="cat-texto">Recipiente de vidrio donde se guardaban dulces o galletas. Era un objeto atractivo para los niños, para cuando venían a comprar después de clases o en los fines de semana.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#8D5C6C; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/cutra.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Cutra</h3>
+                <p class="cat-texto">Recipiente "hechizo" para el transporte y consumo de licor, hecho de materiales variados, en este caso de caucho reciclado de alguna rueda.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="cat-escena" aria-labelledby="esc-comedor">
+          <h2 class="cat-sub" id="esc-comedor"><img class="cat-flama" src="assets/svg/llamas/recorrido-comedor-sobre.png" alt="" width="125" height="125" loading="lazy" decoding="async" />El comedor</h2>
+          <div class="cat-lista">
+            <article class="cat-ficha reveal" style="--c:#FCBF49; --d:0ms">
+              <div class="cat-icono"><img src="assets/svg/Taza.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Taza de té</h3>
+                <p class="cat-texto">Utensilio cotidiano principalmente elaborado de cerámica, pensado para beber infusiones, presente en casi todos los hogares rurales y urbanos.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#FCBF49; --d:70ms">
+              <div class="cat-icono"><img src="assets/svg/Piedra.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Piedra horadada</h3>
+                <p class="cat-texto">Piedras en forma de dona, que datan de la época de los “Kofkeche”, antes de los Mapuches, y se teoriza que se utilizaban para usos rituales de fertilidad agrícola.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#FCBF49; --d:140ms">
+              <div class="cat-icono"><img src="assets/svg/Jarra.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Jarra de loza</h3>
+                <p class="cat-texto">Recipiente de cerámica usado para servir agua, jugo o vino en la mesa. Fue muy común en la primera mitad del siglo XX.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#FCBF49; --d:210ms">
+              <div class="cat-icono"><img src="assets/svg/Plato.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Plato de cerámica Fanaloza</h3>
+                <p class="cat-texto">Vajilla producida en Chile desde mediados del siglo XX, resistente y accesible. Inspirada en el patrón “Willow”, de la loza inglesa con sus ilustraciones en tonos azules.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#FCBF49; --d:280ms">
+              <div class="cat-icono"><img src="assets/svg/Anafe.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Anafe de carbón</h3>
+                <p class="cat-texto">Cocina portátil que funcionaba con brasas o carbón, usada para preparar alimentos en patios o cocinas sin electricidad. O para calentar espacios por las brasas.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#FCBF49; --d:350ms">
+              <div class="cat-icono"><img src="assets/svg/Cubiertos.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Cubiertos de plata</h3>
+                <p class="cat-texto">Símbolo de distinción en las mesas familiares, usados en ocasiones especiales.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#FCBF49; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/Sombrero.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Sombrero de ala ancha</h3>
+                <p class="cat-texto">Prenda usada tanto en faenas agrícolas como en la vida cotidiana, pensado para proteger del sol, más en la faena agrícola en fundos.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#FCBF49; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/Aceitera.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Aceitera</h3>
+                <p class="cat-texto">Recipiente metálico para el almacenamiento, conservación y poder servir aceite. Presente en la mesa y la cocina.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#FCBF49; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/Sarten.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Sartén de hierro</h3>
+                <p class="cat-texto">Utensilio pesado y duradero, usado para freír y cocinar sobre fuego directo.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#FCBF49; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/Molino.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Molino de especias</h3>
+                <p class="cat-texto">Pequeño utensilio manual elaborado en madera, para moler condimentos y servirlos directamente sobre los alimentos.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="cat-escena" aria-labelledby="esc-cancha">
+          <h2 class="cat-sub" id="esc-cancha"><img class="cat-flama" src="assets/svg/llamas/recorrido-cancha-sobre.png" alt="" width="125" height="125" loading="lazy" decoding="async" />La cancha</h2>
+          <div class="cat-lista">
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:0ms">
+              <div class="cat-icono"><img src="assets/svg/Chupalla.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Chupalla</h3>
+                <p class="cat-texto">Sombrero de paja típico del campo chileno, usado en faenas como celebraciones, principalmente para bailar cueca.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:70ms">
+              <div class="cat-icono"><img src="assets/svg/Emboque.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Emboque</h3>
+                <p class="cat-texto">Juguete de madera que consistía en encajar una pieza en un palo amarrado de cada extremo, utilizando una sola mano.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:140ms">
+              <div class="cat-icono"><img src="assets/svg/Cuerda.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Cuerda para saltar</h3>
+                <p class="cat-texto">Juguete sencillo y popular entre niños, usado para juegos colectivos y competencias en la cancha.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:210ms">
+              <div class="cat-icono"><img src="assets/svg/Volantin.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Volantín</h3>
+                <p class="cat-texto">Juguete tradicional chileno hecho de papel liviano, cañas delgadas y una cola de hilo que le da estabilidad en el aire.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:280ms">
+              <div class="cat-icono"><img src="assets/svg/Canica.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Canica ojo de gato</h3>
+                <p class="cat-texto">Bolita de vidrio de tonalidad verdosa con un diseño interno de una hoja de colores que le da su nombre, usado para juegos de puntería y altamente coleccionable.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:350ms">
+              <div class="cat-icono"><img src="assets/svg/Pelota.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Pelota de caucho</h3>
+                <p class="cat-texto">Pelota de caucho o trapos hechiza, para jugar a la pelota.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/Vestido.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Vestido de china</h3>
+                <p class="cat-texto">Nombre proveniente del quechua “china”, significa: “sirvienta”. Término común para nombrar a la mujer campesina, quedando como tradición como vestimenta de la cueca.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/Espuelas.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Espuelas</h3>
+                <p class="cat-texto">Pieza circular con pinchos metálicos, usada para tantear el costado del caballo al cabalgar e indicarle a dónde ir. Usada a su vez en la cueca como  un elemento del vestuario.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/Caballo.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Caballo de palo</h3>
+                <p class="cat-texto">Juguete infantil que imitaba la montura, conformado por un palo y una cabeza de caballo de madera o de plástico en la segunda mitad de siglo.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#B6615C; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/Trompo.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Trompo de madera</h3>
+                <p class="cat-texto">Tradicional juguete de madera que se hacía girar con una cuerda enrollada, buscando que dure el mayor tiempo posible en pie.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="cat-escena" aria-labelledby="esc-corredor">
+          <h2 class="cat-sub" id="esc-corredor"><img class="cat-flama" src="assets/svg/llamas/recorrido-corredor-sobre.png" alt="" width="125" height="125" loading="lazy" decoding="async" />Patio y corredores</h2>
+          <div class="cat-lista">
+            <article class="cat-ficha reveal" style="--c:#6A5544; --d:0ms">
+              <div class="cat-icono"><img src="assets/svg/Arado.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Arado de mancera</h3>
+                <p class="cat-texto">Herramienta agrícola tradicional, tirada por animales, usada para preparar la tierra de cultivo. Al separar el suelo por medio de una hoja curva, para la plantación de semillas.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#6A5544; --d:70ms">
+              <div class="cat-icono"><img src="assets/svg/Pala.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Pala cuadrada</h3>
+                <p class="cat-texto">Utilizada para remover tierra, cargar compost o limpiar corrales. Teniendo una presencia constante en las zonas agrícolas, especialmente por la primera mitad del siglo XX.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#6A5544; --d:140ms">
+              <div class="cat-icono"><img src="assets/svg/Tina.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Tina de lavar</h3>
+                <p class="cat-texto">Recipiente grande para lavar ropa a mano, presente en patios y lavaderos. Usado a la intemperie cerca del tendedero para secar la ropa al sol.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#6A5544; --d:210ms">
+              <div class="cat-icono"><img src="assets/svg/Escoba.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Escoba de quila o colihue</h3>
+                <p class="cat-texto">Fabricada con fibras naturales y económicas, servía para barrer y mantener la limpieza del polvo en interiores, como corredores y patio.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#6A5544; --d:280ms">
+              <div class="cat-icono"><img src="assets/svg/Palangana.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Palangana de barbero</h3>
+                <p class="cat-texto">Recipiente de cerámica o metálico utilizado por barberos para lavar y preparar el afeitado.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#6A5544; --d:350ms">
+              <div class="cat-icono"><img src="assets/svg/Yunque.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Yunque zapatero</h3>
+                <p class="cat-texto">Pieza de hierro forjado también conocida como bigornia o pie de zapatero, se utilizaba para sostener los zapatos durante su reparación o fabricación.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#6A5544; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/Radio-transistores.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Radio de transistores</h3>
+                <p class="cat-texto">Aparato compacto de recepción de ondas de radio, que reproducía noticias o música por medio del uso de transistores, pequeños receptores de radio.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#6A5544; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/Balde.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Balde de pozo</h3>
+                <p class="cat-texto">Recipiente metálico o de madera usado para extraer agua del pozo. Fue vital en la vida rural durante gran parte del siglo XX, antes de la llegada del agua corriente a los hogares.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#6A5544; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/Hacha.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Hacha de mano</h3>
+                <p class="cat-texto">Herramienta formada por una hoja metálica y un mango de madera, usada para cortar troncos y ramas. Siendo la fuente principal de energía en hogares sin electricidad ni gas.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#6A5544; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/Mecedora.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Mecedora de mimbre</h3>
+                <p class="cat-texto">Silla liviana y flexible, con un movimiento oscilante al tener una base en forma de arco, que presentaba un meneo ligero y suave que ayudaba al reposo.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="cat-escena" aria-labelledby="esc-dormitorio">
+          <h2 class="cat-sub" id="esc-dormitorio"><img class="cat-flama" src="assets/svg/llamas/recorrido-dormitorio-sobre.png" alt="" width="125" height="125" loading="lazy" decoding="async" />Baño y dormitorios</h2>
+          <div class="cat-lista">
+            <article class="cat-ficha reveal" style="--c:#77A6A5; --d:0ms">
+              <div class="cat-icono"><img src="assets/svg/Pupitre.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Pupitre escolar</h3>
+                <p class="cat-texto">Mueble de madera utilizado en colegios, que disponía de un apartado para guardar los cuadernos. Impulsando su fabricación tras la reforma educacional de 1965.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#77A6A5; --d:70ms">
+              <div class="cat-icono"><img src="assets/svg/Brasero.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Brasero calienta camas</h3>
+                <p class="cat-texto">Recipiente metálico con brasas que se colocaba para templar el lecho en noches frías. Su uso fue habitual hasta mediados del siglo XX, antes de la llegada de la electricidad.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#77A6A5; --d:140ms">
+              <div class="cat-icono"><img src="assets/svg/Guatero.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Guatero de goma</h3>
+                <p class="cat-texto">Botella de goma que se llenaba de agua caliente para dar calor. Fabricadas también de manera hechiza, con una botella plástica,piedras o ladrillos calientes.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#77A6A5; --d:210ms">
+              <div class="cat-icono"><img src="assets/svg/Telefono.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Teléfono de disco</h3>
+                <p class="cat-texto">Aparato fijo de comunicación doméstica de mediados del siglo XX, con un disco giratorio para marcar los números telefónicos, girando cada número de forma secuencial para llamar.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#77A6A5; --d:280ms">
+              <div class="cat-icono"><img src="assets/svg/Aguamanil.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Aguamanil</h3>
+                <p class="cat-texto">Conjunto de jarra y palangana de cerámica o latón, usado para el aseo personal antes de la llegada del agua corriente.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#77A6A5; --d:350ms">
+              <div class="cat-icono"><img src="assets/svg/Televisor.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Televisor de tubo catódico</h3>
+                <p class="cat-texto">Aparato de visualización mediante el choque de haces de luz sobre una pantalla de fósforo que reflejaba la imagen. Llegando a los hogares en los años 60.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#77A6A5; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/Plancha.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Plancha de brasas</h3>
+                <p class="cat-texto">Utensilio metálico donde se colocaban brasas para alisar la ropa. Se usó ampliamente en la primera mitad del siglo XX, antes de la llegada de las planchas eléctricas.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#77A6A5; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/Silla-orinal.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Silla orinal para niño</h3>
+                <p class="cat-texto">Mueble adaptado para la higiene infantil, usado en hogares hasta fines del siglo XX.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#77A6A5; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/Pelela.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Pélela</h3>
+                <p class="cat-texto">Recipiente portátil para necesidades fisiológicas, usado dentro de la habitación, sobre todo durante la noche. También viendo modelos desechables de cartón.</p>
+              </div>
+            </article>
+            <article class="cat-ficha reveal" style="--c:#77A6A5; --d:420ms">
+              <div class="cat-icono"><img src="assets/svg/Radiador.svg" alt="" width="100" height="100" loading="lazy" decoding="async" /></div>
+              <div class="cat-cuerpo">
+                <h3 class="cat-nombre">Radiador eléctrico de aceite</h3>
+                <p class="cat-texto">Aparato moderno de calefacción, introducido en la segunda mitad del siglo XX.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Volver arriba: aparece al desplazar más de 600px -->
+    <button class="cat-top" id="catTop" type="button" aria-label="Volver arriba" title="Volver arriba">&#8593;</button>
+
+  </div>
+
+  <script src="scripts/menu.js"></script>
+
+  <script src="scripts/nav-transition.js"></script>
+
+  <script>
+    // Catálogo: las fichas entran escalonadas al llegar con el scroll y el
+    // botón de volver arriba aparece a partir de 600px. Con "menos movimiento"
+    // (o si no hay IntersectionObserver) todo se muestra de inmediato.
+    (function () {
+      var items = [].slice.call(document.querySelectorAll('.cat-ficha.reveal'));
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (reduce || !('IntersectionObserver' in window)) {
+        items.forEach(function (el) { el.classList.add('visible'); });
+      } else {
+        var io = new IntersectionObserver(function (entradas) {
+          entradas.forEach(function (e) {
+            if (!e.isIntersecting) return;
+            e.target.classList.add('visible');
+            io.unobserve(e.target);
+          });
+        }, { rootMargin: '0px 0px -6% 0px', threshold: 0.05 });
+        items.forEach(function (el) { io.observe(el); });
+      }
+
+      var btn = document.getElementById('catTop');
+      if (btn) {
+        var alDesplazar = function () {
+          btn.classList.toggle('is-on', (window.scrollY || window.pageYOffset || 0) > 600);
+        };
+        window.addEventListener('scroll', alDesplazar, { passive: true });
+        alDesplazar();
+        btn.addEventListener('click', function () {
+          window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
