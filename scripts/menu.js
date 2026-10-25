@@ -70,4 +70,16 @@
     }
   }
 
+  // 4. Presencia extra del header al desplazar la página: sombra más marcada
+  //    y vidrio más denso. Aquí sólo se alterna la clase; el resto es CSS
+  //    (.site-header.is-scrolled en styles.css).
+  var header = document.querySelector('.site-header');
+  if (header) {
+    var onScroll = function () {
+      header.classList.toggle('is-scrolled', (window.scrollY || window.pageYOffset || 0) > 12);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+
 })();
