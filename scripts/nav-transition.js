@@ -1,10 +1,13 @@
 // scripts/nav-transition.js
 // Transición de salida entre páginas (sitio estático multipágina).
 //
-// Al hacer clic en un enlace interno, añade la clase `is-leaving` a la tarjeta
-// y al header para que se desvanezcan (220ms) y recién entonces navega.
+// Al hacer clic en un enlace interno, difumina el CONTENIDO —tarjeta, escena,
+// maqueta o listado del catálogo— con `is-leaving` (en la tarjeta y en <body>)
+// y recién a los 220ms navega. El fondo de la página y el menú fijo se quedan
+// visibles durante todo el cambio.
 // La animación de entrada de la página siguiente la ejecuta styles.css
-// (.card con `cardEntrance`), de modo que ambos efectos se enlazan.
+// (.card con `cardEntrance` y .cruce con `escenaEntrance`), de modo que ambos
+// efectos se enlazan.
 //
 // Respeta prefers-reduced-motion (navega sin animación) y limpia el estado
 // al restaurar desde la caché del navegador (botón Atrás).
@@ -52,7 +55,12 @@
     e.preventDefault();
     navigating = true;
     if (card) card.classList.add('is-leaving');
-    if (header) header.classList.add('is-leaving');
+    // El menú fijo NO se desvanece: se queda visible durante todo el cambio
+    // (el fondo de la página tampoco). El fundido es sólo del contenido.
+    // Fundido de página COMPLETO del contenido: las páginas de escena (que no
+    // tienen .card, usan .cruce-card), la maqueta de recorrido/final y el
+    // listado del catálogo se difuminan vía body.is-leaving en styles.css.
+    document.body.classList.add('is-leaving');
 
     var target = link.href;
     window.setTimeout(function () {
