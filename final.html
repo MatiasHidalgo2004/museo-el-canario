@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Fin de recorrido — Museo de la vida rural El Canario</title>
+  <meta name="description" content="Fin del recorrido del museo El Canario: cierre de la visita y cómo contactarnos para conocer el catálogo completo de objetos." />
+  <meta name="theme-color" content="#0e1813" />
+  <link rel="icon" href="assets/svg/Logo.svg" type="image/svg+xml" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles/styles.css" />
+
+  <!-- Estilos propios de esta página:
+       - fondo con Recorrido-fondo (mismos parámetros que las demás páginas)
+       - tarjeta traslúcido con desenfoque de fondo (vidrio esmerilado),
+         ocupando un poco menos de la mitad izquierda en escritorio -->
+  <style>
+    /* Fondo propio de la página (la "planta" de la maqueta) */
+    .hero {
+      background-image: url('assets/images/Recorrido-fondo.webp') !important;
+      position: relative;               /* ancla de las capas de la maqueta */
+    }
+
+    /* --- MAQUETA: pared y techo superpuestos a la planta ---
+       .maqueta recorta (overflow:hidden) el vuelo de salida por el borde
+       superior de la ventana. Orden de pintado: pared debajo, techo encima
+       (la tapa va arriba). Va ANTES de .hero-overlay en el HTML, así que el
+       velo oscuro sigue cubriendo toda la escena como hasta ahora. */
+    .maqueta {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .maqueta-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* debe calzar con el background-position: center top !important de .hero
+         (styles.css): así las capas se anclan igual que el piso y la casa
+         queda sobre el terreno en cualquier proporción de pantalla */
+      object-position: center top;
+      /* recorta el filete de 1px del marco del export (stroke del <rect>) para
+         que no barra la escena al desprenderse */
+      clip-path: inset(2px);
+      will-change: transform;
+      /* Vuelo lento a propósito: 2 s por capa (en recorrido.html era 900 ms).
+         Curva ease-in-out: se mueve desde el primer instante y aterriza suave */
+      transition: transform 2000ms cubic-bezier(0.45, 0, 0.55, 1);
+    }
+
+    /* PÁGINA DE CIERRE: la maqueta se arma SOLA, al cargar, y en sentido
+       inverso al de recorrido.html. Estado inicial: pared y techo fuera del
+       encuadre por arriba (translateY(-115%)), de modo que sólo se ve el
+       fondo. Cuando el script añade .armada vuelven de arriba y se colocan
+       sobre el fondo: primero la pared (delay 0) y 600 ms después el techo,
+       que va pintado encima. Las transiciones leen las propiedades del
+       estado destino, por eso el desfase vive en la regla de "armada". */
+    .maqueta-layer { transform: translateY(-115%); }
+    .maqueta.armada .maqueta-layer { transform: translateY(0); }
+    .maqueta.armada .maqueta-pared { transition-delay: 0ms; }
+    .maqueta.armada .maqueta-techo { transition-delay: 600ms; }
+
+    /* La tarjeta nace OCULTA (clase tarjeta-oculta en el HTML) y aparece con
+       un fundido más despacio (450 ms) recién cuando la maqueta quedó
+       armada; si vuelve a ocultarse, el fade de salida es de 280 ms. */
+    .card { transition: opacity 450ms ease; }
+    .card.tarjeta-oculta {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 280ms ease;
+    }
+
+    /* cardEntrance (fill:both) fijaría la opacidad y la tarjeta se vería
+       desde el primer instante: se anula con .sin-entrada, que el HTML trae
+       puesto desde el inicio (no hay animación de entrada que neutralizar). */
+    .card.sin-entrada { animation: none; }
+
+    /* Al pulsar VOLVER AL INICIO, nav-transition.js añade .is-leaving para
+       fundir la tarjeta antes de navegar; sin esta regla, .card.sin-entrada
+       ganaría por orden de fuente y el fundido de salida no se vería. */
+    .card.sin-entrada.is-leaving { animation: cardLeave 220ms ease forwards; }
+
+    /* VOLVER AL INICIO es un <a class="btn-primary">: el cursor y los
+       márgenes ya vienen de ahí; aquí sólo se fija que herede la altura
+       de línea del texto que lo rodea. */
+    #cta-recorrer {
+      cursor: pointer;
+      line-height: inherit;
+      margin-inline: 0;
+    }
+
+    /* Con "menos movimiento": la maqueta cambia de estado sin transiciones */
+    @media (prefers-reduced-motion: reduce) {
+      .maqueta-layer, .card { transition: none !important; }
+    }
+
+    /* Tarjeta en vidrio esmerilado: traslúcida + desenfoque del fondo.
+       El vidrio vive en .card (y no en .card-copy) para que el
+       backdrop-filter no quede aislado por la animación de entrada. */
+    .card {
+      background: rgba(14, 24, 19, 0.42) !important;
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      backdrop-filter: blur(16px) saturate(140%);
+      border: 1px solid rgba(255, 255, 255, 0.20);
+      border-radius: var(--radius) !important;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.30) !important;
+    }
+
+    /* El bloque de texto no pinta fondo propio: el vidrio es la tarjeta */
+    .card-copy {
+      background: transparent !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+    }
+
+    /* Texto claro para que se lea sobre el vidrio esmerilado */
+    .card-title { color: #ffffff !important; }
+    .card-lead, .card-lead-2 { color: rgba(255, 255, 255, 0.92) !important; }
+
+    /* El correo del cierre es un enlace real (mailto:): se subraya para que
+       se vea que es pulsable, pasa al color de acento al pasar el cursor y
+       con overflow-wrap se parte en pantallas angostas sin desbordar el card */
+    .card-copy a.mailto {
+      color: #ffffff;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-thickness: 1px;
+      overflow-wrap: anywhere;
+    }
+    .card-copy a.mailto:hover { color: var(--accent); }
+
+    /* Escritorio: la tarjeta ocupa un poco menos de la mitad izquierda
+       (en vez de centrarse como en el resto de páginas).
+       - margin-left replica el margen izquierdo real del .card.container de las
+         demás páginas (centrado: max(24px, (100% - container)/2)), para que su
+         borde izquierdo quede alineado con el resto del sitio.
+       - el ancho se limita a un poco menos de la mitad del container para que
+         en pantallas muy anchas no se desborde del área de contenido. */
+    @media (min-width: 1101px) {
+      .card.container {
+        width: min(44%, calc(var(--container) * 0.44)) !important;
+        max-width: none !important;
+        margin-left: max(24px, (100% - var(--container)) / 2) !important;
+        margin-right: auto !important;
+      }
+    }
+
+    /* Móvil (solo esta página): el card vuelve a su posición original (arriba)
+       y se hace más compacto verticalmente para cubrir menos del fondo.
+       Para lograrlo se oculta el segundo párrafo solo en móvil (en escritorio
+       se conserva), lo que reduce la altura del card. */
+    @media (max-width: 1100px) {
+      .card-lead-2 {
+        display: none !important;
+      }
+    }
+
+    /* Texto de apertura distinto según el modo: en móvil se muestra una
+       versión breve en dos párrafos (.solo-movil) en vez del texto largo
+       de escritorio (.solo-escritorio). El script alterna el atributo hidden
+       de todos los [data-estado]; el CSS elige qué versión corresponde. */
+    .solo-movil { display: none; }
+
+    @media (max-width: 1100px) {
+      .solo-escritorio { display: none; }
+      .solo-movil:not([hidden]) { display: block; }
+    }
+  </style>
+
+  <!-- Sin JS no se arma la maqueta ni se revela la tarjeta: se fuerza el
+       estado final para que la página quede usable igual. -->
+  <noscript>
+    <style>
+      .maqueta-layer { transform: none !important; }
+      .card.tarjeta-oculta { opacity: 1 !important; pointer-events: auto !important; }
+    </style>
+  </noscript>
+</head>
+<body>
+  <div class="viewport-fixed">
+
+    <!-- Header fijo -->
+    <header class="site-header" role="banner">
+      <div class="header-inner">
+        <a class="brand" href="index.html">
+          <img src="assets/svg/Logo.svg" alt="Logo Museo El Canario" class="logo-img" />
+          <span class="brand-text"><span class="brand-tag">Museo de la vida rural<br></span>El Canario</span>
+        </a>
+
+        <nav class="main-nav" aria-label="Navegación principal">
+          <a href="cronograma.html" class="nav-link">Cronograma</a>
+          <a href="imagenes.html" class="nav-link">Imágenes</a>
+          <a href="biografia.html" class="nav-link">Biografía</a>
+          <a href="contacto.html" class="nav-link">Contacto</a>
+          <a href="catalogo.html" class="nav-link">Catálogo</a>
+        </nav>
+
+        <!-- Toggle móvil -->
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" type="button">
+          <svg class="menu-icon" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <circle class="menu-circle" cx="24" cy="24" r="20" fill="#c0392b" />
+            <g class="bars" stroke="#fff" stroke-linecap="round" stroke-width="3" stroke-linejoin="round">
+              <line class="bar top" x1="14" y1="18" x2="34" y2="18" />
+              <line class="bar bottom" x1="14" y1="30" x2="34" y2="30" />
+            </g>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Menú desplegable móvil -->
+    <aside class="floating-menu" id="floatingMenu" aria-hidden="true">
+      <div class="floating-inner">
+        <nav class="floating-nav" aria-label="Navegación flotante">
+          <a href="cronograma.html">Cronograma</a>
+          <a href="imagenes.html">Imágenes</a>
+          <a href="biografia.html">Biografía</a>
+          <a href="contacto.html">Contacto</a>
+          <a href="catalogo.html">Catálogo</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Hero -->
+    <main class="hero" role="main" aria-label="Hero">
+
+      <!-- Maqueta: pared y techo como capas sobre la planta (fondo).
+           El techo va después en el DOM para quedar pintado encima de la pared. -->
+      <div class="maqueta" aria-hidden="true">
+        <img class="maqueta-layer maqueta-pared" src="assets/svg/Recorrido-pared.svg" alt="" decoding="async" />
+        <img class="maqueta-layer maqueta-techo" src="assets/svg/Recorrido-techo.svg" alt="" decoding="async" />
+      </div>
+
+      <div class="hero-overlay" aria-hidden="true"></div>
+
+      <!-- sin-entrada: anula cardEntrance (la tarjeta NO aparece al cargar);
+           tarjeta-oculta: opacidad 0 hasta que el script arma la maqueta -->
+      <section class="card container sin-entrada tarjeta-oculta" role="region" aria-label="Tarjeta recorrido">
+        <div class="card-inner">
+          <div class="card-copy">
+            <h1 class="card-title"> Fin de recorrido</h1>
+            <p class="card-lead">
+              Aquí pudo ver un poco de lo que era la vida en aquella época. Una forma de vivir que hoy queda reflejada en nuestro catálogo de objetos expuestos.
+            </p>
+            <p class="card-lead">
+              Aquí pudo ver una selección de algunos de ellos, pero sí quiere venir y ver el catálogo completo de más de mis objetos que fueron parte de nuestra historia, reserve su visita contactandonos a través de nuestro correo:
+              <a class="mailto" href="mailto:gladis.minerva.67@gmail.com">gladis.minerva.67@gmail.com</a>
+            </p>
+            <p class="card-lead">
+              O por otro de nuestros medios de comunicación disponibles en el apartado de Contacto.
+            </p>
+            <p class="card-lead"><strong>¡Esperamos su visita!</strong></p>
+            <!-- VOLVER AL INICIO regresa al home; nav-transition.js aplica
+                 el mismo fundido de salida (220 ms) antes de navegar. -->
+            <a id="cta-recorrer" class="btn-primary" href="index.html">VOLVER AL INICIO</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <script src="scripts/menu.js"></script>
+
+  <script src="scripts/nav-transition.js"></script>
+
+  <script>
+    // PÁGINA DE CIERRE: la maqueta se arma sola al llegar desde
+    // dormitorio.html, en sentido inverso al de recorrido.html. Primero
+    // vuelven de arriba la pared y el techo y se colocan sobre el fondo;
+    // recién entonces aparece la tarjeta con "VOLVER AL INICIO".
+    (function () {
+      var maqueta = document.querySelector('.maqueta');
+      var card = document.querySelector('.card');
+      if (!maqueta || !card) return;
+
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+      var arrancado = false;
+
+      function armar() {
+        if (arrancado) return;
+        arrancado = true;
+
+        maqueta.classList.add('armada');
+
+        // Vuelo de las capas: la pared tarda 2000 ms (delay 0) y el techo
+        // 600 + 2000 = 2600 ms. La tarjeta entra 300 ms después, con su
+        // propio fundido de 450 ms.
+        var espera = reduce.matches ? 0 : 2900;
+        setTimeout(function () { card.classList.remove('tarjeta-oculta'); }, espera);
+      }
+
+      // Se arranca en cuanto las DOS capas de la maqueta estén listas (en
+      // vez de esperar window.load, que incluye fuentes y todas las demás
+      // imágenes y retrasaba el arranque): así la animación parte casi de
+      // inmediato y las capas siguen sin aparecer a mitad de vuelo.
+      var capas = [].slice.call(document.querySelectorAll('.maqueta-layer'));
+      var pendientes = capas.filter(function (img) { return !img.complete; });
+      if (pendientes.length === 0) {
+        armar();                              // ya cacheadas: arranca ya
+      } else {
+        pendientes.forEach(function (img) {
+          img.addEventListener('load', armar);
+          img.addEventListener('error', armar); // aunque falle una, que arranque
+        });
+      }
+      // Seguro: si ninguna dispara load, se arranca igual a los 1200 ms
+      setTimeout(armar, 1200);
+    })();
+  </script>
+</body>
+</html>
