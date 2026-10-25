@@ -13,10 +13,23 @@
   --radius: 20px;
   --header-height: 76px;
   --edge-padding: 22px;
+
+  /* Tamaño de las VENTANAS EMERGENTES (.cr-det) de las escenas.
+     1 = 100% (tamaño actual). Súbelo o bájalo —p. ej. 1.1 / 0.9— y todas
+     las páginas cambian juntas, para que siempre se vean como al 100% del
+     zoom del navegador sin repartir cambios por el sitio. */
+  --ventana-zoom: 1;
 }
 
 /* Reset / base */
 *{box-sizing:border-box}
+/* Reserva SIEMPRE el hueco de la barra de desplazamiento: sin esto, el
+   viewport del que calcula width:100% del header fijo (calc(100% - 48px))
+   medía ~15px menos en las páginas con scroll que en las sin él, y el menú
+   fijo se veía más pequeño sólo en algunas páginas. Con gutter estable,
+   todas las páginas reservan el mismo ancho y el header sale igual. */
+html { scrollbar-gutter: stable; }
+
 html,body{
   margin:0;
   height:100%;
@@ -69,13 +82,46 @@ body{overflow:visible}
 .header-inner{width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 var(--edge-padding);height:100%}
 .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
 .logo-img{width:56px;height:56px;object-fit:contain}
-.brand-text{font-family:var(--serif);font-weight:700;font-size:clamp(15px,2vw,22px);text-transform:uppercase;transition:color var(--transition)}
+/* Título a DOS líneas: el <br> viene del HTML y así el bloque gana mucho
+   menos ancho horizontal, dejando espacio al botón CATÁLOGO. Interlineado
+   apretado para que las dos líneas no superen la altura de la barra. */
+.brand-text{font-family:var(--serif);font-weight:700;font-size:clamp(15px,2vw,22px);text-transform:uppercase;transition:color var(--transition);line-height:1.06}
 .brand:hover .brand-text{color:var(--accent)}
 
 /* Nav (escritorio visible) */
 .main-nav{display:flex;gap:20px;align-items:center}
 .nav-link{color:var(--paper);text-decoration:none;font-family:var(--light-sans);font-weight:600;padding:8px 12px;border-radius:8px;transition:color var(--transition)}
 .nav-link:hover{color:var(--accent)}
+
+/* CATÁLOGO: es un enlace más del nav (misma tipografía, mismo padding y
+   mismo hover que Cronograma/Imágenes/Biografía/Contacto) y va DENTRO de
+   .main-nav, así que respeta el gap de 20px de la lista y en ≤1100px
+   desaparece de la barra para aparecer en el menú desplegable (.floating-nav),
+   junto a Contacto. */
+
+/* ---------------- Navegación y detalles ---------------- */
+
+/* Scroll suave al saltar por anclas (índice del catálogo, volver arriba) */
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* Página activa en el menú fijo y en el desplegable: menu.js la marca sola
+   con aria-current="page" comparando la URL actual con cada href */
+.nav-link[aria-current="page"],
+.floating-nav a[aria-current="page"] { color: var(--accent); }
+
+/* El header gana presencia cuando la página empieza a desplazarse
+   (la clase is-scrolled la añade menu.js en el evento scroll) */
+.site-header {
+  transition: box-shadow 240ms ease, background-color 240ms ease;
+}
+.site-header.is-scrolled {
+  background: rgba(14, 24, 19, 0.62);
+  box-shadow: 0 22px 46px rgba(0, 0, 0, 0.42);
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header { transition: none; }
+}
 
 /* Toggle (solo móvil) */
 .menu-toggle{display:none;background:transparent;border:0;padding:6px;cursor:pointer}
@@ -100,6 +146,13 @@ body{overflow:visible}
 .floating-nav{display:flex;flex-direction:column;gap:10px}
 .floating-nav a{color:var(--ink);text-decoration:none;padding:10px;border-radius:8px;font-family:var(--light-sans);font-weight:600}
 .floating-nav a:hover{color:var(--accent)}
+
+/* Tamaño de las ventanas emergentes de las escenas (.cr-det): lo gobierna
+   --ventana-zoom. Se usa `zoom` y no `transform` para no pisar el fundido de
+   entrada/salida de la ventana, que vive en transform. En móvil la ventana
+   cubre toda la escena (inset: 0), así que ahí se queda en 1. */
+.cr-det { zoom: var(--ventana-zoom, 1); }
+@media (max-width: 700px) { .cr-det { zoom: 1; } }
 
 /* Hero */
 .hero{
@@ -568,11 +621,6 @@ body {
   }
 }
 
-@keyframes headerFade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
 /* Texto del pie de imagen: cuando el carrusel avanza, el rótulo y el contador
    reaparecen con un fundido y un leve ascenso para que el cambio se perciba.
    scripts/ (carrusel de imagenes.html) reinicia esta animación en cada imagen.
@@ -592,26 +640,47 @@ body {
   animation: cardEntrance 520ms cubic-bezier(.2,.7,.3,1) both;
 }
 
-/* El header ya usa translateX(-50%) para centrarse; solo se anima la opacidad
-   para no interferir con su posicionamiento. */
-.site-header {
-  animation: headerFade 480ms ease both;
-}
+/* El menú fijo NO se anima ni al llegar ni al salir: así la barra se lee
+   continua durante toda la transición entre páginas (nav-transition.js ya no
+   lo desvanece y aquí se retiró su fundido de entrada de 480ms). */
 
-/* Salida entre páginas: al hacer clic en un enlace interno, la tarjeta y el
-   header se desvanecen antes de navegar (lo dispara scripts/nav-transition.js).
-   Así se enlaza con la animación de entrada de la página siguiente. */
+/* Salida entre páginas: al hacer clic en un enlace interno, el CONTENIDO se
+   difumina antes de navegar (lo dispara scripts/nav-transition.js). El fondo
+   de la página y el menú fijo se quedan visibles durante todo el cambio, para
+   que la transición se lea como un fundido del contenido y no como un salto. */
 @keyframes cardLeave {
   to { opacity: 0; transform: translateY(-6px); }
-}
-@keyframes headerLeave {
-  to { opacity: 0; }
 }
 .card.is-leaving {
   animation: cardLeave 220ms ease forwards;
 }
-.site-header.is-leaving {
-  animation: headerLeave 200ms ease forwards;
+
+/* Contenido que se difumina: tarjeta (.card), banda de escena (.cruce),
+   maqueta de recorrido/final (.maqueta) y listado del catálogo (.cat-wrap).
+   nav-transition.js añade .is-leaving al <body>; pageshow lo retira por si el
+   usuario vuelve con "Atrás". */
+.card, .cruce, .cat-wrap, .maqueta { transition: opacity 220ms ease; }
+body.is-leaving .card,
+body.is-leaving .cruce,
+body.is-leaving .cat-wrap,
+body.is-leaving .maqueta { opacity: 0; }
+/* la escena sale de su animación de entrada (fill:both fijaría opacidad 1)
+   para poder desvanecerse */
+body.is-leaving .cruce { animation: none; }
+
+/* Entrada de las páginas de escena: la banda .cruce entra con fundido y un
+   leve ascenso, enlazando con el fundido de salida (460 ms, un punto más
+   lento que la salida para que la nueva página "asiente"). */
+@keyframes escenaEntrance {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+.cruce { animation: escenaEntrance 460ms cubic-bezier(.2, .7, .3, 1) both; }
+
+/* Con "menos movimiento": entrada y salida sin animación (se navega ya) */
+@media (prefers-reduced-motion: reduce) {
+  .card, .cruce, .cat-wrap, .maqueta { transition: none; }
+  .cruce { animation: none; }
 }
 
 /* Respetar a usuarios que prefieren menos movimiento (accesibilidad) */
