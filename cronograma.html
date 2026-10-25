@@ -172,14 +172,17 @@
 
     /* ---------- Punto sobre la línea ---------- */
     .tl-pt {
+      --pt-lado: 17px;                 /* lado visible del punto */
+      --pt-borde: 4px;                 /* aro de color */
+      --hit: 1px;                      /* margen invisible de selección */
       position: absolute;
       bottom: 93px;
-      width: 17px;
-      height: 17px;
+      width: var(--pt-lado);
+      height: var(--pt-lado);
       padding: 0;
       border-radius: 50%;
       background: #fff;
-      border: 4px solid var(--seg-bg, var(--brand-green));
+      border: var(--pt-borde) solid var(--seg-bg, var(--brand-green));
       box-shadow: 0 2px 6px rgba(0,0,0,.22);
       --tx: -50%;                    /* centrado base (lo reutiliza la coreografía) */
       transform: translateX(var(--tx));
@@ -190,6 +193,18 @@
       transition: transform 200ms ease, box-shadow 200ms ease;
     }
     .tl-rail.tm .tl-pt { bottom: 53px; }
+    /* Zona de selección invisible: un 10 % más grande que el punto visible
+       (19px de área activa frente a los 17px que se ven). Así entra en la
+       ventana con más holgura y cuesta más salirse de ella por error.
+       Es un pseudo-elemento del propio botón: elementFromPoint devuelve el
+       punto y :hover / mouseenter se activan igual que en su caja visible.
+       --hit = 0 deja la zona exactamente del botón. */
+    .tl-pt::before {
+      content: "";
+      position: absolute;
+      inset: calc(-1 * (var(--pt-borde) + var(--hit)));
+      border-radius: 50%;
+    }
     .tl-pt:hover { transform: translateX(var(--tx)) scale(1.25); }
     .tl-pt.is-on {
       transform: translateX(var(--tx)) scale(1.3);
@@ -239,10 +254,15 @@
       border-color: var(--seg-bg, var(--brand-green));
       color: var(--seg-ink, #fff);
     }
-    .tl-rail.h .pt-date.d1 { bottom: 72px; }
-    .tl-rail.h .pt-date.d2 { bottom: 48px; }
-    .tl-rail.tm .pt-date.d1 { bottom: 32px; }
-    .tl-rail.tm .pt-date.d2 { bottom: 8px; }
+    /* Las fechas bajan 8px para dejar aire bajo el punto: así ni la pastilla
+       ni su fila escalonada tocan el marcador (que al pasar el cursor crece). */
+    .tl-rail.h .pt-date.d1 { bottom: 64px; }
+    .tl-rail.h .pt-date.d2 { bottom: 40px; }
+    .tl-rail.tm .pt-date.d1 { bottom: 24px; }
+    .tl-rail.tm .pt-date.d2 { bottom: 0; }
+    /* En la sublínea solo el punto es accionable: título y fecha son
+       etiquetas (conservan su color al pasar el cursor). */
+    #lvl1 .pt-title, #lvl1 .pt-date { cursor: default; }
 
     /* ---------- Cinta: proceso largo, no clicable ---------- */
     .tl-cinta {
@@ -466,6 +486,9 @@
       position: relative;
       flex: 1 1 auto;
       min-width: 0;
+      min-height: 0;                /* respeta el alto máximo de la ventana */
+      display: flex;
+      flex-direction: column;
       box-sizing: border-box;
       padding: 18px 46px 18px 20px;
       color: #fff;
@@ -475,7 +498,19 @@
       backdrop-filter: blur(16px) saturate(140%);
       border: 1px solid rgba(255, 255, 255, .20);
     }
-    .det-text { font-family: var(--light-sans); font-size: 14.5px; line-height: 1.65; }
+    /* Con la ventana limitada en alto, el texto se desplaza dentro de ella */
+    .det-text {
+      font-family: var(--light-sans);
+      font-size: 14.5px;
+      line-height: 1.65;
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,.35) transparent;
+    }
+    .det-text::-webkit-scrollbar { width: 8px; }
+    .det-text::-webkit-scrollbar-thumb { background: rgba(255,255,255,.35); border-radius: 8px; }
+    .det-text::-webkit-scrollbar-track { background: transparent; }
     .det-text p { margin: 0 0 10px; }
     .det-text p:last-child { margin-bottom: 0; }
     .det-text ul, .det-text ol { margin: 0 0 10px; padding-left: 18px; }
@@ -499,6 +534,13 @@
     }
     .det-x:hover { background: rgba(255,255,255,.2); }
     .det-x:focus-visible { outline: 3px solid #f4c542; outline-offset: 2px; }
+    /* Escritorio con cursor: la ventana se abre al pasar el puntero sobre
+       el punto y se cierra al quitarlo (como en cruce.html), así que la ×
+       de cierre desaparece. En móvil y en pantallas táctiles sigue siendo
+       el cierre principal. */
+    @media (min-width: 701px) and (hover: hover) {
+      .det-x { display: none; }
+    }
 
     /* Pista: texto breve y discreto, sin caja (solo en escritorio) */
     .det-hint {
@@ -535,6 +577,59 @@
       .det-card { padding: 16px 18px; }
     }
 
+    /* ---------- Pantallas bajas: la línea sube dentro de la tarjeta ---------- */
+    /* Cuando la ventana de la pantalla no da para la línea + la ventana
+       emergente, se comprime la cabecera (hueco del botón, cabecera de la
+       época y alto del carril) para que la línea quede más arriba y la
+       ventana quepa POR DEBAJO sin desplazar la página: el punto se queda
+       bajo el cursor. Nivel 0 y nivel 1 bajan exactamente lo mismo (se
+       mantienen los 40px de diferencia de carril), así la línea sigue a la
+       misma altura en los dos niveles. */
+    @media (max-height: 780px) {
+      .card-copy.tl-top { padding-top: 12px !important; padding-bottom: 2px !important; }
+      .tl-top .card-lead { margin-top: 4px; }
+      .tl-area { padding-top: 8px; gap: 8px; }
+      .tl-crumb { min-height: 18px; }
+      .tl-band-head { height: 28px; margin-bottom: 4px; }
+      .tl-band-head h2 { font-size: clamp(16px, 2vw, 19px); }
+      .tl-rail.h { height: 190px; }        /* era 250: sube la línea 60px */
+      .tl-rail.h.tm { height: 150px; }     /* era 210: idéntico en nivel 0 */
+    }
+    @media (max-height: 780px) and (max-width: 1100px) {
+      .tl-rail.h { height: 200px; }        /* era 260 */
+      .tl-rail.h.tm { height: 160px; }     /* era 220 */
+      .tl-area { padding-top: 8px; padding-bottom: 12px; }
+    }
+
+    /* Si aun así la ventana no cabe por debajo de la línea (pantallas muy
+       bajas), se pone EN el hueco de encima de la línea: no se mueve nada,
+       el punto queda a la vista bajo el cursor y la miga de pan sigue
+       visible. La posición la calcula fitDetail(); en este modo la ventana
+       va en fila (tarjeta al lado del texto) para aprovechar el alto. */
+    .tl-detail.det-arriba {
+      position: absolute;
+      left: 0;
+      right: 0;
+      z-index: 6;
+      flex-direction: row;
+      /* Queda sobre los títulos y la línea: el fondo casi opaco evita que
+         se transparente nada por detrás. */
+      background:
+        linear-gradient(rgba(14, 24, 19, .90), rgba(14, 24, 19, .90)),
+        url('assets/images/Menu-fondo.webp') center 32% / cover no-repeat;
+    }
+    .det-arriba .det-card {
+      flex: 0 0 auto;
+      min-width: 170px;
+      padding: 10px 16px;
+      gap: 4px;
+    }
+    .det-arriba .det-glass {
+      padding: 10px 40px 10px 16px;
+      border-radius: 0 18px 18px 0;
+    }
+    .det-arriba .det-date { font-size: clamp(20px, 2.4vw, 26px); }
+
     /* ---------- Menos movimiento: cambios instantáneos ---------- */
     @media (prefers-reduced-motion: reduce) {
       .tl-stage { transition: none; }
@@ -554,7 +649,7 @@
       <div class="header-inner">
         <a class="brand" href="index.html">
           <img src="assets/svg/Logo.svg" alt="Logo Museo El Canario" class="logo-img" />
-          <span class="brand-text">Museo de la vida rural El Canario</span>
+          <span class="brand-text"><span class="brand-tag">Museo de la vida rural<br></span>El Canario</span>
         </a>
 
         <nav class="main-nav" aria-label="Navegación principal">
@@ -562,6 +657,7 @@
           <a href="imagenes.html" class="nav-link">Imágenes</a>
           <a href="biografia.html" class="nav-link">Biografía</a>
           <a href="contacto.html" class="nav-link">Contacto</a>
+          <a href="catalogo.html" class="nav-link">Catálogo</a>
         </nav>
 
         <!-- Toggle móvil -->
@@ -585,6 +681,7 @@
           <a href="imagenes.html">Imágenes</a>
           <a href="biografia.html">Biografía</a>
           <a href="contacto.html">Contacto</a>
+          <a href="catalogo.html">Catálogo</a>
         </nav>
       </div>
     </aside>
@@ -860,6 +957,12 @@
     var reduceMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
     function noMotion() { return reduceMQ.matches; }
 
+    /* Modo escritorio con cursor (misma convención que cruce.html: ancho
+       >700px y dispositivo apuntador): las ventanas emergentes se abren al
+       entrar el puntero en un punto y se cierran al quitarlo. */
+    var hoverMQ = window.matchMedia('(hover: hover)');
+    function isHoverMode() { return !isVert() && hoverMQ.matches; }
+
     /* Tramos de la línea maestra: proporcionales a la duración de cada
        época, con un mínimo del 8% para que las épocas cortas no se fundan
        en el extremo derecho. No es matemáticamente perfecto: basta con
@@ -904,6 +1007,10 @@
         stage = $('tlStage');
 
     var state = { level: 0, band: -1, seg: -1 };
+    var vistas = {};     // hitos cuya ventana ya se abrió en la sublínea actual
+    var xy = { x: -1, y: -1 }; // última posición real del puntero
+    var tCierre = 0;     // temporizador del cierre diferido
+    var segPendiente = -1; // ventana abierta al programar un cierre
     var rowEls = [];   // filas verticales por índice de hito
     var ptEls = [];    // punto + título + fecha (modo horizontal) por índice
     var pulsed = false; // tras el primer toque, la pulsación no vuelve
@@ -1063,6 +1170,9 @@
       var b = BANDS[i];
       bandTitle.textContent = b.name;
       bandRange.textContent = yr(b.from) + ' — ' + yr(b.to);
+      // Los elementos viejos se tiran sin mandar mouseleave: se cancela el
+      // cierre pendiente para no cerrar una ventana que ya no existe.
+      clearTimeout(tCierre); tCierre = 0; segPendiente = -1;
       rowEls = [];
       ptEls = [];
       rail.innerHTML = '';
@@ -1112,7 +1222,12 @@
         }
 
         var t = segT(b, s);
-        var pick = function () { selectSeg(idx); };
+        // Solo el punto abre la ventana: el título y la fecha dan su color al
+        // pasar el cursor, pero no accionan el detalle (abajo, en hoverPunto).
+        // `e.detail` distingue el clic del ratón (0 = teclado).
+        var pick = function (e) {
+          selectSeg(idx, isHoverMode() && !!(e && e.detail));
+        };
         var aria = s.title + ', ' + (s.range || s.yr);
 
         var dot = el('button', 'tl-pt');
@@ -1130,7 +1245,6 @@
         tt.style.setProperty('--seg-bg', b.color);
         tt.textContent = shortOf(s);
         edgePos(tt, t);
-        tt.addEventListener('click', pick);
         choreo(tt, t);
         rail.appendChild(tt);
 
@@ -1138,9 +1252,11 @@
         dd.style.setProperty('--seg-bg', b.color);
         dd.textContent = s.yr;
         edgePos(dd, t);
-        dd.addEventListener('click', pick);
         choreo(dd, t);
         rail.appendChild(dd);
+
+        // Escritorio con cursor: solo el punto abre la ventana
+        if (isHoverMode()) hoverPunto(dot, idx);
 
         ptEls[idx] = { dot: dot, title: tt, date: dd };
       });
@@ -1218,15 +1334,20 @@
       if (delay) { setTimeout(go, delay); } else { go(); }
     }
 
-    function selectSeg(si) {
+    function selectSeg(si, fijo) {
       if (swapping) return;
       state.seg = si;
+      vistas[si] = true; // ya se ha visto esta ventana de la sublínea
       if (!pulsed) { pulsed = true; rail.classList.add('no-pulse'); }
       markSeg();
       applyDetail();
       syncStage();
       renderCrumb();
-      if (isVert()) {
+      if (fijo) {
+        // Apertura por puntero (hover): sin scroll automático, para que el
+        // punto se quede bajo el cursor. El scroll sigue existiendo en
+        // móvil y al abrir con teclado o clic.
+      } else if (isVert()) {
         // Corredera: el scroll va cuando la ventana ya mide su altura final
         animateOpen(scrollToDetail);
       } else {
@@ -1281,6 +1402,66 @@
       }
     }
 
+    /* =====================================================================
+       VENTANAS POR HOVER (ESCRITORIO CON CURSOR)
+       ===================================================================== */
+    /* Solo el punto abre la ventana. El título y la fecha cambian de color
+       al pasar el cursor, pero no la accionan. */
+    function hoverPunto(dot, idx) {
+      dot.addEventListener('mouseenter', function () {
+        // `fijo` = apertura por puntero: no se hace scroll automático, para
+        // que el punto siga justo debajo del cursor.
+        if (state.seg !== idx) selectSeg(idx, true);
+      });
+    }
+
+    // ¿Qué hay bajo el cursor AHORA MISMO? Se le pregunta al DOM en la
+    // posición actual del puntero, nunca a un mouseleave: si la página se
+    // desplaza bajo un ratón quieto, el punto se mueve de sitio pero el
+    // puntero no "sale" de él, así que la ventana no se cierra sola.
+    function bajoPuntero(x, y) {
+      if (x < 0 || y < 0) return false;
+      var n = document.elementFromPoint(x, y);
+      if (!n) return false;
+      return !!(n.closest('.tl-detail') || n.closest('.tl-pt') ||
+                n.closest('.pt-title') || n.closest('.pt-date'));
+    }
+
+    // Cierra la ventana comprobando la posición real del puntero 80 ms
+    // después (margen que evita el parpadeo al saltar de una pieza a otra).
+    // Solo se programa desde `mousemove`: el scroll por sí solo no la cierra.
+    function programarCierre() {
+      clearTimeout(tCierre);
+      if (state.seg < 0 || !isHoverMode()) return;
+      segPendiente = state.seg;
+      tCierre = setTimeout(function () {
+        tCierre = 0;
+        if (state.seg < 0 || state.seg !== segPendiente) return;
+        if (bajoPuntero(xy.x, xy.y)) return;
+        closeDetail(true);
+      }, 80);
+    }
+
+    // El puntero manda: su posición real se guarda en `xy` y, con ella,
+    // se decide si la ventana sigue abierta o se cierra.
+    document.addEventListener('mousemove', function (e) {
+      xy.x = e.clientX;
+      xy.y = e.clientY;
+      if (state.seg >= 0 && isHoverMode()) programarCierre();
+    });
+    // Al salir del documento (cambio de ventana, pestaña…): se cierra.
+    document.addEventListener('mouseleave', function () {
+      xy.x = -1; xy.y = -1;
+      if (state.seg >= 0 && isHoverMode()) closeDetail(true);
+    });
+
+    // Sin × en escritorio: Escape también cierra la ventana abierta
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' && e.keyCode !== 27) return;
+      if (state.seg < 0 || swapping) return;
+      closeDetail();
+    });
+
     // Tarjeta de color sólido (fecha + título) + panel de cristal (texto)
     function applyDetail() {
       animTok++; // anula cualquier corredera en curso (su cierre ya no actúa)
@@ -1293,7 +1474,7 @@
           detail.innerHTML = '';
         } else {
           detail.className = 'tl-detail is-hint';
-          detail.innerHTML = '<div class="det-hint">Toca un punto de la línea</div>';
+          detail.innerHTML = '<div class="det-hint">Acércate a un punto de la línea</div>';
         }
       } else {
         var b = BANDS[state.band], s = b.segs[state.seg];
@@ -1314,13 +1495,51 @@
             '<div class="det-text">' + s.body + '</div>' +
           '</div>';
         var x = detail.querySelector('.det-x');
-        if (x) x.addEventListener('click', closeDetail);
+        if (x) x.addEventListener('click', function () { closeDetail(); });
       }
       placeDetail();
     }
 
     // En escritorio el detalle queda bajo la línea; en móvil se despliega
     // justo debajo del punto tocado y la línea continúa.
+    /* En pantallas bajas la ventana no cabe entera por debajo de la línea:
+       1) si casi cabe, se limita su alto al hueco y el texto se desplaza
+          dentro (la ventana se ve completa sin mover la página);
+       2) si ni siquiera eso, se pone EN el hueco de encima de la línea.
+       En los dos casos nada se desplaza: el punto se queda bajo el cursor. */
+    function fitDetail() {
+      // Se vuelve a la posición normal (debajo de la línea) para medir
+      detail.classList.remove('det-arriba');
+      detail.style.removeProperty('max-height');
+      detail.style.removeProperty('top');
+      if (isVert() || state.seg < 0) return;
+
+      var natural = detail.offsetHeight;   // alto que tendría sin tope
+      var punto = ptEls[state.seg] && ptEls[state.seg].dot;
+      if (!punto) return;
+      var lvl = detail.closest('.tl-level') || detail.parentNode;
+      var lvlTop = lvl.getBoundingClientRect().top;
+      var bajo = Math.round(window.innerHeight - detail.getBoundingClientRect().top - 16);
+
+      if (bajo >= natural) return;         // cabe por debajo: sin tope
+
+      if (bajo >= 100) {                   // cabe casi: se limita su alto
+        detail.style.maxHeight = bajo + 'px';
+        return;
+      }
+
+      // No cabe por debajo: se pone encima de la línea, dejando el punto a
+      // la vista. Se limita su alto al hueco que hay entre la miga de pan
+      // y el propio punto (tapa la cabecera de la época, no la ruta).
+      var crumb = document.getElementById('tlCrumb');
+      var limite = (crumb ? crumb.getBoundingClientRect().bottom : lvlTop) + 6;
+      var borde = punto.getBoundingClientRect().top - 4;    // borde inferior
+      var tope = Math.max(100, Math.round(borde - limite));
+      detail.classList.add('det-arriba');
+      detail.style.maxHeight = tope + 'px';
+      detail.style.top = Math.round(borde - detail.offsetHeight - lvlTop) + 'px';
+    }
+
     function placeDetail() {
       if (isVert() && state.level === 1) {
         if (state.seg >= 0 && rowEls[state.seg]) {
@@ -1332,9 +1551,30 @@
       } else if (detail.parentNode !== slot) {
         slot.appendChild(detail);
       }
+      fitDetail(); // la ventana respeta el hueco que queda en pantalla
     }
 
-    function closeDetail() {
+    // Al cambiar el tamaño de la ventana se vuelve a medir ese hueco.
+    window.addEventListener('resize', function () {
+      if (state.seg >= 0) fitDetail();
+    });
+
+    // ¿Se han visto ya todas las ventanas de la sublínea en esta sesión?
+    // Solo cuentan los hitos con ventana: las cintas de color no son clicables.
+    function completa() {
+      if (state.level !== 1 || state.band < 0) return false;
+      var b = BANDS[state.band], n = 0, v = 0;
+      b.segs.forEach(function (s, i) {
+        if (s.type === 'cinta') return;
+        n++;
+        if (vistas[i]) v++;
+      });
+      return n > 0 && v >= n;
+    }
+
+    // Cierra la ventana abierta. `silent` = cierre por hover (el puntero se
+    // va): no se roba el foco, que sigue donde lo dejó la persona.
+    function closeDetail(silent) {
       var closing = state.seg;
       var back = null;
       if (state.seg >= 0) {
@@ -1348,7 +1588,11 @@
         renderCrumb();
         // El foco vuelve a la fila, pero sin mover la página: así al cerrar
         // la vista se queda donde estaba (evita el salto hacia atrás).
-        if (back && back.focus) back.focus({ preventScroll: true });
+        // En el cierre por hover no se toca el foco (sigue donde estaba).
+        if (back && back.focus && !silent) back.focus({ preventScroll: true });
+        // Si con este cierre se han visto todas las ventanas de la línea,
+        // la persona vuelve sola a la línea principal.
+        if (completa()) goRoot();
       };
       // En móvil se pliega despacio; en escritorio, directo
       if (isVert() && !noMotion() && detail.offsetHeight > 0) {
@@ -1470,10 +1714,11 @@
       if (swapping) return;
       swapLevels(function () {
         state.band = i; state.seg = -1;
+        vistas = {};        // al entrar a la sublínea empieza el recuento
         renderBand(i);
         show(1);
         markSeg();
-        applyDetail();  // pista: "Toca un punto…"
+        applyDetail();  // pista: "Acércate a un punto…"
         syncStage();
       });
     }
