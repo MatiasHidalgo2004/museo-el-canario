@@ -158,21 +158,32 @@
 
     function abierto() { return visor.classList.contains('is-open'); }
 
-    // ----- Gestos -----
-    function onDown(e) {
-      if (e.target === btnCerrar) return;        // dejar que el botón actúe
-      e.preventDefault();
-      // Captura implícita del navegador (touch): el target real se conserva
-      // y los eventos burbujean hasta el visor, permitiendo distinguir en
-      // onUp si el toque fue sobre la imagen o sobre el fondo difuminado.
-      punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    // ----- Gestos (eventos táctiles: los fiables en móvil) -----
+    // En móvil, los eventos pointer son interceptados por el navegador para su
+    // propio zoom/scroll y disparan pointercancel, reiniciando el gesto. Con
+    // touchstart/touchmove/touchend + touch-action:none (CSS) el control es
+    // total. Cada dedo se sigue por identifier.
+    var idArrastre = null;         // identifier del dedo que arrastra
+    var toqueEnImagen = false;     // ¿el toque de un dedo empezó sobre la imagen?
+
+    function onTouchStart(e) {
+      if (e.target === btnCerrar) return;   // dejar que el botón genere su click
+      e.preventDefault();                   // bloquear zoom/scroll nativo
+
+      var t = e.changedTouches;
+      for (var i = 0; i < t.length; i++) {
+        punteros.set(t[i].identifier, { x: t[i].clientX, y: t[i].clientY });
+      }
 
       if (punteros.size === 1) {
         modo = 'pan';
-        ultX = e.clientX; ultY = e.clientY;
-        abajoX = e.clientX; abajoY = e.clientY; abajoT = Date.now();
+        var s = t[0];
+        idArrastre = s.identifier;
+        toqueEnImagen = (e.target === capaInt);
+        ultX = s.clientX; ultY = s.clientY;
+        abajoX = s.clientX; abajoY = s.clientY; abajoT = Date.now();
         movio = false;
-      } else if (punteros.size === 2) {
+      } else if (punteros.size >= 2) {
         modo = 'pinch';
         var p = [].slice.call(punteros.values());
         d0 = Math.hypot(p[1].x - p[0].x, p[1].y - p[0].y) || 1;
@@ -183,10 +194,12 @@
       }
     }
 
-    function onMove(e) {
-      var p = punteros.get(e.pointerId);
-      if (!p) return;
-      p.x = e.clientX; p.y = e.clientY;
+    function onTouchMove(e) {
+      var t = e.changedTouches;
+      for (var i = 0; i < t.length; i++) {
+        var p = punteros.get(t[i].identifier);
+        if (p) { p.x = t[i].clientX; p.y = t[i].clientY; }
+      }
 
       if (modo === 'pinch' && punteros.size >= 2) {
         var q = [].slice.call(punteros.values());
@@ -197,69 +210,83 @@
         tx = mx - ex - escala * lx0;
         ty = my - ey - escala * ly0;
         limitar(); aplicar();
-      } else if (modo === 'pan' && punteros.size === 1) {
-        var dx = e.clientX - ultX, dy = e.clientY - ultY;
-        if (Math.abs(e.clientX - abajoX) > 10 || Math.abs(e.clientY - abajoY) > 10) {
-          movio = true;
-        }
-        if (escala > ESC_MIN + 0.001) {         // sólo arrastra si hay zoom
+      } else if (modo === 'pan' && idArrastre !== null) {
+        var a = punteros.get(idArrastre);
+        if (!a) return;
+        var dx = a.x - ultX, dy = a.y - ultY;
+        if (Math.abs(a.x - abajoX) > 10 || Math.abs(a.y - abajoY) > 10) movio = true;
+        if (escala > ESC_MIN + 0.001) {       // sólo arrastra si hay zoom
           tx += dx; ty += dy;
           limitar(); aplicar();
         }
-        ultX = e.clientX; ultY = e.clientY;
+        ultX = a.x; ultY = a.y;
       }
+      if (modo) e.preventDefault();
     }
 
-    function onUp(e) {
-      if (!punteros.has(e.pointerId)) return;
-      punteros.delete(e.pointerId);
+    function onTouchEnd(e) {
+      var t = e.changedTouches;
+      for (var i = 0; i < t.length; i++) {
+        punteros.delete(t[i].identifier);
+      }
 
-      if (punteros.size === 1 && modo === 'pinch') {
+      if (modo === 'pinch' && punteros.size === 1) {
         // queda un dedo: sigue como arrastre desde su posición actual
         modo = 'pan';
-        var r = [].slice.call(punteros.values())[0];
-        ultX = r.x; ultY = r.y;
-        abajoX = r.x; abajoY = r.y; abajoT = Date.now(); movio = false;
+        var resto = punteros.entries().next().value;   // [identifier, {x,y}]
+        idArrastre = resto[0];
+        ultX = resto[1].x; ultY = resto[1].y;
+        abajoX = resto[1].x; abajoY = resto[1].y; abajoT = Date.now();
+        movio = false;
         return;
       }
       if (punteros.size > 0) return;
 
+      // todos los dedos levantados
+      var eraDelArrastre = (idArrastre === t[0].identifier);
+      idArrastre = null;
       modo = null;
-      var rapido = (Date.now() - abajoT) < 300;
+      if (!eraDelArrastre) return;
 
-      if (!movio && rapido) {
-        var esImagen = (e.target === capaInt);
-        if (esImagen) {
-          // doble-toque: alterna entre acercar (al punto) y volver al ajuste
-          var cerca = (Date.now() - ultimoToqueT) < 300 &&
-                      Math.hypot(e.clientX - ultimoToqueX, e.clientY - ultimoToqueY) < 30;
-          if (cerca) {
-            if (escala < 2) {
-              var l = localBajo(e.clientX, e.clientY);
-              escala = Math.min(ESC_MAX, ESC_DOBLE);
-              tx = e.clientX - ex - escala * l[0];
-              ty = e.clientY - ey - escala * l[1];
-              limitar(); aplicar();
-            } else {
-              escala = ESC_MIN; tx = 0; ty = 0; aplicar();   // ajuste = centrado
-            }
-            ultimoToqueT = 0;
-            return;
+      var rapido = (Date.now() - abajoT) < 300;
+      if (movio || !rapido) return;
+
+      if (toqueEnImagen) {
+        // doble-toque: alterna entre acercar (al punto) y volver al ajuste
+        var cerca = (Date.now() - ultimoToqueT) < 300 &&
+                    Math.hypot(t[0].clientX - ultimoToqueX, t[0].clientY - ultimoToqueY) < 30;
+        if (cerca) {
+          if (escala < 2) {
+            var l = localBajo(t[0].clientX, t[0].clientY);
+            escala = Math.min(ESC_MAX, ESC_DOBLE);
+            tx = t[0].clientX - ex - escala * l[0];
+            ty = t[0].clientY - ey - escala * l[1];
+            limitar(); aplicar();
+          } else {
+            escala = ESC_MIN; tx = 0; ty = 0; aplicar();   // ajuste = centrado
           }
-          ultimoToqueT = Date.now();
-          ultimoToqueX = e.clientX; ultimoToqueY = e.clientY;
-        } else if (e.target === visor) {
-          cerrar();                                   // toque en el fondo difuminado
+          ultimoToqueT = 0;
+          return;
         }
+        ultimoToqueT = Date.now();
+        ultimoToqueX = t[0].clientX; ultimoToqueY = t[0].clientY;
+      } else {
+        cerrar();                                   // toque en el fondo difuminado
       }
+    }
+
+    function onTouchCancel(e) {
+      var t = e.changedTouches;
+      for (var i = 0; i < t.length; i++) punteros.delete(t[i].identifier);
+      if (punteros.size === 0) { modo = null; idArrastre = null; }
     }
 
     btnAbrir.addEventListener('click', abrir);
     btnCerrar.addEventListener('click', cerrar);
-    visor.addEventListener('pointerdown', onDown);
-    visor.addEventListener('pointermove', onMove);
-    visor.addEventListener('pointerup', onUp);
-    visor.addEventListener('pointercancel', onUp);
+    visor.addEventListener('touchstart', onTouchStart, { passive: false });
+    visor.addEventListener('touchmove', onTouchMove, { passive: false });
+    visor.addEventListener('touchend', onTouchEnd);
+    visor.addEventListener('touchcancel', onTouchCancel);
 
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && abierto()) cerrar();
