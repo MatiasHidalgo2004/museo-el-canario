@@ -782,7 +782,7 @@ body.is-leaving .cruce { animation: none; }
     position: absolute;
     top: 10px;
     left: 10px;
-    z-index: 6;
+    z-index: 4;                 /* por debajo del popup .cr-det (5): la ventana lo tape */
     display: inline-flex;
     align-items: center;
     justify-content: center;
