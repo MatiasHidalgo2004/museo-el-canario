@@ -1,12 +1,12 @@
 /* Visor de zoom de la ilustración (sólo móvil).
    En las salas del recorrido añade un botón [+] sobre la escena. Al pulsarlo,
-   la capa intermedia (.cr-capa-int) se despega del marco chico y se muestra
-   dentro de un visor fijo, casi a pantalla completa y con un ~55% de acercamiento
-   inicial; todo lo demás (fondo, texto, header, puntos) queda difuminado detrás
-   por el CSS. Dentro del visor se puede pellizcar, doble-toque y arrastrar.
-   Se cierra con [-], con Escape o tocando el fondo difuminado.
-   Sólo corre en pantallas angostas (≤700px), igual que el bloque CSS que lo
-   acompaña en styles/styles.css. Sin dependencias. */
+   se abre un visor fijo con una VERSIÓN OPTIMIZADA y recortada al contenido
+   de la ilustración (assets/images/zoom-<sala>.png), casi a pantalla completa
+   y centrada, de modo que se ve entera sin recortes. Todo lo demás (escena,
+   texto, header, puntos) queda difuminado detrás por el CSS (backdrop-filter
+   del overlay). Dentro del visor se puede pellizcar, doble-toque y arrastrar.
+   Se cierra con [-], Escape o tocando el fondo difuminado.
+   La capa de la escena NO se mueve: el visor usa su propio <img>. Sin dependencias. */
 (function () {
   'use strict';
 
@@ -16,16 +16,24 @@
   var lienzos = [].slice.call(document.querySelectorAll('.cruce-lienzo'));
   if (!lienzos.length) return;
 
-  // Escala mínima = ajuste a pantalla (1); apertura con ~55% de acercamiento;
-  // doble-toque sube a 2.6 y un segundo doble-toque vuelve al ajuste; tope 4x.
+  // ESC_ABRIR = 1 (ajuste): la ilustración recortada se ve ENTERA, sin recorte.
+  // Doble-toque sube a 2.6; un segundo doble-toque vuelve al ajuste; tope 4x.
   var ESC_MIN = 1;
-  var ESC_ABRIR = 1.55;
+  var ESC_ABRIR = 1;
   var ESC_DOBLE = 2.6;
   var ESC_MAX = 4;
 
   lienzos.forEach(function (lienzo) {
     var capaInt = lienzo.querySelector('.cr-capa-int');
     if (!capaInt) return;
+
+    // Ruta de la versión optimizada. Se puede forzar con data-zoom-src sobre
+    // la capa; si no, se deriva del src (recorrido-<sala>-intermedio.png).
+    var fuenteZoom = capaInt.getAttribute('data-zoom-src');
+    if (!fuenteZoom) {
+      var m = (capaInt.getAttribute('src') || '').match(/recorrido-(.+)-intermedio\.png/);
+      fuenteZoom = m ? 'assets/images/zoom-' + m[1] + '.png' : '';
+    }
 
     // ----- Botón [+] inyectado en la escena (esquina superior izquierda) -----
     var btnAbrir = document.createElement('button');
@@ -50,19 +58,27 @@
     btnCerrar.textContent = '[-]';
     btnCerrar.setAttribute('aria-label', 'Reducir la ilustración');
     visor.appendChild(btnCerrar);
+
+    // Imagen del visor (versión optimizada, recortada al contenido)
+    var imgZoom = document.createElement('img');
+    imgZoom.className = 'cr-zoom-img';
+    imgZoom.alt = capaInt.getAttribute('alt') || 'Ilustración ampliada';
+    imgZoom.decoding = 'async';
+    if (fuenteZoom) imgZoom.setAttribute('src', fuenteZoom);
+    visor.appendChild(imgZoom);
+
     document.body.appendChild(visor);
 
-    // Geometría base de la imagen (posición/desplazada SIN transform) y del
-    // visor, leída al abrir para calcular anclajes de pellizco y límites.
+    // Geometría base de la imagen del visor (SIN transform) y del overlay,
+    // leída al abrir para calcular anclajes de pellizco y límites.
     var ex = 0, ey = 0, iw = 0, ih = 0;      // rect de la imagen (sin transform)
     var sx = 0, sy = 0, sw = 0, sh = 0;      // rect del visor (= viewport)
     var escala = ESC_ABRIR, tx = 0, ty = 0;
-    var zoomX = 0;                         // empuje horizontal del zoom (por página)
 
-    var punteros = new Map();                // pointerId -> {x, y}
+    var punteros = new Map();                // identifier -> {x, y}
     var modo = null;                         // 'pan' | 'pinch' | null
     // pellizco
-    var d0 = 0, esc0 = 1, lx0 = 0, ly0 = 0, mx0 = 0, my0 = 0;
+    var d0 = 0, esc0 = 1, lx0 = 0, ly0 = 0;
     // arrastre
     var ultX = 0, ultY = 0;
     // toque / doble-toque
@@ -75,7 +91,7 @@
     }
 
     function aplicar() {
-      capaInt.style.transform =
+      imgZoom.style.transform =
         'translate(' + tx + 'px,' + ty + 'px) scale(' + escala + ')';
     }
 
@@ -94,12 +110,19 @@
       escala = enEscala;
       tx = (sx + sw / 2) - ex - escala * (iw / 2);
       ty = (sy + sh / 2) - ey - escala * (ih / 2);
-      // Empuje horizontal por página (data-zoom-x sobre .cr-capa-int): como
-      // el contenido de algunos intermedios está tirado hacia un extremo del
-      // lienzo, al centrar el marco se recortaba. Se aplica sólo al abrir el
-      // zoom; la vista normal no se toca. Fracción del ancho ya escalado.
-      tx += zoomX * escala * iw;
       aplicar();
+    }
+
+    // Mide la imagen ya cargada y la centra a la escala dada.
+    function medirYCentrar(enEscala) {
+      imgZoom.classList.remove('is-ready');
+      imgZoom.style.transform = '';           // medir sin transform
+      var r = imgZoom.getBoundingClientRect();
+      ex = r.left; ey = r.top; iw = r.width; ih = r.height;
+      var vr = visor.getBoundingClientRect();
+      sx = vr.left; sy = vr.top; sw = vr.width; sh = vr.height;
+      centrar(enEscala);
+      imgZoom.classList.add('is-ready');
     }
 
     function abrir() {
@@ -110,48 +133,34 @@
         if (x) x.click();
       }
 
-      // Guardar el sitio original de la capa para devolverla al cerrar
-      capaInt._visorPadre = capaInt.parentNode;
-      capaInt._visorSiguiente = capaInt.nextSibling;
-      visor.appendChild(capaInt);
-
-      // Quitar transform previo y leer geometría base
-      capaInt.style.transform = '';
-      var r = capaInt.getBoundingClientRect();
-      ex = r.left; ey = r.top; iw = r.width; ih = r.height;
-      var vr = visor.getBoundingClientRect();
-      sx = vr.left; sy = vr.top; sw = vr.width; sh = vr.height;
-
-      // Empuje horizontal propio de esta escena (opcional)
-      var zx = parseFloat(capaInt.getAttribute('data-zoom-x'));
-      zoomX = isNaN(zx) ? 0 : zx;
-
       lienzo.classList.add('zoom-activo');
       visor.classList.add('is-open');
       visor.setAttribute('aria-hidden', 'false');
       btnAbrir.setAttribute('aria-expanded', 'true');
       document.body.style.overflow = 'hidden';   // sin scroll de fondo
-
-      centrar(ESC_ABRIR);
       btnCerrar.focus();
+
+      if (!fuenteZoom) return;               // sin versión optimizada: no hacer nada
+      // Medir y centrar cuando la imagen tenga tamaño (cargada o de caché)
+      if (imgZoom.complete && imgZoom.naturalWidth) {
+        medirYCentrar(ESC_ABRIR);
+      } else {
+        imgZoom.onload = function () { if (abierto()) medirYCentrar(ESC_ABRIR); };
+      }
     }
 
     function cerrar() {
       visor.classList.remove('is-open');
       visor.setAttribute('aria-hidden', 'true');
       btnAbrir.setAttribute('aria-expanded', 'false');
-      btnAbrir.setAttribute('aria-label', 'Ampliar la ilustración');
       document.body.style.overflow = '';
       punteros.clear();
       modo = null;
+      idArrastre = null;
 
-      // Devolver la capa a su sitio y limpiar transform
-      capaInt.style.transform = '';
-      if (capaInt._visorPadre) {
-        capaInt._visorPadre.insertBefore(capaInt, capaInt._visorSiguiente);
-        capaInt._visorPadre = null;
-        capaInt._visorSiguiente = null;
-      }
+      imgZoom.classList.remove('is-ready');
+      imgZoom.style.transform = '';
+      escala = ESC_ABRIR; tx = 0; ty = 0;
       lienzo.classList.remove('zoom-activo');
       btnAbrir.focus();
     }
@@ -179,7 +188,7 @@
         modo = 'pan';
         var s = t[0];
         idArrastre = s.identifier;
-        toqueEnImagen = (e.target === capaInt);
+        toqueEnImagen = (e.target === imgZoom);
         ultX = s.clientX; ultY = s.clientY;
         abajoX = s.clientX; abajoY = s.clientY; abajoT = Date.now();
         movio = false;
@@ -187,7 +196,7 @@
         modo = 'pinch';
         var p = [].slice.call(punteros.values());
         d0 = Math.hypot(p[1].x - p[0].x, p[1].y - p[0].y) || 1;
-        mx0 = (p[0].x + p[1].x) / 2; my0 = (p[0].y + p[1].y) / 2;
+        var mx0 = (p[0].x + p[1].x) / 2, my0 = (p[0].y + p[1].y) / 2;
         esc0 = escala;
         var l = localBajo(mx0, my0);
         lx0 = l[0]; ly0 = l[1];
@@ -263,7 +272,7 @@
             ty = t[0].clientY - ey - escala * l[1];
             limitar(); aplicar();
           } else {
-            escala = ESC_MIN; tx = 0; ty = 0; aplicar();   // ajuste = centrado
+            centrar(ESC_MIN);                  // volver al ajuste centrado
           }
           ultimoToqueT = 0;
           return;
