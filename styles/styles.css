@@ -378,6 +378,14 @@ html { scroll-behavior: smooth; }
     background: transparent !important;
     box-shadow: none !important;
     position: relative;
+    /* La clase .container inyecta padding:0 22px y, con border-box, eso
+       encogía .card-inner/.card-media a (ancho - 44px), dejando las imágenes
+       44px más angostas que el menú fijo (el card-box medía bien, pero su
+       contenido no). En escritorio ya se anula (.card.container en
+       min-width:1101px); aquí se hace lo mismo para móvil. Así .card-media y
+       .card-copy llenan los 342px iguales al header, como en cronograma. */
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 
   .card-inner {
@@ -890,11 +898,88 @@ body.is-leaving .cruce { animation: none; }
   }
   .cr-zoom-close:focus-visible { outline: 3px solid #f4c542; outline-offset: 2px; }
 
+  /* Pista de doble-toque: punto central con DOBLE latido (dos toques) y onda
+     que se expande, más un rótulo. Aparece al ampliar sólo si el usuario aún
+     no ha hecho un doble-toque; en cuanto lo hace, se guarda (localStorage)
+     y ya no vuelve a aparecer en ninguna sala. pointer-events:none para no
+     interferir con los gestos sobre la imagen. */
+  .cr-zoom-hint {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 300ms ease, visibility 300ms ease;
+  }
+  .cr-zoom-hint.is-on { opacity: 1; visibility: visible; }
+  .cr-zoom-hint .badge {
+    position: relative;
+    width: 16px;
+    height: 16px;
+  }
+  .cr-zoom-hint .dot,
+  .cr-zoom-hint .ring {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border-radius: 50%;
+    box-sizing: border-box;
+  }
+  .cr-zoom-hint .dot {
+    background: rgba(255, 255, 255, .95);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .45);
+    animation: crHintDot 1.6s ease-in-out infinite;
+  }
+  .cr-zoom-hint .ring {
+    border: 2px solid rgba(255, 255, 255, .85);
+    animation: crHintRing 1.6s ease-out infinite;
+  }
+  .cr-zoom-hint .cap {
+    font-family: var(--light-sans);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: .4px;
+    color: rgba(255, 255, 255, .95);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, .55);
+    white-space: nowrap;
+  }
+  /* Doble latido: dos golpes seguidos y luego reposo (≈1.6s por ciclo) */
+  @keyframes crHintDot {
+    0%, 100% { transform: scale(1); }
+    5%  { transform: scale(1.45); }
+    10% { transform: scale(1); }
+    18% { transform: scale(1.45); }
+    23% { transform: scale(1); }
+  }
+  @keyframes crHintRing {
+    0%   { transform: scale(1); opacity: .85; }
+    12%  { transform: scale(3); opacity: 0; }
+    16%  { transform: scale(1); opacity: 0; }
+    20%  { transform: scale(1); opacity: .85; }
+    32%  { transform: scale(3); opacity: 0; }
+    100% { transform: scale(3); opacity: 0; }
+  }
+
 }
 
-/* Menos movimiento: el visor aparece/desaparece sin fundido */
+/* Menos movimiento: el visor aparece/desaparece sin fundido y la pista de
+   doble-toque queda fija (sin parpadeo), conservando el rótulo */
 @media (prefers-reduced-motion: reduce) {
   .cr-zoom,
   .cr-zoom-btn,
-  .cruce-puntos { transition: none !important; }
+  .cruce-puntos,
+  .cr-zoom-hint { transition: none !important; }
+  .cr-zoom-hint .dot,
+  .cr-zoom-hint .ring { animation: none !important; }
+  .cr-zoom-hint .ring { display: none; }
 }
