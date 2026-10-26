@@ -721,3 +721,44 @@ body.is-leaving .cruce { animation: none; }
     min-height: 100dvh;
   }
 }
+
+/* --------------------------- Ajustes de móvil ---------------------------
+   Todo lo de este bloque aplica sólo a pantallas angostas: el escritorio no
+   cambia en nada. */
+
+/* Card e imágenes al MISMO ancho que el menú fijo (24px de margen por lado);
+   antes el card iba con --edge-padding (22px) y sobresalía 2px por lado. */
+@media (max-width: 1100px) {
+  .card { width: calc(100% - 48px) !important; }
+}
+
+/* Escenas: la fila de botones (< y DAR PASO) siempre a la misma altura. El
+   #cta-recorrer global impone align-self/margin-top y, en cuanto la fila
+   crece (zoom de texto, fuente del sistema), el < se desalineaba. */
+@media (max-width: 700px) {
+  .cruce-acciones { align-items: center; }
+  .cruce-acciones #cta-recorrer {
+    /* !important: el #cta-recorrer global (móvil) impone margin-top:12px,
+       que desplazaba DAR PASO 6px respecto al < */
+    align-self: center !important;
+    margin-top: 0 !important;
+  }
+  .cruce-acciones .btn-primary {
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Ventana emergente: el cuerpo del texto en negrita — sobre los colores
+     nuevos de las tarjetas (oro, turquesa, marrón) el peso 400 se perdía. */
+  .cr-text { font-weight: 700; }
+}
+
+/* Invertir el orden de la tarjeta en móvil: card de texto arriba y imagen
+   abajo. Se activa con la clase .invertir-tarjeta en el <main> de las
+   páginas que la piden; el resto mantiene la imagen arriba. */
+@media (max-width: 1100px) {
+  .invertir-tarjeta .card-copy { order: 1 !important; }
+  .invertir-tarjeta .card-media { order: 2 !important; }
+}
