@@ -27,12 +27,15 @@
     var capaInt = lienzo.querySelector('.cr-capa-int');
     if (!capaInt) return;
 
+    // Nombre de la escena (cruce, bodega, ...): se deriva del src de la capa
+    var mSrc = (capaInt.getAttribute('src') || '').match(/recorrido-(.+)-intermedio\.png/);
+    var sala = mSrc ? mSrc[1] : '';
+
     // Ruta de la versión optimizada. Se puede forzar con data-zoom-src sobre
-    // la capa; si no, se deriva del src (recorrido-<sala>-intermedio.png).
+    // la capa; si no, se deriva del nombre de la escena.
     var fuenteZoom = capaInt.getAttribute('data-zoom-src');
     if (!fuenteZoom) {
-      var m = (capaInt.getAttribute('src') || '').match(/recorrido-(.+)-intermedio\.png/);
-      fuenteZoom = m ? 'assets/images/zoom-' + m[1] + '.png' : '';
+      fuenteZoom = sala ? 'assets/images/zoom-' + sala + '.png' : '';
     }
 
     // ----- Botón [+] inyectado en la escena (esquina superior izquierda) -----
@@ -66,6 +69,26 @@
     imgZoom.decoding = 'async';
     if (fuenteZoom) imgZoom.setAttribute('src', fuenteZoom);
     visor.appendChild(imgZoom);
+
+    // Pista de doble-toque: sólo se muestra mientras el usuario no haya hecho
+    // aún su primer doble-toque. En cuanto lo hace, queda marcada en
+    // localStorage y no vuelve a aparecer en ninguna sala.
+    var hint = document.createElement('div');
+    hint.className = 'cr-zoom-hint';
+    hint.setAttribute('aria-hidden', 'true');
+    hint.innerHTML =
+      '<span class="badge"><span class="ring"></span><span class="dot"></span></span>' +
+      '<span class="cap">Doble toque para zoom</span>';
+    visor.appendChild(hint);
+
+    var KEY_HINT = 'museo-canario:doble-toque-aprendido';
+    function yaAprendido() {
+      try { return window.localStorage.getItem(KEY_HINT) === '1'; }
+      catch (e) { return false; }        // sin storage: se vuelve a mostrar
+    }
+    function marcarAprendido() {
+      try { window.localStorage.setItem(KEY_HINT, '1'); } catch (e) { /* noop */ }
+    }
 
     document.body.appendChild(visor);
 
@@ -140,6 +163,11 @@
       document.body.style.overflow = 'hidden';   // sin scroll de fondo
       btnCerrar.focus();
 
+      // La pista de doble-toque sólo aparece en la sala del CRUCE (la primera
+      // del recorrido) y sólo mientras el usuario no haya hecho su primer
+      // doble-toque; en cuanto lo hace, no vuelve a aparecer (localStorage).
+      hint.classList.toggle('is-on', sala === 'cruce' && !yaAprendido());
+
       if (!fuenteZoom) return;               // sin versión optimizada: no hacer nada
       // Medir y centrar cuando la imagen tenga tamaño (cargada o de caché)
       if (imgZoom.complete && imgZoom.naturalWidth) {
@@ -157,6 +185,7 @@
       punteros.clear();
       modo = null;
       idArrastre = null;
+      hint.classList.remove('is-on');      // la pista no persiste tras cerrar
 
       imgZoom.classList.remove('is-ready');
       imgZoom.style.transform = '';
@@ -274,6 +303,10 @@
           } else {
             centrar(ESC_MIN);                  // volver al ajuste centrado
           }
+          // Primer doble-toque hecho: el gesto ya se entendió. Se marca en
+          // localStorage y la pista NO vuelve a aparecer en ninguna sala.
+          marcarAprendido();
+          hint.classList.remove('is-on');
           ultimoToqueT = 0;
           return;
         }
