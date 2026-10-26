@@ -297,6 +297,20 @@
     visor.addEventListener('touchend', onTouchEnd);
     visor.addEventListener('touchcancel', onTouchCancel);
 
+    // Guardia global de gestos: el viewport no desactiva el zoom del usuario,
+    // y en varios navegadores móviles el touch-action:none del elemento no
+    // basta para DOS dedos: el navegador se queda con el pinch-zoom nativo y
+    // dispara touchcancel, matando el pellizco. Impedir el default de
+    // touchmove a nivel de documento (sólo con el visor abierto) garantiza
+    // que el pellizco llegue entero a nuestro handler. Con el visor cerrado
+    // no hace nada, así el scroll de la página sigue normal.
+    function guardGestos(e) { if (abierto()) e.preventDefault(); }
+    document.addEventListener('touchmove', guardGestos, { passive: false });
+    // iOS Safari: su pellizco de dos dedos usa eventos propios (gesture*) que
+    // no siempre los cubre touch-action. Bloquearlos con el visor abierto.
+    document.addEventListener('gesturestart', guardGestos, { passive: false });
+    document.addEventListener('gesturechange', guardGestos, { passive: false });
+
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && abierto()) cerrar();
     });
