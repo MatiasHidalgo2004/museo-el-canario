@@ -15,6 +15,30 @@
 (function () {
   'use strict';
 
+  // Ancho real de la barra de desplazamiento → --sbw en :root. Compensa el
+  // cálculo del ancho del header (calc(100% - 48px + var(--sbw))) para que
+  // el menú fijo mida lo mismo en páginas con y sin scroll, sin reservar
+  // hueco con scrollbar-gutter (dejaba una franja verde en el borde derecho).
+  //
+  // Se mide con una sonda de width:100vw y no con innerWidth: las unidades vw
+  // SÍ incluyen la barra, mientras que innerWidth la excluye en algunos
+  // entornos y entonces la resta daba 0 (sin compensación).
+  var ajustaScrollbar = function () {
+    var sonda = document.createElement('div');
+    sonda.style.cssText = 'position:absolute;left:-10000px;top:0;width:100vw;height:0';
+    document.documentElement.appendChild(sonda);
+    var vw = sonda.offsetWidth;
+    document.documentElement.removeChild(sonda);
+    var sbw = vw - (document.documentElement.clientWidth || 0);
+    document.documentElement.style.setProperty('--sbw', (sbw > 0 ? sbw : 0) + 'px');
+  };
+  ajustaScrollbar();
+  window.addEventListener('resize', ajustaScrollbar);
+  if ('ResizeObserver' in window) {
+    // la barra puede aparecer al terminar de cargar imágenes, sin resize real
+    new ResizeObserver(ajustaScrollbar).observe(document.documentElement);
+  }
+
   var toggle = document.getElementById('menuToggle');
   var menu = document.getElementById('floatingMenu');
   if (!toggle || !menu) return;
