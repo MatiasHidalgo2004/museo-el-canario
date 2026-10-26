@@ -299,21 +299,21 @@
         height: 20px;
         margin: -10px 0 0 -10px;
       }
-      /* Sólo en móvil: el intermedio crece un 5% y además se corre 6% más
-         a la derecha (right: -6%): el borde derecho sale del lienzo y se
+      /* Sólo en móvil: el intermedio crece un 15% y además se corre 16% más
+         a la derecha (right: -16%): el borde derecho sale del lienzo y se
          recorta, y por el otro lado se descubre un poco más de escena. Los
          puntos lo siguen con exactamente el mismo desplazamiento desde un
          contenedor del 105% anclado a la misma esquina: se reubican, pero
          su marcador no crece. En escritorio no se aplica ninguno de los dos. */
       .cr-capa-int {
-        inset: auto -6% 0 auto;
-        width: 105%;
+        inset: auto -16% 0 auto;
+        width: 116%;
         height: auto;
       }
       .cruce-puntos {
-        inset: auto -6% 0 auto;
-        width: 105%;
-        height: 105%;
+        inset: auto -16% 0 auto;
+        width: 116%;
+        height: 116%;
       }
       /* La ventana de las fichas ocupa exactamente la imagen de la escena:
          mismo alto y ancho que recorrido-cruce-fondo.png y en la misma
