@@ -23,12 +23,11 @@
 
 /* Reset / base */
 *{box-sizing:border-box}
-/* Reserva SIEMPRE el hueco de la barra de desplazamiento: sin esto, el
-   viewport del que calcula width:100% del header fijo (calc(100% - 48px))
-   medía ~15px menos en las páginas con scroll que en las sin él, y el menú
-   fijo se veía más pequeño sólo en algunas páginas. Con gutter estable,
-   todas las páginas reservan el mismo ancho y el header sale igual. */
-html { scrollbar-gutter: stable; }
+/* El ancho real de la barra de desplazamiento se mide con JS (--sbw, en
+   menu.js) y se suma al cálculo del header: así el menú fijo mide lo mismo
+   con y sin scroll. Antes se usaba scrollbar-gutter: stable, que reservaba
+   15px en las páginas sin scroll y dejaba una franja del color de fondo
+   asomando por el borde derecho. */
 
 html,body{
   margin:0;
@@ -63,7 +62,10 @@ body{overflow:visible}
   left:50%;
   transform:translateX(-50%);
   z-index:120;
-  width:calc(100% - 48px);
+  /* + var(--sbw): en las páginas con scroll el viewport (100%) es 15px más
+     angosto; sumando el ancho de la barra el header mide exactamente lo mismo
+     con y sin scroll. --sbw la calcula menu.js (0 si no hay barra). */
+  width:calc(100% - 48px + var(--sbw, 0px));
   max-width:var(--container);
   height:var(--header-height);
   display:flex;
