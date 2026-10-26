@@ -146,7 +146,7 @@ html { scroll-behavior: smooth; }
 .floating-menu.open{opacity:1;visibility:visible;transform:translateY(0) scale(1);pointer-events:auto}
 .floating-inner{padding:6px}
 .floating-nav{display:flex;flex-direction:column;gap:10px}
-.floating-nav a{color:var(--ink);text-decoration:none;padding:10px;border-radius:8px;font-family:var(--light-sans);font-weight:600}
+.floating-nav a{color:var(--ink);text-decoration:none;padding:10px;border-radius:8px;font-family:var(--light-sans);font-weight:700}
 .floating-nav a:hover{color:var(--accent)}
 
 /* Tamaño de las ventanas emergentes de las escenas (.cr-det): lo gobierna
