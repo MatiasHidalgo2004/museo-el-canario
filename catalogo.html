@@ -129,6 +129,13 @@
     .cat-top:hover { background: var(--accent); border-color: var(--accent); }
     .cat-top:focus-visible { outline: 3px solid #f4c542; outline-offset: 3px; }
 
+    /* Volver atrás bajo el texto de entrada: mismo estilo de botón que el
+       resto del sitio (.btn-primary no trae padding: hay que darle).
+       Escritorio: justificado a la izquierda, alineado con el título.
+       Móvil/tablet: centrado. */
+    .cat-volver-fila { margin: 18px 0 2px; }
+    .cat-volver { display: inline-flex; padding: 10px 28px; margin-left: 48px; }
+
     .cat-escena { margin-top: 40px; }
     .cat-sub {
       padding-left: 48px;   /* mismo margen de texto que .card-copy */
@@ -215,6 +222,8 @@
     /* Mismo margen de texto que .card-copy en tablet/móvil (28px) */
     @media (max-width: 1100px) {
       .cat-titulo, .cat-sub, .cat-bajada, .cat-indice { padding-left: 28px; }
+      .cat-volver-fila { text-align: center; }   /* centrado en móvil */
+      .cat-volver { margin-left: 0; }
     }
 
     /* Teléfono: ficha más angosta, icono arriba */
@@ -291,6 +300,12 @@
       <div class="cat-wrap">
         <h1 class="cat-titulo">Catálogo de objetos</h1>
         <p class="cat-bajada">Aquí podra ver una selección de 70 piezas que forman parte del recorrido en nuestro museo representativa de cada estancia de la casa y sus alrededores.</p>
+
+        <!-- Volver atrás, bajo el texto de entrada y antes de partir el catálogo:
+             a la izquierda en escritorio y centrado en móvil -->
+        <div class="cat-volver-fila">
+          <a class="btn-primary cat-volver" href="index.html">VOLVER ATRÁS</a>
+        </div>
 
         <!-- Índice: salto directo a cada categoría (anclas esc-*) -->
         <nav class="cat-indice" aria-label="Categorías del catálogo">
