@@ -762,3 +762,133 @@ body.is-leaving .cruce { animation: none; }
   .invertir-tarjeta .card-copy { order: 1 !important; }
   .invertir-tarjeta .card-media { order: 2 !important; }
 }
+
+/* ------- Zoom de la ilustración en las salas del recorrido (solo móvil) -------
+   Botón [+] en la esquina superior de la escena. Al abrirlo, la capa
+   intermedia (.cr-capa-int) se despega del marco chico y se muestra casi a
+   pantalla completa dentro de un visor fijo; todo lo demás (fondo, texto,
+   header y puntos) queda difuminado detrás. Se cierra con [-], Escape o
+   tocando el fondo difuminado. La lógica vive en scripts/visor.js, que sólo
+   se instala en pantallas angostas. El botón y el visor están ocultos por
+   defecto (escritorio) y sólo se activan dentro de este media query. */
+
+.cr-zoom-btn { display: none; }
+.cr-zoom { display: none; }
+
+@media (max-width: 700px) {
+
+  /* Botón de apertura: cristal oscuro como el header, sobre la escena */
+  .cr-zoom-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 6;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;              /* área de toque cómoda */
+    height: 44px;
+    padding: 0 10px;
+    border: 1px solid rgba(255, 255, 255, .28);
+    border-radius: 12px;
+    background: rgba(14, 24, 19, .55);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    backdrop-filter: blur(10px) saturate(140%);
+    color: #fff;
+    font-family: var(--light-sans);
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1;
+    letter-spacing: .5px;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .28);
+    transition: background-color var(--transition), transform var(--transition);
+  }
+  .cr-zoom-btn:hover { background: rgba(14, 24, 19, .7); }
+  .cr-zoom-btn:active { transform: scale(.96); }
+  .cr-zoom-btn:focus-visible { outline: 3px solid #f4c542; outline-offset: 2px; }
+
+  /* Mientras se amplía, los puntos de la escena dejan de verse */
+  .cruce-puntos { transition: opacity 220ms ease; }
+  .cruce-lienzo.zoom-activo .cruce-puntos { opacity: 0; }
+
+  /* Visor fijo: cubre la ventana y difumina/tiñe todo lo de detrás */
+  .cr-zoom {
+    position: fixed;
+    inset: 0;
+    z-index: 200;                /* por encima del header (120) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;            /* sin barras al ampliar; recorta en el borde */
+    padding: 3vh 3vw;
+    background: rgba(10, 18, 14, .5);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+    backdrop-filter: blur(10px) saturate(120%);
+    touch-action: none;          /* los gestos los maneja el JS */
+    overscroll-behavior: contain;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 240ms ease, visibility 240ms ease;
+  }
+  .cr-zoom.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  /* La capa intermedia, ya dentro del visor: contenida y lista para el zoom */
+  .cr-zoom .cr-capa-int {
+    position: static;
+    inset: auto;
+    width: auto;
+    height: auto;
+    max-width: 96vw;
+    max-height: 92vh;
+    object-fit: contain;
+    z-index: 1;
+    border: 0;
+    border-radius: 10px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, .45);
+    transform-origin: 0 0;       /* el JS calcula pan/zoom desde la esquina */
+    will-change: transform;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  /* Botón de cierre [-] flotando sobre el visor */
+  .cr-zoom-close {
+    position: absolute;
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    left: 12px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    height: 44px;
+    padding: 0 10px;
+    border: 1px solid rgba(255, 255, 255, .3);
+    border-radius: 12px;
+    background: rgba(14, 24, 19, .7);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    backdrop-filter: blur(10px) saturate(140%);
+    color: #fff;
+    font-family: var(--light-sans);
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .35);
+  }
+  .cr-zoom-close:focus-visible { outline: 3px solid #f4c542; outline-offset: 2px; }
+
+}
+
+/* Menos movimiento: el visor aparece/desaparece sin fundido */
+@media (prefers-reduced-motion: reduce) {
+  .cr-zoom,
+  .cr-zoom-btn,
+  .cruce-puntos { transition: none !important; }
+}
