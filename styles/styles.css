@@ -838,27 +838,30 @@ body.is-leaving .cruce { animation: none; }
     pointer-events: auto;
   }
 
-  /* La capa intermedia, ya dentro del visor: contenida y lista para el zoom */
-  .cr-zoom .cr-capa-int {
+  /* La ilustración recortada al contenido, ya dentro del visor: contenida y
+     lista para el zoom. Se carga desde un <img> propio (versión optimizada),
+     sin tocar la capa de la escena. */
+  .cr-zoom-img {
     position: static;
-    inset: auto;
     width: auto;
     height: auto;
     max-width: 96vw;
     max-height: 92vh;
     object-fit: contain;
     z-index: 1;
-    border: 0;
     border-radius: 10px;
     box-shadow: 0 20px 50px rgba(0, 0, 0, .45);
     transform-origin: 0 0;       /* el JS calcula pan/zoom desde la esquina */
     will-change: transform;
     user-select: none;
     -webkit-user-select: none;
-    -webkit-touch-callout: none;  /* sin menú de iOS al mantener pulsado */
+    -webkit-touch-callout: none;
     -webkit-user-drag: none;
-    touch-action: none;           /* clave: el navegador no intercepta pellizco/doble-toque */
+    touch-action: none;          /* clave: el navegador no intercepta pellizco/doble-toque */
+    opacity: 0;                  /* aparece cuando termina de cargar y se centra */
+    transition: opacity 200ms ease;
   }
+  .cr-zoom-img.is-ready { opacity: 1; }
 
   /* Botón de cierre [-] flotando sobre el visor */
   .cr-zoom-close {
