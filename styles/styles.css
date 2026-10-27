@@ -983,3 +983,19 @@ body.is-leaving .cruce { animation: none; }
   .cr-zoom-hint .ring { animation: none !important; }
   .cr-zoom-hint .ring { display: none; }
 }
+
+/* ---------------- Puntos vistos del recorrido ----------------
+   Indicador de qué puntos ya abrió el visitante: dejan de pulsar y quedan
+   translúcidos (siguen funcionando igual). Sólo cambia la apariencia.
+   La clase .is-visto la pone scripts/puntos-vistos.js; el estado vive en
+   sessionStorage (se borra al cerrar la pestaña). Va en styles.css porque
+   gana especificidad sobre las reglas inline de las páginas, así no hay que
+   tocar sus estilos. */
+.cruce-pt.is-visto { opacity: .6; transition: opacity 220ms ease; }
+.cruce-pt.is-visto::after { animation: none; opacity: 0; }
+/* Con la ficha abierta, el punto activo vuelve a opacidad total para que se
+   lea bien cuál está abierto; al cerrar, vuelve a translúcido. */
+.cruce-pt.is-visto.is-on { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .cruce-pt.is-visto { transition: none; }
+}
