@@ -1,10 +1,12 @@
 /* Visor de zoom de la ilustración (sólo móvil).
    En las salas del recorrido añade un botón [+] sobre la escena. Al pulsarlo,
-   se abre un visor fijo con una VERSIÓN OPTIMIZADA y recortada al contenido
-   de la ilustración (assets/images/zoom-<sala>.png), casi a pantalla completa
-   y centrada, de modo que se ve entera sin recortes. Todo lo demás (escena,
-   texto, header, puntos) queda difuminado detrás por el CSS (backdrop-filter
-   del overlay). Dentro del visor se puede pellizcar, doble-toque y arrastrar.
+   se abre un visor fijo con la versión SVG vectorial, recortada y optimizada,
+   de la ilustración (assets/svg/zoom-<sala>.svg), casi a pantalla completa y
+   centrada, de modo que se ve entera sin recortes y con nitidez al ampliar
+   (los SVG re-rasterizan a la escala del zoom; si un SVG fallara, se cae al
+   PNG equivalente de assets/images/). Todo lo demás (escena, texto, header,
+   puntos) queda difuminado detrás por el CSS (backdrop-filter del overlay).
+   Dentro del visor se puede pellizcar, doble-toque y arrastrar.
    Se cierra con [-], Escape o tocando el fondo difuminado.
    La capa de la escena NO se mueve: el visor usa su propio <img>. Sin dependencias. */
 (function () {
@@ -31,12 +33,16 @@
     var mSrc = (capaInt.getAttribute('src') || '').match(/recorrido-(.+)-intermedio\.png/);
     var sala = mSrc ? mSrc[1] : '';
 
-    // Ruta de la versión optimizada. Se puede forzar con data-zoom-src sobre
-    // la capa; si no, se deriva del nombre de la escena.
+    // Ruta de la versión de zoom: SVG vectorial (más nítido al ampliar y más
+    // ligero tras optimizar). Se puede forzar con data-zoom-src sobre la capa;
+    // si no, se deriva del nombre de la escena.
     var fuenteZoom = capaInt.getAttribute('data-zoom-src');
     if (!fuenteZoom) {
-      fuenteZoom = sala ? 'assets/images/zoom-' + sala + '.png' : '';
+      fuenteZoom = sala ? 'assets/svg/zoom-' + sala + '.svg' : '';
     }
+    // Respaldo: si el SVG no cargara, se cae al PNG optimizado equivalente.
+    var fuenteRespaldo = sala ? 'assets/images/zoom-' + sala + '.png' : '';
+    var intentoRespaldo = false;
 
     // ----- Botón [+] inyectado en la escena (esquina superior izquierda) -----
     var btnAbrir = document.createElement('button');
@@ -62,11 +68,18 @@
     btnCerrar.setAttribute('aria-label', 'Reducir la ilustración');
     visor.appendChild(btnCerrar);
 
-    // Imagen del visor (versión optimizada, recortada al contenido)
+    // Imagen del visor (SVG vectorial; si falla, PNG de respaldo)
     var imgZoom = document.createElement('img');
     imgZoom.className = 'cr-zoom-img';
     imgZoom.alt = capaInt.getAttribute('alt') || 'Ilustración ampliada';
     imgZoom.decoding = 'async';
+    imgZoom.onerror = function () {
+      // Un solo intento de respaldo, para no entrar en bucle si el PNG
+      // tampoco existe.
+      if (intentoRespaldo || !fuenteRespaldo) return;
+      intentoRespaldo = true;
+      imgZoom.setAttribute('src', fuenteRespaldo);
+    };
     if (fuenteZoom) imgZoom.setAttribute('src', fuenteZoom);
     visor.appendChild(imgZoom);
 
@@ -81,7 +94,10 @@
       '<span class="cap">Doble toque para zoom</span>';
     visor.appendChild(hint);
 
-    var KEY_HINT = 'museo-canario:doble-toque-aprendido';
+    // v2: clave con versión. La v1 quedó marcada durante las pruebas previas
+    // (cuando la pista aparecía en todas las salas) y bloqueaba la pista en
+    // cruce para siempre; al renombrar, esos valores viejos se ignoran.
+    var KEY_HINT = 'museo-canario:doble-toque-aprendido:v2';
     function yaAprendido() {
       try { return window.localStorage.getItem(KEY_HINT) === '1'; }
       catch (e) { return false; }        // sin storage: se vuelve a mostrar
@@ -303,9 +319,11 @@
           } else {
             centrar(ESC_MIN);                  // volver al ajuste centrado
           }
-          // Primer doble-toque hecho: el gesto ya se entendió. Se marca en
-          // localStorage y la pista NO vuelve a aparecer en ninguna sala.
-          marcarAprendido();
+          // Primer doble-toque hecho EN EL CRUCE (donde se muestra la pista):
+          // el gesto ya se entendió y la pista no vuelve a aparecer en ninguna
+          // sala. Se marca sólo aquí para que un doble-toque en otras salas
+          // (bodega, etc.), donde la pista nunca se ve, no la consuma a escondidas.
+          if (sala === 'cruce') marcarAprendido();
           hint.classList.remove('is-on');
           ultimoToqueT = 0;
           return;
