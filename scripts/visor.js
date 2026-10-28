@@ -5,7 +5,10 @@
    centrada, de modo que se ve entera sin recortes y con nitidez al ampliar
    (los SVG re-rasterizan a la escala del zoom; si un SVG fallara, se cae al
    PNG equivalente de assets/images/). Todo lo demás (escena, texto, header,
-   puntos) queda difuminado detrás por el CSS (backdrop-filter del overlay).
+   puntos) queda difuminado detrás por el CSS (backdrop-filter del overlay),
+   con una capa de atmósfera encima (estelas de luz y polvo flotante) para
+   que ese fondo no se vea estático. La imagen sólo usa will-change durante
+   el gesto, para re-rasterizarse nítida al soltar (clase .is-zooming).
    Dentro del visor se puede pellizcar, doble-toque y arrastrar.
    Se cierra con [-], Escape o tocando el fondo difuminado.
    La capa de la escena NO se mueve: el visor usa su propio <img>. Sin dependencias. */
@@ -67,6 +70,24 @@
     btnCerrar.textContent = '[-]';
     btnCerrar.setAttribute('aria-label', 'Reducir la ilustración');
     visor.appendChild(btnCerrar);
+
+    // ----- Atmósfera del fondo: estelas de luz + polvo flotante -----
+    // Sólo marcado: el movimiento vive en los keyframes de styles.css.
+    // Va tras el [-] pero con z-index 0, así queda detrás de la imagen.
+    var atm = document.createElement('div');
+    atm.className = 'cr-zoom-atm';
+    atm.setAttribute('aria-hidden', 'true');
+    atm.innerHTML =
+      '<span class="atm-estela atm-e1"></span>' +
+      '<span class="atm-estela atm-e2"></span>' +
+      '<span class="atm-estela atm-e3"></span>' +
+      '<span class="atm-polvo atm-p1"></span>' +
+      '<span class="atm-polvo atm-p2"></span>' +
+      '<span class="atm-polvo atm-p3"></span>' +
+      '<span class="atm-polvo atm-p4"></span>' +
+      '<span class="atm-polvo atm-p5"></span>' +
+      '<span class="atm-polvo atm-p6"></span>';
+    visor.appendChild(atm);
 
     // Imagen del visor (SVG vectorial; si falla, PNG de respaldo)
     var imgZoom = document.createElement('img');
@@ -204,6 +225,7 @@
       hint.classList.remove('is-on');      // la pista no persiste tras cerrar
 
       imgZoom.classList.remove('is-ready');
+      imgZoom.classList.remove('is-zooming');
       imgZoom.style.transform = '';
       escala = ESC_ABRIR; tx = 0; ty = 0;
       lienzo.classList.remove('zoom-activo');
@@ -223,6 +245,12 @@
     function onTouchStart(e) {
       if (e.target === btnCerrar) return;   // dejar que el botón genere su click
       e.preventDefault();                   // bloquear zoom/scroll nativo
+
+      // will-change sólo mientras hay gesto: al soltar, la capa se libera y
+      // el navegador re-rasteriza el SVG a resolución completa (con la
+      // propiedad fija, la textura quedaba congelada a tamaño inicial y el
+      // zoom se veía borroso). Ver .cr-zoom-img.is-zooming en styles.css.
+      imgZoom.classList.add('is-zooming');
 
       var t = e.changedTouches;
       for (var i = 0; i < t.length; i++) {
@@ -296,7 +324,9 @@
       }
       if (punteros.size > 0) return;
 
-      // todos los dedos levantados
+      // todos los dedos levantados: fin del gesto → soltar la capa para que
+      // se re-rasterice nítida a la escala a la que haya quedado la imagen
+      imgZoom.classList.remove('is-zooming');
       var eraDelArrastre = (idArrastre === t[0].identifier);
       idArrastre = null;
       modo = null;
@@ -338,7 +368,10 @@
     function onTouchCancel(e) {
       var t = e.changedTouches;
       for (var i = 0; i < t.length; i++) punteros.delete(t[i].identifier);
-      if (punteros.size === 0) { modo = null; idArrastre = null; }
+      if (punteros.size === 0) {
+        modo = null; idArrastre = null;
+        imgZoom.classList.remove('is-zooming');
+      }
     }
 
     btnAbrir.addEventListener('click', abrir);
