@@ -775,10 +775,12 @@ body.is-leaving .cruce { animation: none; }
    Botón [+] en la esquina superior de la escena. Al abrirlo, la capa
    intermedia (.cr-capa-int) se despega del marco chico y se muestra casi a
    pantalla completa dentro de un visor fijo; todo lo demás (fondo, texto,
-   header y puntos) queda difuminado detrás. Se cierra con [-], Escape o
-   tocando el fondo difuminado. La lógica vive en scripts/visor.js, que sólo
-   se instala en pantallas angostas. El botón y el visor están ocultos por
-   defecto (escritorio) y sólo se activan dentro de este media query. */
+   header y puntos) queda difuminado detrás. Ese difuminado lleva una capa
+   de atmósfera (estelas de luz + polvo flotante) para que no se vea estático.
+   Se cierra con [-], Escape o tocando el fondo difuminado. La lógica vive en
+   scripts/visor.js, que sólo se instala en pantallas angostas. El botón y el
+   visor están ocultos por defecto (escritorio) y sólo se activan dentro de
+   este media query. */
 
 .cr-zoom-btn { display: none; }
 .cr-zoom { display: none; }
@@ -846,6 +848,103 @@ body.is-leaving .cruce { animation: none; }
     pointer-events: auto;
   }
 
+  /* ------- Atmósfera del visor: estelas de luz + polvo flotante -------
+     Capa decorativa (inyectada por scripts/visor.js) detrás de la ilustración:
+     da vida al fondo difuminado sin restarle legibilidad. Sólo se animan
+     transform/opacity (GPU) y los bordes suaves vienen del propio degradado
+     (sin filter:blur, que en móvil sale caro); pointer-events:none para no
+     interferir con los gestos sobre la imagen ni con el toque de cierre. */
+  .cr-zoom-atm {
+    position: absolute;
+    inset: 0;
+    z-index: 0;                 /* imagen 1, [-] 2, pista 3: la atmósfera queda al fondo */
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .atm-estela,
+  .atm-polvo {
+    position: absolute;
+    display: block;
+    pointer-events: none;
+  }
+
+  /* Estelas: manchas alargadas y rotadas de luz cálida (crema→dorado),
+     apenas visibles a propósito: sólo se perciben al desplazarse. El
+     transform base conserva la inclinación si no hay animación. */
+  .atm-estela {
+    border-radius: 50%;
+    background: radial-gradient(closest-side,
+      rgba(255, 238, 190, .13),
+      rgba(244, 197, 66, .06) 48%,
+      rgba(244, 197, 66, 0) 75%);
+  }
+  .atm-e1 {                       /* diagonal principal, desde arriba-izquierda */
+    width: 150vmax; height: 30vmax;
+    top: -12vmax; left: -38vmax;
+    transform: rotate(-26deg);
+    animation: atmEstela1 64s ease-in-out infinite alternate;
+  }
+  @keyframes atmEstela1 {
+    from { transform: rotate(-26deg) translate3d(0, 0, 0); }
+    to   { transform: rotate(-22deg) translate3d(9vmax, 4vmax, 0); }
+  }
+  .atm-e2 {                       /* más tenue, cruzando desde la derecha */
+    width: 130vmax; height: 22vmax;
+    top: 36%; left: -28vmax;
+    transform: rotate(16deg);
+    animation: atmEstela2 82s ease-in-out infinite alternate;
+  }
+  @keyframes atmEstela2 {
+    from { transform: rotate(16deg) translate3d(0, 0, 0); }
+    to   { transform: rotate(19deg) translate3d(-7vmax, 5vmax, 0); }
+  }
+  .atm-e3 {                       /* rasa, rozando el borde inferior */
+    width: 90vmax; height: 16vmax;
+    bottom: -6vmax; right: -32vmax;
+    transform: rotate(-10deg);
+    animation: atmEstela3 54s ease-in-out infinite alternate;
+  }
+  @keyframes atmEstela3 {
+    from { transform: rotate(-10deg) translate3d(0, 0, 0); }
+    to   { transform: rotate(-7deg) translate3d(6vmax, -3vmax, 0); }
+  }
+
+  /* Polvo/pelusa: motas diminutas con el borde difuminado por el propio
+     degradado, a distintas alturas y con deriva + parpadeo muy lentos.
+     Tres keyframes (A/B/C) reutilizados con duraciones y retardos distintos
+     para que nunca se muevan al unísono. Sin animación queda un campo fijo. */
+  .atm-polvo {
+    border-radius: 50%;
+    opacity: .4;
+    background: radial-gradient(circle,
+      rgba(255, 249, 232, .6),
+      rgba(255, 249, 232, 0) 70%);
+  }
+  .atm-p1 { top: 14%; left: 18%; width: 6px; height: 6px;
+            animation: atmPolvoA 38s ease-in-out infinite alternate; }
+  .atm-p2 { top: 62%; left: 12%; width: 4px; height: 4px;
+            animation: atmPolvoB 47s ease-in-out -12s infinite alternate; }
+  .atm-p3 { top: 28%; left: 74%; width: 8px; height: 8px;
+            animation: atmPolvoC 56s ease-in-out -24s infinite alternate; }
+  .atm-p4 { top: 76%; left: 68%; width: 5px; height: 5px;
+            animation: atmPolvoA 44s ease-in-out -8s infinite alternate; }
+  .atm-p5 { top: 46%; left: 40%; width: 4px; height: 4px;
+            animation: atmPolvoB 34s ease-in-out -18s infinite alternate; }
+  .atm-p6 { top: 84%; left: 34%; width: 7px; height: 7px;
+            animation: atmPolvoC 62s ease-in-out -30s infinite alternate; }
+  @keyframes atmPolvoA {
+    from { transform: translate3d(0, 0, 0); opacity: .18; }
+    to   { transform: translate3d(24px, -38px, 0); opacity: .55; }
+  }
+  @keyframes atmPolvoB {
+    from { transform: translate3d(0, 0, 0); opacity: .5; }
+    to   { transform: translate3d(-30px, 22px, 0); opacity: .15; }
+  }
+  @keyframes atmPolvoC {
+    from { transform: translate3d(0, 0, 0); opacity: .12; }
+    to   { transform: translate3d(18px, 30px, 0); opacity: .5; }
+  }
+
   /* La ilustración recortada al contenido, ya dentro del visor: contenida y
      lista para el zoom. Se carga desde un <img> propio (versión optimizada),
      sin tocar la capa de la escena. */
@@ -860,7 +959,6 @@ body.is-leaving .cruce { animation: none; }
     border-radius: 10px;
     box-shadow: 0 20px 50px rgba(0, 0, 0, .45);
     transform-origin: 0 0;       /* el JS calcula pan/zoom desde la esquina */
-    will-change: transform;
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
@@ -870,6 +968,14 @@ body.is-leaving .cruce { animation: none; }
     transition: opacity 200ms ease;
   }
   .cr-zoom-img.is-ready { opacity: 1; }
+
+  /* Sólo mientras el usuario pellizca/arrastra (la clase alterna
+     scripts/visor.js). Con will-change fijo, el navegador congelaba la
+     rasterización de la capa a su tamaño inicial y al ampliar el SVG salía
+     borroso; al soltar los dedos se libera la capa y se re-rasteriza el
+     vector a resolución completa. Durante el gesto se conserva para que el
+     pan/zoom siga siendo fluido. */
+  .cr-zoom-img.is-zooming { will-change: transform; }
 
   /* Botón de cierre [-] flotando sobre el visor */
   .cr-zoom-close {
@@ -972,8 +1078,9 @@ body.is-leaving .cruce { animation: none; }
 
 }
 
-/* Menos movimiento: el visor aparece/desaparece sin fundido y la pista de
-   doble-toque queda fija (sin parpadeo), conservando el rótulo */
+/* Menos movimiento: el visor aparece/desaparece sin fundido, la pista de
+   doble-toque queda fija (sin parpadeo), conservando el rótulo, y la
+   atmósfera del fondo (estelas y polvo) se congela como campo estático */
 @media (prefers-reduced-motion: reduce) {
   .cr-zoom,
   .cr-zoom-btn,
@@ -982,6 +1089,8 @@ body.is-leaving .cruce { animation: none; }
   .cr-zoom-hint .dot,
   .cr-zoom-hint .ring { animation: none !important; }
   .cr-zoom-hint .ring { display: none; }
+  .atm-estela,
+  .atm-polvo { animation: none !important; }
 }
 
 /* ---------------- Puntos vistos del recorrido ----------------
