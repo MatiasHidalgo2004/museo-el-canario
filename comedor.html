@@ -487,6 +487,8 @@
         { svg: 'assets/svg/Sarten.svg',    titulo: 'Sartén de hierro',          texto: 'Utensilio pesado y duradero, usado para freír y cocinar sobre fuego directo.' },
         { svg: 'assets/svg/Molino.svg',    titulo: 'Molino de especias',        texto: 'Pequeño utensilio manual de madera para moler condimentos y servirlos directamente sobre los alimentos.' }
       ];
+      // scripts/objetos.js (compartido): objetos flotantes detrás de la intermedia
+      window.escenaDatos = datos;
 
       var abierto = -1;
       var cerrarT = null;
@@ -578,5 +580,7 @@
       });
     })();
   </script>
+
+  <script src="scripts/objetos.js"></script>
 </body>
 </html>
