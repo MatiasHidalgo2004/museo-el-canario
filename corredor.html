@@ -487,6 +487,8 @@
         { svg: 'assets/svg/Hacha.svg',     titulo: 'Hacha de mano',             texto: 'Herramienta con hoja metálica y mango de madera para cortar troncos y ramas; fuente principal de energía en hogares sin electricidad.' },
         { svg: 'assets/svg/Mecedora.svg',  titulo: 'Mecedora de mimbre',        texto: 'Silla liviana y flexible con base en forma de arco; su meneo ligero y suave ayudaba al reposo.' }
       ];
+      // scripts/objetos.js (compartido): objetos flotantes detrás de la intermedia
+      window.escenaDatos = datos;
 
       var abierto = -1;
       var cerrarT = null;
@@ -578,5 +580,7 @@
       });
     })();
   </script>
+
+  <script src="scripts/objetos.js"></script>
 </body>
 </html>
