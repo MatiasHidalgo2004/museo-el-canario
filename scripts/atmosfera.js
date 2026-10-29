@@ -1,15 +1,20 @@
-/* Atmósfera ambiental de FONDO en todas las páginas (estelas de luz +
-   polvo flotante). El marcado y las animaciones viven en styles.css (clases
-   .fondo-atm y .atm-*); aquí sólo se inyecta la capa en el punto correcto:
+/* scripts/atmosfera.js
+   Atmósfera ambiental de FONDO en todas las páginas: estelas de luz, motas
+   de polvo y HOJAS al viento. El marcado y las animaciones viven en
+   styles.css (clases .atm-*, .hoja-*); aquí sólo se inyecta la capa en el
+   punto correcto:
 
    - Páginas de escena (salas del recorrido, con .cruce-lienzo): la capa se
      coloca dentro del lienzo y por delante de .cruce-puntos (.fondo-atm-
      en-escena, z-index 0), de modo que el polvo flota SOBRE la ilustración
-     de la sala y por debajo de puntos, fichas y botones.
-   - El resto: primer hijo de <main class="hero"> (.fondo-atm, z-index -1),
-     por encima de la imagen de fondo de la página y por debajo de todo el
-     contenido. El hero queda como contexto de apilamiento aislado en CSS
-     (isolation:isolate), sin lo cual la capa quedaría oculta tras el fondo.
+     de la sala y por debajo de puntos, fichas y botones. Las HOJAS sólo se
+     añaden en las escenas de exterior (cruce, bodega, cancha y corredor):
+     en comedor, dormitorio y local no vuelan.
+   - El resto (incluida la portada): primer hijo de <main class="hero">
+     (.fondo-atm, z-index -1), por encima de la imagen de fondo de la página
+     y por debajo de todo el contenido. El hero queda como contexto de
+     apilamiento aislado en CSS (isolation:isolate), sin lo cual la capa
+     quedaría oculta tras el fondo.
 
    Sin dependencias. Se carga en todas las páginas junto a menu.js; como el
    script puede ejecutarse mientras el DOM aún se construye (cronograma.html
@@ -17,6 +22,9 @@
    hace falta. */
 (function () {
   'use strict';
+
+  // Escenas de exterior: único caso en que las hojas vuelan sobre la escena
+  var HOJAS_EN_ESCENA = /^(cruce|bodega|cancha|corredor)\.html$/;
 
   function inyectar() {
     if (document.querySelector('.fondo-atm')) return;   // no duplicar
@@ -37,6 +45,17 @@
     for (var i = 1; i <= 24; i++) {
       marcado += '<span class="atm-polvo atm-p' + i + '"></span>';
     }
+
+    // Hojas al viento: siempre en las páginas normales (o en la portada) y,
+    // en las escenas, sólo si es de exterior. Color/tiempos: .hoja-N en CSS.
+    var pagina = window.location.pathname.split('/').pop() || 'index.html';
+    var conHojas = !lienzo || HOJAS_EN_ESCENA.test(pagina);
+    if (conHojas) {
+      for (var h = 1; h <= 10; h++) {
+        marcado += '<span class="hoja hoja-' + h + '"></span>';
+      }
+    }
+
     capa.innerHTML = marcado;
 
     if (lienzo) {
