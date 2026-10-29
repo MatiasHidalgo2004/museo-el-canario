@@ -25,9 +25,7 @@
 *{box-sizing:border-box}
 /* El ancho real de la barra de desplazamiento se mide con JS (--sbw, en
    menu.js) y se suma al cálculo del header: así el menú fijo mide lo mismo
-   con y sin scroll. Antes se usaba scrollbar-gutter: stable, que reservaba
-   15px en las páginas sin scroll y dejaba una franja del color de fondo
-   asomando por el borde derecho. */
+   con y sin scroll, sin reservar hueco con scrollbar-gutter. */
 
 html,body{
   margin:0;
@@ -38,14 +36,11 @@ html,body{
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
 }
-/* Antes había overflow:hidden en html Y body. Eso impedía cualquier
-   desplazamiento en escritorio: si la tarjeta superaba la altura de la ventana
-   (ventana baja, zoom de texto, texto largo) el resto quedaba recortado y era
-   imposible de ver. Ahora el scroll vertical aparece solo cuando algo desborda
-   (en pantallas normales no cambia nada: no se genera barra) y el horizontal
-   sigue bloqueado. body queda en visible para que su contenido sobrante llegue
-   al scroll del documento; si body fuera scrollable tendríamos dos barras
-   independientes y desincronizadas. */
+/* El scroll vertical aparece sólo cuando algo desborda (en pantallas
+   normales no se genera barra) y el horizontal sigue bloqueado. body queda en
+   visible para que su contenido sobrante llegue al scroll del documento; si
+   body fuera scrollable tendríamos dos barras independientes y
+   desincronizadas. */
 html{overflow-x:hidden;overflow-y:auto}
 body{overflow:visible}
 .container{max-width:var(--container);margin:0 auto;padding:0 var(--edge-padding)}
@@ -380,10 +375,9 @@ html { scroll-behavior: smooth; }
     position: relative;
     /* La clase .container inyecta padding:0 22px y, con border-box, eso
        encogía .card-inner/.card-media a (ancho - 44px), dejando las imágenes
-       44px más angostas que el menú fijo (el card-box medía bien, pero su
-       contenido no). En escritorio ya se anula (.card.container en
-       min-width:1101px); aquí se hace lo mismo para móvil. Así .card-media y
-       .card-copy llenan los 342px iguales al header, como en cronograma. */
+       44px más angostas que el menú fijo. Se anula aquí igual que en
+       escritorio (.card.container en min-width:1101px), para que imágenes y
+       texto llenen el ancho igual que el header. */
     padding-left: 0 !important;
     padding-right: 0 !important;
   }
@@ -651,8 +645,7 @@ body {
 }
 
 /* El menú fijo NO se anima ni al llegar ni al salir: así la barra se lee
-   continua durante toda la transición entre páginas (nav-transition.js ya no
-   lo desvanece y aquí se retiró su fundido de entrada de 480ms). */
+   continua durante toda la transición entre páginas. */
 
 /* Salida entre páginas: al hacer clic en un enlace interno, el CONTENIDO se
    difumina antes de navegar (lo dispara scripts/nav-transition.js). El fondo
@@ -1064,8 +1057,7 @@ html.con-skeleton:not(.listo) .card.is-leaving { animation-play-state: running; 
    Todo lo de este bloque aplica sólo a pantallas angostas: el escritorio no
    cambia en nada. */
 
-/* Card e imágenes al MISMO ancho que el menú fijo (24px de margen por lado);
-   antes el card iba con --edge-padding (22px) y sobresalía 2px por lado. */
+/* Card e imágenes al MISMO ancho que el menú fijo (24px de margen por lado). */
 @media (max-width: 1100px) {
   .card { width: calc(100% - 48px) !important; }
 }
