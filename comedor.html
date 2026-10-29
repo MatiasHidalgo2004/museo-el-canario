@@ -14,6 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700;800;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles/styles.css" />
+  <script src="scripts/skeleton.js"></script>
 
   <!-- Escena del comedor: banda al margen del menú fijo, card blanco en el
        margen derecho y capas alineadas (lienzo 1440x1024) + puntos a la
@@ -449,6 +450,7 @@
   </div>
 
   <script src="scripts/menu.js"></script>
+  <script src="scripts/atmosfera.js"></script>
 
   <script src="scripts/nav-transition.js"></script>
 
@@ -474,16 +476,16 @@
 
       // Ficha de cada punto: icono (SVG del museo) + título + descripción
       var datos = [
-        { svg: 'assets/svg/Taza.svg',      titulo: 'Taza de té',                texto: 'Utensilio cotidiano principalmente elaborado de cerámica, pensado para beber infusiones, presente en casi todos los hogares rurales y urbanos.' },
-        { svg: 'assets/svg/Piedra.svg',    titulo: 'Piedra horadada',           texto: 'Piedras en forma de dona, que datan de la época de los “Kofkeche”, antes de los Mapuches, y se teoriza que se utilizaban para usos rituales de fertilidad agrícola.' },
+        { svg: 'assets/svg/Taza.svg',      titulo: 'Taza de té',                texto: 'Utensilio cotidiano, generalmente de cerámica, para beber infusiones; presente en casi todos los hogares.' },
+        { svg: 'assets/svg/Piedra.svg',    titulo: 'Piedra horadada',           texto: 'Piedras en forma de dona de la época de los “Kofkeche”, anteriores a los mapuches; se usaban con fines rituales de fertilidad.' },
         { svg: 'assets/svg/Jarra.svg',     titulo: 'Jarra de loza',             texto: 'Recipiente de cerámica usado para servir agua, jugo o vino en la mesa. Fue muy común en la primera mitad del siglo XX.' },
-        { svg: 'assets/svg/Plato.svg',     titulo: 'Plato de cerámica Fanaloza', texto: 'Vajilla producida en Chile desde mediados del siglo XX, resistente y accesible. Inspirada en el patrón “Willow”, de la loza inglesa con sus ilustraciones en tonos azules.' },
-        { svg: 'assets/svg/Anafe.svg',     titulo: 'Anafe de carbón',           texto: 'Cocina portátil que funcionaba con brasas o carbón, usada para preparar alimentos en patios o cocinas sin electricidad. O para calentar espacios por las brasas.' },
+        { svg: 'assets/svg/Plato.svg',     titulo: 'Plato de cerámica Fanaloza', texto: 'Vajilla producida en Chile desde mediados del siglo XX, resistente y accesible, inspirada en el patrón “Willow” de la loza inglesa.' },
+        { svg: 'assets/svg/Anafe.svg',     titulo: 'Anafe de carbón',           texto: 'Cocina portátil de brasas o carbón para preparar alimentos en patios o cocinas sin electricidad; también calentaba los espacios.' },
         { svg: 'assets/svg/Cubiertos.svg', titulo: 'Cubiertos de plata',        texto: 'Símbolo de distinción en las mesas familiares, usados en ocasiones especiales.' },
-        { svg: 'assets/svg/Sombrero.svg',  titulo: 'Sombrero de ala ancha',     texto: 'Prenda usada tanto en faenas agrícolas como en la vida cotidiana, pensado para proteger del sol, más en la faena agrícola en fundos.' },
-        { svg: 'assets/svg/Aceitera.svg',  titulo: 'Aceitera',                  texto: 'Recipiente metálico para el almacenamiento, conservación y poder servir aceite. Presente en la mesa y la cocina.' },
+        { svg: 'assets/svg/Sombrero.svg',  titulo: 'Sombrero de ala ancha',     texto: 'Prenda usada tanto en las faenas agrícolas como en la vida cotidiana para protegerse del sol.' },
+        { svg: 'assets/svg/Aceitera.svg',  titulo: 'Aceitera',                  texto: 'Recipiente metálico para almacenar, conservar y servir aceite; presente en la mesa y en la cocina.' },
         { svg: 'assets/svg/Sarten.svg',    titulo: 'Sartén de hierro',          texto: 'Utensilio pesado y duradero, usado para freír y cocinar sobre fuego directo.' },
-        { svg: 'assets/svg/Molino.svg',    titulo: 'Molino de especias',        texto: 'Pequeño utensilio manual elaborado en madera, para moler condimentos y servirlos directamente sobre los alimentos.' }
+        { svg: 'assets/svg/Molino.svg',    titulo: 'Molino de especias',        texto: 'Pequeño utensilio manual de madera para moler condimentos y servirlos directamente sobre los alimentos.' }
       ];
 
       var abierto = -1;
