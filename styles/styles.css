@@ -1340,6 +1340,8 @@ html.con-skeleton:not(.listo) .card.is-leaving { animation-play-state: running; 
   .atm-estela,
   .atm-polvo,
   .hoja { animation: none !important; }
+  .obj-flot img { animation: none !important; }
+  .obj-flot { transition: none !important; }
 }
 
 /* ---------------- Atmósfera ambiental del sitio: estelas + polvo ----------------
@@ -1567,6 +1569,51 @@ html.con-skeleton:not(.listo) .card.is-leaving { animation-play-state: running; 
 .hoja-10 { top: 64%; width: 22px; height: 28px;
            background-image: url('../assets/svg/hoja-cafe.svg'); opacity: .62;
            animation: hojaVuelaB 35s ease-in-out -24s infinite; }
+
+/* En móvil la escena es pequeña: sobre la ilustración NI estelas NI hojas
+   (estorban la lectura del dibujo); sólo queda el polvo. En escritorio y en
+   los fondos generales de la página siguen todas. */
+@media (max-width: 700px) {
+  .fondo-atm-en-escena .atm-estela,
+  .fondo-atm-en-escena .hoja { display: none; }
+}
+
+/* ----- Objetos flotantes del visor de zoom -----
+   4-5 de los 10 objetos de la estancia (los mismos de los puntos y del
+   catálogo), elegidos al azar por carga, en BLANCO y flotando DENTRO del
+   visor de zoom: DETRÁS de la imagen ampliada y junto a las partículas y
+   las estelas de su atmósfera. Los monta scripts/objetos.js (fábrica
+   MuseoObjetos) en la primera apertura y sólo existen en móvil, porque el
+   visor es móvil. Un poco grandes, girando suavemente sobre sí mismos y con
+   deriva MUY lenta; rebotan en los bordes y chocan entre sí con física
+   suave. Sin interactividad (heredan pointer-events:none de la capa): al
+   tocarlos el visor se cierra como con cualquier punto del fondo. En
+   prefers-reduced-motion quedan estáticos. */
+.cruce-objetos {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.obj-flot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 50px;                 /* base; el módulo varía el tamaño 44-58px */
+  height: 50px;
+  opacity: 0;                  /* entran escalonados (opacidad final vía --o) */
+  transition: opacity 900ms ease;
+}
+.cruce-objetos.is-in .obj-flot { opacity: var(--o, .7); }
+.obj-flot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: brightness(0) invert(1);   /* blancos, como el icono de las fichas */
+  animation: objGira 32s linear infinite;   /* duración y retardo por objeto (inline) */
+}
+@keyframes objGira {
+  to { transform: rotate(360deg); }
+}
 
 /* ---------------- Portada (index de entrada) ----------------
    Pantalla de presentación: niebla blanca que se disuelve mientras la casa
