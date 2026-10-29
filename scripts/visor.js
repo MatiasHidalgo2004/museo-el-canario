@@ -203,6 +203,10 @@
       imgZoom.classList.add('is-ready');
     }
 
+    // Objetos flotantes del visor (fábrica scripts/objetos.js): se montan en
+    // la primera apertura y sólo corren mientras el visor está abierto
+    var objetos = null;
+
     function abrir() {
       // Cerrar cualquier ficha (.cr-det) abierta, para que no tape la escena
       var det = lienzo.querySelector('.cr-det');
@@ -223,6 +227,12 @@
       // doble-toque; en cuanto lo hace, no vuelve a aparecer (localStorage).
       hint.classList.toggle('is-on', sala === 'cruce' && !yaAprendido());
 
+      // Objetos flotantes detrás de la imagen: montaje perezoso + reanudar
+      if (!objetos && window.MuseoObjetos && window.escenaDatos) {
+        objetos = window.MuseoObjetos.montar(visor, window.escenaDatos);
+      }
+      if (objetos) objetos.reanudar();
+
       if (!fuenteZoom) return;               // sin versión optimizada: no hacer nada
       // Medir y centrar cuando la imagen tenga tamaño (cargada o de caché)
       if (imgZoom.complete && imgZoom.naturalWidth) {
@@ -241,6 +251,7 @@
       modo = null;
       idArrastre = null;
       hint.classList.remove('is-on');      // la pista no persiste tras cerrar
+      if (objetos) objetos.pausar();       // los flotantes se quedan quietos
 
       imgZoom.classList.remove('is-ready');
       imgZoom.classList.remove('is-zooming');
