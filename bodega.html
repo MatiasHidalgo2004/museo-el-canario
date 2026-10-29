@@ -494,6 +494,8 @@
         { svg: 'assets/svg/garrafa-pequeña.svg',titulo: 'Garrafa pequeña',         texto: 'Botella de vidrio con corcho para contener licor de 5 litros.' },
         { svg: 'assets/svg/tonel.svg',          titulo: 'Tonel de vino',           texto: 'Barril grande para almacenar y fermentar vino; era la opción económica para el mercado nacional, con formatos menores para exportar.' },
       ];
+      // scripts/objetos.js (compartido): objetos flotantes detrás de la intermedia
+      window.escenaDatos = datos;
 
       var abierto = -1;
       var cerrarT = null;
@@ -585,5 +587,7 @@
       });
     })();
   </script>
+
+  <script src="scripts/objetos.js"></script>
 </body>
 </html>
