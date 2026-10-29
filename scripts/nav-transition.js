@@ -4,7 +4,9 @@
 // Al hacer clic en un enlace interno, difumina el CONTENIDO —tarjeta, escena,
 // maqueta o listado del catálogo— con `is-leaving` (en la tarjeta y en <body>)
 // y recién a los 220ms navega. El fondo de la página y el menú fijo se quedan
-// visibles durante todo el cambio.
+// visibles durante todo el cambio. Además marca sessionStorage "museo:carga"
+// y monta el skeleton de salida (scripts/skeleton.js), que la página entrante
+// replica en su primer frame para cubrir la carga real.
 // La animación de entrada de la página siguiente la ejecuta styles.css
 // (.card con `cardEntrance` y .cruce con `escenaEntrance`), de modo que ambos
 // efectos se enlazan.
@@ -46,11 +48,20 @@
     var link = e.target && e.target.closest ? e.target.closest('a') : null;
     if (!isInternalPageLink(link)) return;
     if (pointsToCurrentPage(link)) return;
-    if (prefersReducedMotion()) return;
 
     var card = document.querySelector('.card');
     var header = document.querySelector('.site-header');
     if (!card && !header) return;
+
+    var target = link.href;
+
+    // Marca para la página entrante (scripts/skeleton.js la consume en
+    // <head>): mostrará su skeleton mientras carga. Se pone en los DOS caminos
+    // (el animado y el de movimiento reducido, que navega nativo abajo).
+    try { window.sessionStorage.setItem('museo:carga', '1'); }
+    catch (err) { /* sin storage: sin skeleton, todo lo demás igual */ }
+
+    if (prefersReducedMotion()) return;
 
     e.preventDefault();
     navigating = true;
@@ -62,7 +73,14 @@
     // listado del catálogo se difuminan vía body.is-leaving en styles.css.
     document.body.classList.add('is-leaving');
 
-    var target = link.href;
+    // Skeleton de salida con la forma del DESTINO: hace crossfade con el
+    // contenido que se desvanece y su frame queda congelado mientras el
+    // navegador carga la página siguiente —que pinta el suyo idéntico en el
+    // primer frame (scripts/skeleton.js). Así el hueco no se nota.
+    if (window.MuseoSkeleton) {
+      window.MuseoSkeleton.mostrarDesdeHref(target);
+    }
+
     window.setTimeout(function () {
       window.location.href = target;
     }, EXIT_MS);
