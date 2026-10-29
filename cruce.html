@@ -479,6 +479,8 @@
         { svg: 'assets/svg/horcate.svg',        titulo: 'Horcate',                 texto: 'Arnés colocado en animales de tiro para distribuir el peso de la carga.' },
         { svg: 'assets/svg/herradura.svg',      titulo: 'Herradura',               texto: 'Pieza metálica fijada a las patas de los caballos para protegerlas y mejorar su rendimiento.' }
       ];
+      // scripts/objetos.js (compartido): objetos flotantes detrás de la intermedia
+      window.escenaDatos = datos;
 
       var abierto = -1;
       var cerrarT = null;
@@ -570,5 +572,7 @@
       });
     })();
   </script>
+
+  <script src="scripts/objetos.js"></script>
 </body>
 </html>
