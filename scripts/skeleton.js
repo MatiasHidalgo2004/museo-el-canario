@@ -10,9 +10,10 @@
    Esta página, al cargar en <head> (síncrono, tras styles.css), consume la
    marca y pinta SU skeleton en el primer frame —misma forma, calculada por
    nombre de archivo—, de modo que el hueco queda cubierto sin parpadeo.
-   Se retira en window.load (tope de 3,5s) añadiendo html.listo, que a su vez
-   lanza cardEntrance/escenaEntrance (pausadas mientras el skeleton está,
-   ver styles.css).
+   Se retira cuando lo cargado en window.load está ya DECODIFICADO (tope de
+   3,5s), añadiendo html.listo, que a su vez lanza cardEntrance/escenaEntrance
+   (pausadas mientras el skeleton está, ver styles.css). Esperar al decode
+   evita destellos negros en móvil (imágenes con decoding="async").
 
    El marcado CALZA con la geometría del contenido real: la caja de cada tipo
    (.card / .cruce / .cat-wrap) vive en styles.css → sección "Skeleton", el
@@ -192,15 +193,39 @@
     if (!sk || ocultando) return;
     ocultando = true;
     if (timer) { window.clearTimeout(timer); timer = null; }
-    // .listo lanza las animaciones de entrada; .se-va funde el skeleton
-    // encima, revelando esa entrada ya en marcha.
-    document.documentElement.classList.add('listo');
-    sk.classList.add('se-va');
-    window.setTimeout(function () {
-      if (sk && sk.parentNode) sk.parentNode.removeChild(sk);
-      sk = null;
-      document.documentElement.classList.remove('con-skeleton');
-    }, SALE_MS);
+
+    // Las imágenes pueden dar `load` antes de estar decodificadas
+    // (decoding="async"); en móvil eso dejó algún destello negro (p. ej. el
+    // SVG de pared/techo de recorrido/final, que además se anima al cargar).
+    // El skeleton sólo se retira cuando lo ya cargado está decodificado
+    // (o si el navegador no lo soporta), con seguro de 1,2s.
+    var imgs = [];
+    try {
+      imgs = [].slice.call(document.images).filter(function (im) {
+        return im.complete && im.naturalWidth > 0 && typeof im.decode === 'function';
+      });
+    } catch (e) { imgs = []; }
+
+    var yaRetirado = false;
+    function retirar() {
+      if (yaRetirado) return;
+      yaRetirado = true;
+      // .listo lanza las animaciones de entrada; .se-va funde el skeleton
+      // encima, revelando esa entrada ya en marcha.
+      document.documentElement.classList.add('listo');
+      sk.classList.add('se-va');
+      window.setTimeout(function () {
+        if (sk && sk.parentNode) sk.parentNode.removeChild(sk);
+        sk = null;
+        document.documentElement.classList.remove('con-skeleton');
+      }, SALE_MS);
+    }
+
+    if (!window.Promise || imgs.length === 0) { retirar(); return; }
+    window.setTimeout(retirar, 1200);      // seguro: nunca colgado en decode
+    Promise.all(imgs.map(function (im) {
+      return im.decode().catch(function () { /* imagen ilegible: seguir igual */ });
+    })).then(retirar);
   }
 
   // ----- API para la página saliente (nav-transition.js): muestra el
