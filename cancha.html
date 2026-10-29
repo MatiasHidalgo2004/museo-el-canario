@@ -480,6 +480,8 @@
         { svg: 'assets/svg/Caballo.svg',   titulo: 'Caballo de palo',            texto: 'Juguete infantil que imitaba la montura: un palo con cabeza de caballo de madera o plástico, popular en la segunda mitad del siglo XX.' },
         { svg: 'assets/svg/Trompo.svg',    titulo: 'Trompo de madera',          texto: 'Tradicional juguete de madera que se hacía girar con una cuerda enrollada; el objetivo era mantenerlo el mayor tiempo en pie.' }
       ];
+      // scripts/objetos.js (compartido): objetos flotantes detrás de la intermedia
+      window.escenaDatos = datos;
 
       var abierto = -1;
       var cerrarT = null;
@@ -571,5 +573,7 @@
       });
     })();
   </script>
+
+  <script src="scripts/objetos.js"></script>
 </body>
 </html>
