@@ -1,68 +1,80 @@
 /* scripts/atmosfera.js
-   Atmósfera ambiental de FONDO en todas las páginas: estelas de luz, motas
-   de polvo y HOJAS al viento. El marcado y las animaciones viven en
-   styles.css (clases .atm-*, .hoja-*); aquí sólo se inyecta la capa en el
-   punto correcto:
+   Atmósfera ambiental: estelas de luz, motas de polvo y HOJAS al viento.
+   El marcado y las animaciones viven en styles.css (clases .atm-*, .hoja-*);
+   aquí se inyectan las capas en su punto. Hay DOS capas posibles por página:
 
-   - Páginas de escena (salas del recorrido, con .cruce-lienzo): la capa se
-     coloca dentro del lienzo y por delante de .cruce-puntos (.fondo-atm-
-     en-escena, z-index 0), de modo que el polvo flota SOBRE la ilustración
-     de la sala y por debajo de puntos, fichas y botones. Las HOJAS sólo se
-     añaden en las escenas de exterior (cruce, bodega, cancha y corredor):
-     en comedor, dormitorio y local no vuelan.
-   - El resto (incluida la portada): primer hijo de <main class="hero">
-     (.fondo-atm, z-index -1), por encima de la imagen de fondo de la página
-     y por debajo de todo el contenido. El hero queda como contexto de
-     apilamiento aislado en CSS (isolation:isolate), sin lo cual la capa
-     quedaría oculta tras el fondo.
+   1) .fondo-atm — el FONDO de la página (detrás del card y del menú fijo):
+      primer hijo de <main class="hero">, z-index -1 con el hero aislado
+      (isolation:isolate), por encima de la imagen de fondo y por debajo de
+      todo el contenido. SIEMPRE completa (estelas + polvo + hojas) y en
+      TODAS las páginas — también en las salas del recorrido, donde antes no
+      existía y se echaba de menos en móvil.
 
-   Sin dependencias. Se carga en todas las páginas junto a menu.js; como el
-   script puede ejecutarse mientras el DOM aún se construye (cronograma.html
-   carga menu.js en mitad del cuerpo), se espera a DOMContentLoaded cuando
-   hace falta. */
+   2) .fondo-atm-en-escena — SOBRE la ilustración de la escena (sólo las
+      salas): dentro de .cruce-lienzo y por delante de .cruce-puntos (por
+      encima del dibujo, por debajo de puntos y fichas). Polvo siempre;
+      hojas sólo en las escenas de exterior (cruce, bodega, cancha y
+      corredor); en móvil (≤700px) las estelas y hojas la oculta el CSS
+      (la escena es pequeña y estorban), como se acordó.
+
+   El visor de zoom NO usa esta capa: lleva la suya (.cr-zoom-atm, ver
+   scripts/visor.js).
+
+   Sin dependencias. Se carga en todas las páginas; si el DOM aún se está
+   construyendo (cronograma.html carga sus scripts en mitad del cuerpo), se
+   espera a DOMContentLoaded. */
 (function () {
   'use strict';
 
-  // Escenas de exterior: único caso en que las hojas vuelan sobre la escena
+  // Escenas de exterior: único caso en que las hojas vuelan SOBRE la escena
   var HOJAS_EN_ESCENA = /^(cruce|bodega|cancha|corredor)\.html$/;
 
-  function inyectar() {
-    if (document.querySelector('.fondo-atm')) return;   // no duplicar
-
-    var lienzo = document.querySelector('.cruce-lienzo');
-    var hero = document.querySelector('.hero');
-    if (!lienzo && !hero) return;                      // sin dónde: no hacer nada
-
-    var capa = document.createElement('div');
-    capa.className = 'fondo-atm' + (lienzo ? ' fondo-atm-en-escena' : '');
-    capa.setAttribute('aria-hidden', 'true');
-
-    // 3 estelas + 24 motas de polvo. Posiciones, tamaños y keyframes: styles.css
-    var marcado =
+  // Estelas + polvo (+ hojas opcional). Posiciones/tiempos: styles.css
+  function capaTexto(conHojas) {
+    var html =
       '<span class="atm-estela atm-e1"></span>' +
       '<span class="atm-estela atm-e2"></span>' +
       '<span class="atm-estela atm-e3"></span>';
-    for (var i = 1; i <= 24; i++) {
-      marcado += '<span class="atm-polvo atm-p' + i + '"></span>';
+    var i, h;
+    for (i = 1; i <= 24; i++) {
+      html += '<span class="atm-polvo atm-p' + i + '"></span>';
     }
-
-    // Hojas al viento: siempre en las páginas normales (o en la portada) y,
-    // en las escenas, sólo si es de exterior. Color/tiempos: .hoja-N en CSS.
-    var pagina = window.location.pathname.split('/').pop() || 'index.html';
-    var conHojas = !lienzo || HOJAS_EN_ESCENA.test(pagina);
     if (conHojas) {
-      for (var h = 1; h <= 10; h++) {
-        marcado += '<span class="hoja hoja-' + h + '"></span>';
+      for (h = 1; h <= 10; h++) {
+        html += '<span class="hoja hoja-' + h + '"></span>';
       }
     }
+    return html;
+  }
 
-    capa.innerHTML = marcado;
+  function crearCapa(clase, conHojas) {
+    var capa = document.createElement('div');
+    capa.className = clase;
+    capa.setAttribute('aria-hidden', 'true');
+    capa.innerHTML = capaTexto(conHojas);
+    return capa;
+  }
 
-    if (lienzo) {
-      // Antes de .cruce-puntos (si no existiera, al final: mismos z-index)
-      lienzo.insertBefore(capa, lienzo.querySelector('.cruce-puntos'));
-    } else {
-      hero.insertBefore(capa, hero.firstElementChild);
+  function inyectar() {
+    var lienzo = document.querySelector('.cruce-lienzo');
+    var hero = document.querySelector('.hero');
+    if (!lienzo && !hero) return;
+
+    var pagina = window.location.pathname.split('/').pop() || 'index.html';
+
+    // 1) Fondo de la página (detrás del card y del menú fijo): completa y
+    //    siempre que haya hero — en las salas también, para que móvil conserve
+    //    estelas y hojas en ese fondo aunque la escena no las lleve.
+    if (hero && !hero.querySelector('.fondo-atm')) {
+      hero.insertBefore(crearCapa('fondo-atm', true), hero.firstElementChild);
+    }
+
+    // 2) Sobre la escena (sólo salas): polvo siempre, hojas sólo en exterior;
+    //    estelas/hojas fuera en móvil lo decide el CSS (sólo escena pequeña)
+    if (lienzo && !lienzo.querySelector('.fondo-atm-en-escena')) {
+      lienzo.insertBefore(
+        crearCapa('fondo-atm-en-escena', HOJAS_EN_ESCENA.test(pagina)),
+        lienzo.querySelector('.cruce-puntos'));
     }
   }
 
