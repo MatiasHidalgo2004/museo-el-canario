@@ -14,6 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700;800;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles/styles.css" />
+  <script src="scripts/skeleton.js"></script>
 
   <!-- Escena del corredor: banda al margen del menú fijo, card blanco en el
        margen derecho y capas alineadas (lienzo 1440x1024) + puntos a la
@@ -449,6 +450,7 @@
   </div>
 
   <script src="scripts/menu.js"></script>
+  <script src="scripts/atmosfera.js"></script>
 
   <script src="scripts/nav-transition.js"></script>
 
@@ -474,16 +476,16 @@
 
       // Ficha de cada punto: icono (SVG del museo) + título + descripción
       var datos = [
-        { svg: 'assets/svg/Arado.svg',     titulo: 'Arado de mancera',          texto: 'Herramienta agrícola tradicional, tirada por animales, usada para preparar la tierra de cultivo. Al separar el suelo por medio de una hoja curva, para la plantación de semillas.' },
-        { svg: 'assets/svg/Pala.svg',      titulo: 'Pala cuadrada',             texto: 'Utilizada para remover tierra, cargar compost o limpiar corrales. Teniendo una presencia constante en las zonas agrícolas, especialmente por la primera mitad del siglo XX.' },
-        { svg: 'assets/svg/Tina.svg',      titulo: 'Tina de lavar',             texto: 'Recipiente grande para lavar ropa a mano, presente en patios y lavaderos. Usado a la intemperie cerca del tendedero para secar la ropa al sol.' },
-        { svg: 'assets/svg/Escoba.svg',    titulo: 'Escoba de quila o colihue', texto: 'Fabricada con fibras naturales y económicas, servía para barrer y mantener la limpieza del polvo en interiores, como corredores y patio.' },
-        { svg: 'assets/svg/Palangana.svg', titulo: 'Palangana de barbero',      texto: 'Recipiente de cerámica o metálico utilizado por barberos para lavar y preparar el afeitado.' },
-        { svg: 'assets/svg/Yunque.svg',    titulo: 'Yunque zapatero',           texto: 'Pieza de hierro forjado también conocida como bigornia o pie de zapatero, se utilizaba para sostener los zapatos durante su reparación o fabricación.' },
-        { svg: 'assets/svg/Radio-transistores.svg', titulo: 'Radio de transistores', texto: 'Aparato compacto de recepción de ondas de radio, que reproducía noticias o música por medio del uso de transistores, pequeños receptores de radio.' },
-        { svg: 'assets/svg/Balde.svg',     titulo: 'Balde de pozo',             texto: 'Recipiente metálico o de madera usado para extraer agua del pozo. Fue vital en la vida rural durante gran parte del siglo XX, antes de la llegada del agua corriente a los hogares.' },
-        { svg: 'assets/svg/Hacha.svg',     titulo: 'Hacha de mano',             texto: 'Herramienta formada por una hoja metálica y un mango de madera, usada para cortar troncos y ramas. Siendo la fuente principal de energía en hogares sin electricidad ni gas.' },
-        { svg: 'assets/svg/Mecedora.svg',  titulo: 'Mecedora de mimbre',        texto: 'Silla liviana y flexible, con un movimiento oscilante al tener una base en forma de arco, que presentaba un meneo ligero y suave que ayudaba al reposo.' }
+        { svg: 'assets/svg/Arado.svg',     titulo: 'Arado de mancera',          texto: 'Herramienta agrícola tradicional tirada por animales para preparar la tierra; su hoja curva removía el suelo para sembrar.' },
+        { svg: 'assets/svg/Pala.svg',      titulo: 'Pala cuadrada',             texto: 'Para remover tierra, cargar compost o limpiar corrales. Muy usada en las zonas agrícolas durante la primera mitad del siglo XX.' },
+        { svg: 'assets/svg/Tina.svg',      titulo: 'Tina de lavar',             texto: 'Recipiente grande para lavar ropa a mano, presente en patios y lavaderos; se usaba a la intemperie, junto al tendedero.' },
+        { svg: 'assets/svg/Escoba.svg',    titulo: 'Escoba de quila o colihue', texto: 'Fabricada con fibras naturales, servía para barrer el polvo en interiores, como corredores y patio.' },
+        { svg: 'assets/svg/Palangana.svg', titulo: 'Palangana de barbero',      texto: 'Recipiente de cerámica o metal que usaban los barberos para el lavado y la preparación del afeitado.' },
+        { svg: 'assets/svg/Yunque.svg',    titulo: 'Yunque zapatero',           texto: 'Pieza de hierro forjado también conocida como bigornia o pie de zapatero; se usaba para sostener los zapatos durante su reparación.' },
+        { svg: 'assets/svg/Radio-transistores.svg', titulo: 'Radio de transistores', texto: 'Radio compacta que reproducía noticias o música gracias a los transistores, pequeños receptores electrónicos.' },
+        { svg: 'assets/svg/Balde.svg',     titulo: 'Balde de pozo',             texto: 'Recipiente metálico o de madera para extraer agua del pozo; vital en la vida rural antes de la llegada del agua corriente.' },
+        { svg: 'assets/svg/Hacha.svg',     titulo: 'Hacha de mano',             texto: 'Herramienta con hoja metálica y mango de madera para cortar troncos y ramas; fuente principal de energía en hogares sin electricidad.' },
+        { svg: 'assets/svg/Mecedora.svg',  titulo: 'Mecedora de mimbre',        texto: 'Silla liviana y flexible con base en forma de arco; su meneo ligero y suave ayudaba al reposo.' }
       ];
 
       var abierto = -1;
