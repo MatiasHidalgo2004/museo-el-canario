@@ -10,7 +10,8 @@ No hay build, ni frameworks, ni dependencias: son HTML, CSS y JavaScript puro.
 
 | Archivo            | Contenido                                                     |
 | ------------------ | ------------------------------------------------------------- |
-| `index.html`       | Portada con ilustración de la casa                            |
+| `index.html`       | Portada de entrada: niebla, zoom a la casa isométrica y botón  |
+| `inicio.html`      | Inicio del sitio: tarjeta de bienvenida con la vista frontal   |
 | `cronograma.html`  | Línea del tiempo horizontal (SVG desplazable con arrastre)     |
 | `imagenes.html`    | Carrusel de fotos con pies de foto y contador (`1 / 10`)       |
 | `biografia.html`   | Historia del museo y su colección                             |
