@@ -86,7 +86,25 @@
       '<span class="atm-polvo atm-p3"></span>' +
       '<span class="atm-polvo atm-p4"></span>' +
       '<span class="atm-polvo atm-p5"></span>' +
-      '<span class="atm-polvo atm-p6"></span>';
+      '<span class="atm-polvo atm-p6"></span>' +
+      '<span class="atm-polvo atm-p7"></span>' +
+      '<span class="atm-polvo atm-p8"></span>' +
+      '<span class="atm-polvo atm-p9"></span>' +
+      '<span class="atm-polvo atm-p10"></span>' +
+      '<span class="atm-polvo atm-p11"></span>' +
+      '<span class="atm-polvo atm-p12"></span>' +
+      '<span class="atm-polvo atm-p13"></span>' +
+      '<span class="atm-polvo atm-p14"></span>' +
+      '<span class="atm-polvo atm-p15"></span>' +
+      '<span class="atm-polvo atm-p16"></span>' +
+      '<span class="atm-polvo atm-p17"></span>' +
+      '<span class="atm-polvo atm-p18"></span>' +
+      '<span class="atm-polvo atm-p19"></span>' +
+      '<span class="atm-polvo atm-p20"></span>' +
+      '<span class="atm-polvo atm-p21"></span>' +
+      '<span class="atm-polvo atm-p22"></span>' +
+      '<span class="atm-polvo atm-p23"></span>' +
+      '<span class="atm-polvo atm-p24"></span>';
     visor.appendChild(atm);
 
     // Imagen del visor (SVG vectorial; si falla, PNG de respaldo)
