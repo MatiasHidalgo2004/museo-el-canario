@@ -14,6 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700;800;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles/styles.css" />
+  <script src="scripts/skeleton.js"></script>
 
   <!-- Catálogo: todas las ventanas emergentes del recorrido, pero fijas a la
        vista y apiladas en una lista con scroll vertical. Cada ficha conserva
@@ -31,7 +32,7 @@
       content: "";
       position: fixed;
       inset: 0;
-      z-index: 0;
+      z-index: -2;              /* tras la atmósfera (.fondo-atm, z -1) y su polvo */
       background: url('assets/images/Menu-fondo.webp') center top / cover no-repeat;
       pointer-events: none;
     }
@@ -844,6 +845,7 @@
   </div>
 
   <script src="scripts/menu.js"></script>
+  <script src="scripts/atmosfera.js"></script>
 
   <script src="scripts/nav-transition.js"></script>
 
