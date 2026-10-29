@@ -7,8 +7,8 @@
 
    Elige 4-5 de los 10 objetos de la estancia (los mismos de los puntos y del
    catálogo), en BLANCO, un poco grandes (44-58px) y GIRANDO suavemente sobre
-   sí mismos (22-44s por vuelta); derivan MUY despacio (2-6 px/s), rebotan en
-   los bordes y chocan entre sí con física suave.
+   sí mismos (22-44s por vuelta); derivan MUY despacio (2-6 px/s) y rebotan en
+   los bordes. Entre sí se atraviesan: sin interacción de ningún tipo.
 
    SIN interactividad (pointer-events: none en CSS): son decoración. Al
    tocarlos el visor recibe el toque como cualquier punto del fondo y se
@@ -83,8 +83,9 @@
       });
     }
 
-    // ----- Bucle: deriva + rebotes de borde + colisiones (arranca pausado;
-    // sólo corre mientras el visor está abierto, vía api.reanudar) -----
+    // ----- Bucle: deriva + rebotes de borde (arranca pausado; sólo corre
+    // mientras el visor está abierto, vía api.reanudar). Entre sí se
+    // atraviesan: sin colisiones -----
     var corriendo = false;
     var ultimo = 0;
     function paso(t) {
@@ -93,7 +94,7 @@
       ultimo = t;
       if (!document.hidden) {
         var w = contenedor.clientWidth, h = contenedor.clientHeight;
-        var a, b, A, B, dx, dy, d2, rr, d, nx, ny, solapa, avn, bvn, imp;
+        var a, A;
 
         for (a = 0; a < objs.length; a++) {
           A = objs[a];
@@ -110,30 +111,6 @@
           if (A.x > w - A.r) { A.x = w - A.r; A.vx = -Math.abs(A.vx); }
           if (A.y < A.r) { A.y = A.r; A.vy = Math.abs(A.vy); }
           if (A.y > h - A.r) { A.y = h - A.r; A.vy = -Math.abs(A.vy); }
-        }
-
-        // colisiones por pares (masas iguales, restitución suave)
-        for (a = 0; a < objs.length; a++) {
-          for (b = a + 1; b < objs.length; b++) {
-            A = objs[a]; B = objs[b];
-            dx = B.x - A.x; dy = B.y - A.y;
-            d2 = dx * dx + dy * dy;
-            rr = A.r + B.r;
-            if (d2 > 0 && d2 < rr * rr) {
-              d = Math.sqrt(d2);
-              nx = dx / d; ny = dy / d;
-              solapa = (rr - d) / 2;
-              A.x -= nx * solapa; A.y -= ny * solapa;
-              B.x += nx * solapa; B.y += ny * solapa;
-              avn = A.vx * nx + A.vy * ny;
-              bvn = B.vx * nx + B.vy * ny;
-              if (avn - bvn > 0) {                 // sólo si se acercan
-                imp = -(1 + 0.92) * (avn - bvn) / 2;
-                A.vx -= imp * nx; A.vy -= imp * ny;
-                B.vx += imp * nx; B.vy += imp * ny;
-              }
-            }
-          }
         }
 
         for (a = 0; a < objs.length; a++) pintar(objs[a]);
