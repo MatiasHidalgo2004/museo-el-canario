@@ -480,6 +480,8 @@
         { svg: 'assets/svg/frasco.svg',     titulo: 'Frasco de confitería',      texto: 'Recipiente de vidrio donde se guardaban dulces o galletas; un objeto atractivo para los niños que venían a comprar.' },
         { svg: 'assets/svg/cutra.svg',      titulo: 'Cutra',                     texto: 'Recipiente "hechizo" para transportar y consumir licor, hecho de materiales variados; en este caso, caucho reciclado de una rueda.' }
       ];
+      // scripts/objetos.js (compartido): objetos flotantes detrás de la intermedia
+      window.escenaDatos = datos;
 
       var abierto = -1;
       var cerrarT = null;
@@ -571,5 +573,7 @@
       });
     })();
   </script>
+
+  <script src="scripts/objetos.js"></script>
 </body>
 </html>
