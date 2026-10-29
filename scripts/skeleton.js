@@ -69,7 +69,7 @@
   //      .tl-stage (min-height 430px) expande el card; la cabecera va en
   //      fila como .card-copy.tl-top.
   var TARJETA = {
-    'index.html':      { ar: '564 / 706', inv: true },
+    'inicio.html':      { ar: '564 / 706', inv: true },
     'biografia.html':  { ar: '1119 / 1400', inv: true },
     'contacto.html':   { ar: '1120 / 1400', inv: true },
     'imagenes.html':   { ar: '1400 / 1400', inv: true },
