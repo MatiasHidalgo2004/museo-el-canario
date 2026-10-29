@@ -14,6 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700;800;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles/styles.css" />
+  <script src="scripts/skeleton.js"></script>
 
   <!-- Escena de dormitorio: banda al margen del menú fijo, card blanco en el
        margen derecho y capas alineadas (lienzo 1440x1024) + puntos a la
@@ -472,6 +473,7 @@
   </div>
 
   <script src="scripts/menu.js"></script>
+  <script src="scripts/atmosfera.js"></script>
 
   <script src="scripts/nav-transition.js"></script>
 
@@ -497,15 +499,15 @@
 
       // Ficha de cada punto: icono (SVG del museo) + título + descripción
       var datos = [
-        { svg: 'assets/svg/Pupitre.svg',   titulo: 'Pupitre escolar',           texto: 'Mueble de madera utilizado en colegios, que disponía de un apartado para guardar los cuadernos. Impulsando su fabricación tras la reforma educacional de 1965.' },
-        { svg: 'assets/svg/Brasero.svg',   titulo: 'Brasero calienta camas',     texto: 'Recipiente metálico con brasas que se colocaba para templar el lecho en noches frías. Su uso fue habitual hasta mediados del siglo XX, antes de la llegada de la electricidad.' },
-        { svg: 'assets/svg/Guatero.svg',   titulo: 'Guatero de goma',            texto: 'Botella de goma que se llenaba de agua caliente para dar calor. Fabricadas también de manera hechiza, con una botella plástica,piedras o ladrillos calientes.' },
-        { svg: 'assets/svg/Telefono.svg',  titulo: 'Teléfono de disco',          texto: 'Aparato fijo de comunicación doméstica de mediados del siglo XX, con un disco giratorio para marcar los números telefónicos, girando cada número de forma secuencial para llamar.' },
+        { svg: 'assets/svg/Pupitre.svg',   titulo: 'Pupitre escolar',           texto: 'Mueble de madera usado en colegios, con un apartado para guardar los cuadernos; su fabricación se impulsó con la reforma de 1965.' },
+        { svg: 'assets/svg/Brasero.svg',   titulo: 'Brasero calienta camas',     texto: 'Recipiente metálico con brasas que se colocaba para templar el lecho en noches frías; habitual hasta mediados del siglo XX.' },
+        { svg: 'assets/svg/Guatero.svg',   titulo: 'Guatero de goma',            texto: 'Botella de goma que se llenaba de agua caliente para dar calor; también se hacían de forma artesanal con botellas y piedras calientes.' },
+        { svg: 'assets/svg/Telefono.svg',  titulo: 'Teléfono de disco',          texto: 'Aparato fijo de comunicación doméstica de mediados del siglo XX, con un disco giratorio para marcar los números de forma secuencial.' },
         { svg: 'assets/svg/Aguamanil.svg', titulo: 'Aguamanil',                  texto: 'Conjunto de jarra y palangana de cerámica o latón, usado para el aseo personal antes de la llegada del agua corriente.' },
-        { svg: 'assets/svg/Televisor.svg', titulo: 'Televisor de tubo catódico', texto: 'Aparato de visualización mediante el choque de haces de luz sobre una pantalla de fósforo que reflejaba la imagen. Llegando a los hogares en los años 60.' },
-        { svg: 'assets/svg/Plancha.svg',   titulo: 'Plancha de brasas',          texto: 'Utensilio metálico donde se colocaban brasas para alisar la ropa. Se usó ampliamente en la primera mitad del siglo XX, antes de la llegada de las planchas eléctricas.' },
+        { svg: 'assets/svg/Televisor.svg', titulo: 'Televisor de tubo catódico', texto: 'Aparato que mostraba la imagen mediante haces de luz que chocaban sobre una pantalla de fósforo; llegó a los hogares en los años 60.' },
+        { svg: 'assets/svg/Plancha.svg',   titulo: 'Plancha de brasas',          texto: 'Utensilio metálico con brasas para alisar la ropa; muy usado en la primera mitad del siglo XX, antes de las planchas eléctricas.' },
         { svg: 'assets/svg/Silla-orinal.svg', titulo: 'Silla orinal para niño', texto: 'Mueble adaptado para la higiene infantil, usado en hogares hasta fines del siglo XX.' },
-        { svg: 'assets/svg/Pelela.svg',    titulo: 'Pélela',                     texto: 'Recipiente portátil para necesidades fisiológicas, usado dentro de la habitación, sobre todo durante la noche. También viendo modelos desechables de cartón.' },
+        { svg: 'assets/svg/Pelela.svg',    titulo: 'Pélela',                     texto: 'Recipiente portátil para necesidades fisiológicas, usado en la habitación sobre todo de noche; también hay modelos desechables de cartón.' },
         { svg: 'assets/svg/Radiador.svg',  titulo: 'Radiador eléctrico de aceite', texto: 'Aparato moderno de calefacción, introducido en la segunda mitad del siglo XX.' }
       ];
 
