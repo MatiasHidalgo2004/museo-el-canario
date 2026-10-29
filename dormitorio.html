@@ -510,6 +510,8 @@
         { svg: 'assets/svg/Pelela.svg',    titulo: 'Pélela',                     texto: 'Recipiente portátil para necesidades fisiológicas, usado en la habitación sobre todo de noche; también hay modelos desechables de cartón.' },
         { svg: 'assets/svg/Radiador.svg',  titulo: 'Radiador eléctrico de aceite', texto: 'Aparato moderno de calefacción, introducido en la segunda mitad del siglo XX.' }
       ];
+      // scripts/objetos.js (compartido): objetos flotantes detrás de la intermedia
+      window.escenaDatos = datos;
 
       var abierto = -1;
       var cerrarT = null;
@@ -601,5 +603,7 @@
       });
     })();
   </script>
+
+  <script src="scripts/objetos.js"></script>
 </body>
 </html>
