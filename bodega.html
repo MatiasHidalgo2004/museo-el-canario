@@ -14,6 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700;800;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles/styles.css" />
+  <script src="scripts/skeleton.js"></script>
 
   <!-- Escena del cruce: banda al margen del menú fijo, card blanco a la
        izquierda y capas alineadas (lienzo 1440x1024) + puntos a la derecha -->
@@ -457,6 +458,7 @@
   </div>
 
   <script src="scripts/menu.js"></script>
+  <script src="scripts/atmosfera.js"></script>
 
   <script src="scripts/nav-transition.js"></script>
 
@@ -481,16 +483,16 @@
 
       // Ficha de cada punto: icono (SVG del museo) + título + descripción
       var datos = [
-        { svg: 'assets/svg/bidon.svg',          titulo: 'Bidón lechero',           texto: 'Tarro de hierro galvanizado para contener leche de entre 20 a 40 litros. Popularizado tras el 70, con la masificación del consumo lácteo tras el programa “Medio Litro de Leche”.' },
-        { svg: 'assets/svg/saco.svg',           titulo: 'Saco de legumbres',       texto: 'Costales de yute, elaborados en arpillera resistente y transpirable, ideales para el almacenamiento de granos y legumbres, con un almacenamiento de entre 50 a 100 kilos.' },
-        { svg: 'assets/svg/cajon.svg',          titulo: 'Cajón envuelto',          texto: 'Caja de madera envuelta en tela arpillera para el traslado de productos más delicados como botellas de vidrio, conservas enlatadas o frutas. ' },
+        { svg: 'assets/svg/bidon.svg',          titulo: 'Bidón lechero',           texto: 'Tarro de hierro galvanizado para entre 20 y 40 litros de leche; se popularizó con el programa “Medio Litro de Leche” en los años 70.' },
+        { svg: 'assets/svg/saco.svg',           titulo: 'Saco de legumbres',       texto: 'Costales de yute o arpillera, resistentes y transpirables, ideales para almacenar granos y legumbres; contenían de 50 a 100 kilos.' },
+        { svg: 'assets/svg/cajon.svg',          titulo: 'Cajón envuelto',          texto: 'Caja de madera envuelta en tela arpillera para el traslado de productos delicados: botellas de vidrio, conservas o frutas.' },
         { svg: 'assets/svg/chuica.svg',         titulo: 'Chuica',                  texto: 'Botella de vidrio envuelta en mimbre con mango y corcho para contener licor de 10 litros.' },
-        { svg: 'assets/svg/conservas.svg',      titulo: 'Conservas enlatadas',     texto: 'Latas de hojalata para la conservación de sardinas, jurel, durazno en almíbar o arvejas entre otros productos.' },
+        { svg: 'assets/svg/conservas.svg',      titulo: 'Conservas enlatadas',     texto: 'Latas de hojalata para conservar sardinas, jurel, durazno en almíbar o arvejas, entre otros productos.' },
         { svg: 'assets/svg/garrafa-mediana.svg',titulo: 'Garrafa mediana',         texto: 'Botella de vidrio con corcho para contener licor de 8 litros.' },
         { svg: 'assets/svg/damajuana.svg',      titulo: 'Damajuana',               texto: 'Botella de vidrio envuelta en mimbre con mango y corcho para contener licor de 15 litros.' },
-        { svg: 'assets/svg/barril.svg',         titulo: 'Barril',                  texto: 'Barril más mediano para la venta directa, conservando productos como el vinagre, la chicha o otros licores.' },
+        { svg: 'assets/svg/barril.svg',         titulo: 'Barril',                  texto: 'Barril mediano para la venta directa de productos como vinagre, chicha u otros licores.' },
         { svg: 'assets/svg/garrafa-pequeña.svg',titulo: 'Garrafa pequeña',         texto: 'Botella de vidrio con corcho para contener licor de 5 litros.' },
-        { svg: 'assets/svg/tonel.svg',          titulo: 'Tonel de vino',           texto: 'Barril grande para el almacenamiento y fermentación del vino. Siendo una más económica para el mercado nacional, con formatos más pequeños para la creciente exportación.' },
+        { svg: 'assets/svg/tonel.svg',          titulo: 'Tonel de vino',           texto: 'Barril grande para almacenar y fermentar vino; era la opción económica para el mercado nacional, con formatos menores para exportar.' },
       ];
 
       var abierto = -1;
