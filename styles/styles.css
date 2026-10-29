@@ -1577,10 +1577,10 @@ html.con-skeleton:not(.listo) .card.is-leaving { animation-play-state: running; 
    las estelas de su atmósfera. Los monta scripts/objetos.js (fábrica
    MuseoObjetos) en la primera apertura y sólo existen en móvil, porque el
    visor es móvil. Un poco grandes, girando suavemente sobre sí mismos y con
-   deriva MUY lenta; rebotan en los bordes y chocan entre sí con física
-   suave. Sin interactividad (heredan pointer-events:none de la capa): al
-   tocarlos el visor se cierra como con cualquier punto del fondo. En
-   prefers-reduced-motion quedan estáticos. */
+   deriva MUY lenta; rebotan en los bordes y se atraviesan entre sí, sin
+   interacción de ningún tipo. Sin interactividad (heredan pointer-events:none
+   de la capa): al tocarlos el visor se cierra como con cualquier punto del
+   fondo. En prefers-reduced-motion quedan estáticos. */
 .cruce-objetos {
   position: absolute;
   inset: 0;
