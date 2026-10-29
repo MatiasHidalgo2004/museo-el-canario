@@ -22,11 +22,9 @@
   <style>
     /* --- Fondo fijo al viewport -------------------------------------------
        El catálogo mide miles de px de alto: con background-size:cover sobre
-       toda la altura, Menu-fondo.webp se estira ~7,4x y el filete negro de
-       1px que trae su borde superior se veía como una franja de ~11px justo
-       bajo el header. Pintándolo en un ::before fijo, la imagen se calcula
-       contra la ventana (igual que en el resto de páginas): sin magnificar
-       y cubriendo siempre desde y=0. */
+       toda la altura la imagen se estiraría ~7,4x. El ::before fijo calcula
+       la imagen contra la ventana (igual que en el resto de páginas): sin
+       magnificar y cubriendo siempre desde y=0. */
     .hero { background-image: none !important; }
     .hero::before {
       content: "";
