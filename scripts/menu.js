@@ -1,9 +1,6 @@
 // scripts/menu.js
-// Menú móvil compartido por todas las páginas (fuente única de verdad).
-//
-// Antes cada HTML repetía este mismo bloque y contacto.html traía una copia
-// desactualizada (sin cierre con Escape). Ahora todas las páginas solo hacen:
-//     <script src="scripts/menu.js"></script>
+// Menú móvil compartido por todas las páginas (fuente única de verdad),
+// cargado con <script src="scripts/menu.js"></script>.
 //
 // Responsabilidades:
 //   1. Abrir/cerrar el desplegable (#floatingMenu) con #menuToggle.
@@ -18,11 +15,10 @@
   // Ancho real de la barra de desplazamiento → --sbw en :root. Compensa el
   // cálculo del ancho del header (calc(100% - 48px + var(--sbw))) para que
   // el menú fijo mida lo mismo en páginas con y sin scroll, sin reservar
-  // hueco con scrollbar-gutter (dejaba una franja verde en el borde derecho).
+  // hueco con scrollbar-gutter.
   //
-  // Se mide con una sonda de width:100vw y no con innerWidth: las unidades vw
-  // SÍ incluyen la barra, mientras que innerWidth la excluye en algunos
-  // entornos y entonces la resta daba 0 (sin compensación).
+  // Se mide con una sonda de width:100vw: las unidades vw sí incluyen la
+  // barra, mientras que innerWidth la excluye en algunos entornos.
   var ajustaScrollbar = function () {
     var sonda = document.createElement('div');
     sonda.style.cssText = 'position:absolute;left:-10000px;top:0;width:100vw;height:0';
