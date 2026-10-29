@@ -133,9 +133,8 @@
       '<span class="cap">Doble toque para zoom</span>';
     visor.appendChild(hint);
 
-    // v2: clave con versión. La v1 quedó marcada durante las pruebas previas
-    // (cuando la pista aparecía en todas las salas) y bloqueaba la pista en
-    // cruce para siempre; al renombrar, esos valores viejos se ignoran.
+    // Clave con versión: un valor guardado por una versión anterior no debe
+    // bloquear la pista
     var KEY_HINT = 'museo-canario:doble-toque-aprendido:v2';
     function yaAprendido() {
       try { return window.localStorage.getItem(KEY_HINT) === '1'; }
