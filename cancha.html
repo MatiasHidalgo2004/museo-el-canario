@@ -14,6 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700;800;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles/styles.css" />
+  <script src="scripts/skeleton.js"></script>
 
   <!-- Escena del cruce: banda al margen del menú fijo, card blanco a la
        izquierda y capas alineadas (lienzo 1440x1024) + puntos a la derecha -->
@@ -443,6 +444,7 @@
   </div>
 
   <script src="scripts/menu.js"></script>
+  <script src="scripts/atmosfera.js"></script>
 
   <script src="scripts/nav-transition.js"></script>
 
@@ -467,16 +469,16 @@
 
       // Ficha de cada punto: icono (SVG del museo) + título + descripción
       var datos = [
-        { svg: 'assets/svg/Chupalla.svg',  titulo: 'Chupalla',                   texto: 'Sombrero de paja típico del campo chileno, usado en faenas como celebraciones, principalmente para bailar cueca.' },
-        { svg: 'assets/svg/Emboque.svg',   titulo: 'Emboque',                    texto: 'Juguete de madera que consistía en encajar una pieza en un palo amarrado de cada extremo, utilizando una sola mano.' },
+        { svg: 'assets/svg/Chupalla.svg',  titulo: 'Chupalla',                   texto: 'Sombrero de paja típico del campo chileno, usado en faenas y celebraciones, principalmente para bailar cueca.' },
+        { svg: 'assets/svg/Emboque.svg',   titulo: 'Emboque',                    texto: 'Juguete de madera que consistía en encajar una pieza en el extremo de un palo, usando una sola mano.' },
         { svg: 'assets/svg/Cuerda.svg',    titulo: 'Cuerda para saltar',        texto: 'Juguete sencillo y popular entre niños, usado para juegos colectivos y competencias en la cancha.' },
-        { svg: 'assets/svg/Volantin.svg',  titulo: 'Volantín',                   texto: 'Juguete tradicional chileno hecho de papel liviano, cañas delgadas y una cola de hilo que le da estabilidad en el aire.' },
-        { svg: 'assets/svg/Canica.svg',    titulo: 'Canica ojo de gato',         texto: 'Bolita de vidrio de tonalidad verdosa con un diseño interno de una hoja de colores que le da su nombre, usado para juegos de puntería y altamente coleccionable.' },
+        { svg: 'assets/svg/Volantin.svg',  titulo: 'Volantín',                   texto: 'Juguete tradicional chileno hecho de papel liviano, cañas delgadas y una cola de hilo que le daba estabilidad en el aire.' },
+        { svg: 'assets/svg/Canica.svg',    titulo: 'Canica ojo de gato',         texto: 'Bolita de vidrio verdosa con un diseño interior de colores que le da su nombre; muy coleccionable y usada para juegos de puntería.' },
         { svg: 'assets/svg/Pelota.svg',    titulo: 'Pelota de caucho',          texto: 'Pelota de caucho o trapos hechiza, para jugar a la pelota.' },
-        { svg: 'assets/svg/Vestido.svg',   titulo: 'Vestido de china',           texto: 'Nombre proveniente del quechua “china”, significa: “sirvienta”. Término común para nombrar a la mujer campesina, quedando como tradición como vestimenta de la cueca.' },
-        { svg: 'assets/svg/Espuelas.svg',  titulo: 'Espuelas',                   texto: 'Pieza circular con pinchos metálicos, usada para tantear el costado del caballo al cabalgar e indicarle a dónde ir. Usada a su vez en la cueca como  un elemento del vestuario.' },
-        { svg: 'assets/svg/Caballo.svg',   titulo: 'Caballo de palo',            texto: 'Juguete infantil que imitaba la montura, conformado por un palo y una cabeza de caballo de madera o de plástico en la segunda mitad de siglo.' },
-        { svg: 'assets/svg/Trompo.svg',    titulo: 'Trompo de madera',          texto: 'Tradicional juguete de madera que se hacía girar con una cuerda enrollada, buscando que dure el mayor tiempo posible en pie.' }
+        { svg: 'assets/svg/Vestido.svg',   titulo: 'Vestido de china',           texto: 'Del quechua “china”, que significa “sirvienta”; nombre común de la mujer campesina, hoy vestimenta tradicional de la cueca.' },
+        { svg: 'assets/svg/Espuelas.svg',  titulo: 'Espuelas',                   texto: 'Pieza circular con pinchos metálicos para tantear el costado del caballo al cabalgar; también es elemento del vestuario de la cueca.' },
+        { svg: 'assets/svg/Caballo.svg',   titulo: 'Caballo de palo',            texto: 'Juguete infantil que imitaba la montura: un palo con cabeza de caballo de madera o plástico, popular en la segunda mitad del siglo XX.' },
+        { svg: 'assets/svg/Trompo.svg',    titulo: 'Trompo de madera',          texto: 'Tradicional juguete de madera que se hacía girar con una cuerda enrollada; el objetivo era mantenerlo el mayor tiempo en pie.' }
       ];
 
       var abierto = -1;
