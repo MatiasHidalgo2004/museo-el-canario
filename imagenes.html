@@ -158,9 +158,7 @@
     const cntEl = document.getElementById('carouselCounter');
 
     // Precarga "justo antes": la imagen siguiente se pide mientras se muestra
-    // la actual. Antes se lanzaban las 10 peticiones a la vez (~30 MB) al abrir
-    // la página, saturando la conexión justo cuando hay que pintar la primera
-    // pantalla. La 0 ya viene marcada porque la trae el propio <img> del HTML.
+    // la actual. La 0 ya viene marcada porque la trae el propio <img> del HTML.
     const requested = images.map((item, i) => i === 0);
 
     function preload(position) {
