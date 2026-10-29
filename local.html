@@ -14,6 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700;800;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles/styles.css" />
+  <script src="scripts/skeleton.js"></script>
 
   <!-- Escena del cruce: banda al margen del menú fijo, card blanco a la
        izquierda y capas alineadas (lienzo 1440x1024) + puntos a la derecha -->
@@ -443,6 +444,7 @@
   </div>
 
   <script src="scripts/menu.js"></script>
+  <script src="scripts/atmosfera.js"></script>
 
   <script src="scripts/nav-transition.js"></script>
 
@@ -467,16 +469,16 @@
 
       // Ficha de cada punto: icono (SVG del museo) + título + descripción
       var datos = [
-        { svg: 'assets/svg/esmiral.svg',    titulo: 'Esmeril de banco',          texto: 'Herramienta de taller, usada para afilar por medio de una piedra u hoja metálica giratoria.' },
-        { svg: 'assets/svg/balanza.svg',    titulo: 'Balanza abanico',           texto: 'Usada para el pesaje de alimentos como legumbres o harina. Con un diseño en abanico, que permitía ver con claridad el peso, asegurando una venta transparente al comprador.' },
-        { svg: 'assets/svg/poruña.svg',     titulo: 'Poruña',                    texto: 'Un modo de surtir los alimentos como grano, legumbre o azúcar, de su contenedor de origen a los sacos de los clientes.' },
-        { svg: 'assets/svg/bascula.svg',    titulo: 'Báscula de cocina',         texto: 'Instrumento doméstico para el pesaje de porciones menores, como azúcar o café. Ideal para aquellos que iban a comprar diariamente en menor cantidad para su desayuno u once.' },
-        { svg: 'assets/svg/chanchito.svg',  titulo: 'Chanchito de greda',        texto: 'Alcancía de barro originario de Pomaire, usado para guardar monedas. Mismas que se sacaban rompiendo el recipiente, o por debajo a través de un tapón.' },
-        { svg: 'assets/svg/lampara.svg',    titulo: 'Lampara de kerosene',       texto: 'Lámpara transportable que iluminaba utilizando queroseno, un líquido inflamable y económico. Usadas en la primera mitad del siglo, antes de la masificación de la electricidad.' },
-        { svg: 'assets/svg/maquina.svg',    titulo: 'Máquina de escribir mecánica', texto: 'Se usaba para redactar documentos y llevar cuentas con mayor formalidad. Funcionaba por la transferencia de tinta a través de los impactos de caracteres metálicos sobre el papel.' },
-        { svg: 'assets/svg/tocadiscos.svg', titulo: 'Tocadiscos portátil',       texto: 'Reproductor de vinilos de diseño compacto. Llegando a las áreas rurales de Chile durante la segunda mitad del siglo XX.' },
-        { svg: 'assets/svg/frasco.svg',     titulo: 'Frasco de confitería',      texto: 'Recipiente de vidrio donde se guardaban dulces o galletas. Era un objeto atractivo para los niños, para cuando venían a comprar después de clases o en los fines de semana.' },
-        { svg: 'assets/svg/cutra.svg',      titulo: 'Cutra',                     texto: 'Recipiente "hechizo" para el transporte y consumo de licor, hecho de materiales variados, en este caso de caucho reciclado de alguna rueda.' }
+        { svg: 'assets/svg/esmiral.svg',    titulo: 'Esmeril de banco',          texto: 'Herramienta de taller con piedra giratoria, usada para afilar otras herramientas.' },
+        { svg: 'assets/svg/balanza.svg',    titulo: 'Balanza abanico',           texto: 'Balanza de diseño en abanico para pesar alimentos como legumbres o harina, con el peso bien visible para una venta transparente.' },
+        { svg: 'assets/svg/poruña.svg',     titulo: 'Poruña',                    texto: 'Instrumento para surtir alimentos a grano, como legumbres o azúcar, desde su contenedor a los sacos de los clientes.' },
+        { svg: 'assets/svg/bascula.svg',    titulo: 'Báscula de cocina',         texto: 'Instrumento doméstico para pesar porciones menores, como azúcar o café; ideal para compras diarias de poca cantidad.' },
+        { svg: 'assets/svg/chanchito.svg',  titulo: 'Chanchito de greda',        texto: 'Alcancía de barro originaria de Pomaire para guardar monedas; se sacaban rompiendo el recipiente o por debajo, con un tapón.' },
+        { svg: 'assets/svg/lampara.svg',    titulo: 'Lámpara de queroseno',      texto: 'Lámpara transportable que iluminaba con queroseno, líquido inflamable y económico. Se usó antes de la masificación de la electricidad.' },
+        { svg: 'assets/svg/maquina.svg',    titulo: 'Máquina de escribir mecánica', texto: 'Se usaba para redactar documentos y llevar cuentas con formalidad; transfería tinta por los impactos de caracteres metálicos.' },
+        { svg: 'assets/svg/tocadiscos.svg', titulo: 'Tocadiscos portátil',       texto: 'Reproductor de vinilos de diseño compacto que llegó a las áreas rurales de Chile en la segunda mitad del siglo XX.' },
+        { svg: 'assets/svg/frasco.svg',     titulo: 'Frasco de confitería',      texto: 'Recipiente de vidrio donde se guardaban dulces o galletas; un objeto atractivo para los niños que venían a comprar.' },
+        { svg: 'assets/svg/cutra.svg',      titulo: 'Cutra',                     texto: 'Recipiente "hechizo" para transportar y consumir licor, hecho de materiales variados; en este caso, caucho reciclado de una rueda.' }
       ];
 
       var abierto = -1;
