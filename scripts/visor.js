@@ -149,6 +149,9 @@
     // Geometría base de la imagen del visor (SIN transform) y del overlay,
     // leída al abrir para calcular anclajes de pellizco y límites.
     var ex = 0, ey = 0, iw = 0, ih = 0;      // rect de la imagen (sin transform)
+    var iw0 = 0, ih0 = 0;                    // rect al AJUSTE (1 = fit, base
+                                              // para el zoom absoluto y los
+                                              // destinos de doble-toque)
     var sx = 0, sy = 0, sw = 0, sh = 0;      // rect del visor (= viewport)
     var escala = ESC_ABRIR, tx = 0, ty = 0;
 
@@ -183,23 +186,51 @@
       ty = Math.min(maxY, Math.max(minY, ty));
     }
 
+    // enEscala es ABSOLUTO (1 = ajuste); el transform va contra el layout
+    // actual, así que se convierte al formato de escala (ajuste/iw)
     function centrar(enEscala) {
-      escala = enEscala;
+      escala = enEscala * (iw0 / iw);
       tx = (sx + sw / 2) - ex - escala * (iw / 2);
       ty = (sy + sh / 2) - ey - escala * (ih / 2);
       aplicar();
     }
 
-    // Mide la imagen ya cargada y la centra a la escala dada.
+    // Mide la imagen al AJUSTE (layout sin transform) y la centra a la escala dada.
     function medirYCentrar(enEscala) {
       imgZoom.classList.remove('is-ready');
+      imgZoom.style.width = '';              // caja auto: ajuste nativo (fit)
       imgZoom.style.transform = '';           // medir sin transform
       var r = imgZoom.getBoundingClientRect();
       ex = r.left; ey = r.top; iw = r.width; ih = r.height;
       var vr = visor.getBoundingClientRect();
       sx = vr.left; sy = vr.top; sw = vr.width; sh = vr.height;
+      iw0 = iw; ih0 = ih;
       centrar(enEscala);
       imgZoom.classList.add('is-ready');
+    }
+
+    // Vuelca la escala actual al TAMAÑO DE LAYOUT (y deja sólo la traslación
+    // en transform). WebKit rasteriza el <img> según su layout: así, al
+    // terminar un gesto, se re-rasteriza a resolución final en vez de escalar
+    // una textura vieja (el zoom se veía blando tras ampliar). Las fórmulas del
+    // visor siguen intactas: iw pasa a ser el tamaño ya volcado y escala = 1.
+    function fijar() {
+      if (!iw0) return;
+      var nivel = escala * (iw / iw0);           // zoom absoluto (1 = ajuste)
+      var izq = ex + tx, arr = ey + ty;          // esquina visual actual
+      imgZoom.style.transform = '';
+      if (Math.abs(nivel - 1) < 0.0005) {
+        imgZoom.style.width = '';                // ajuste: caja auto (fit)
+      } else {
+        imgZoom.style.width = (iw0 * nivel) + 'px';
+      }
+      imgZoom.style.height = 'auto';              // proporción intacta
+      void imgZoom.offsetWidth;                   // reflow → re-medida
+      var r = imgZoom.getBoundingClientRect();
+      ex = r.left; ey = r.top; iw = r.width; ih = r.height;
+      escala = 1;
+      tx = izq - ex; ty = arr - ey;                // misma posición visual
+      aplicar();
     }
 
     // Objetos flotantes del visor (fábrica scripts/objetos.js): se montan en
@@ -312,10 +343,14 @@
       }
 
       if (modo === 'pinch' && punteros.size >= 2) {
+        if (!iw0) { e.preventDefault(); return; }   // sin imagen medida aún (carga muy rápida)
         var q = [].slice.call(punteros.values());
         var d = Math.hypot(q[1].x - q[0].x, q[1].y - q[0].y) || 1;
         var mx = (q[0].x + q[1].x) / 2, my = (q[0].y + q[1].y) / 2;
-        escala = Math.min(ESC_MAX, Math.max(ESC_MIN, esc0 * (d / d0)));
+        // la escala es relativa al layout actual: se limita el ZOOM ABSOLUTO
+        // (1 = ajuste, 4 = tope) con iw0/iw
+        escala = Math.min(ESC_MAX * iw0 / iw,
+                          Math.max(ESC_MIN * iw0 / iw, esc0 * (d / d0)));
         // ancla el punto inicial bajo el centro actual del pellizco
         tx = mx - ex - escala * lx0;
         ty = my - ey - escala * ly0;
@@ -325,7 +360,7 @@
         if (!a) return;
         var dx = a.x - ultX, dy = a.y - ultY;
         if (Math.abs(a.x - abajoX) > 10 || Math.abs(a.y - abajoY) > 10) movio = true;
-        if (escala > ESC_MIN + 0.001) {       // sólo arrastra si hay zoom
+        if (escala * iw / iw0 > ESC_MIN + 0.001) {   // sólo arrastra si hay zoom (absoluto)
           tx += dx; ty += dy;
           limitar(); aplicar();
         }
@@ -352,9 +387,11 @@
       }
       if (punteros.size > 0) return;
 
-      // todos los dedos levantados: fin del gesto → soltar la capa para que
-      // se re-rasterice nítida a la escala a la que haya quedado la imagen
+      // todos los dedos levantados: fin del gesto → soltar la capa y VOLCAR
+      // la escala al layout (la re-rasterización a resolución final es lo que
+      // mantiene el SVG nítido tras ampliar; ver fijar())
       imgZoom.classList.remove('is-zooming');
+      if (escala !== 1 || iw !== iw0) fijar();
       var eraDelArrastre = (idArrastre === t[0].identifier);
       idArrastre = null;
       modo = null;
@@ -363,20 +400,24 @@
       var rapido = (Date.now() - abajoT) < 300;
       if (movio || !rapido) return;
 
+      // sin imagen medida aún (carga muy rápida): sin gestos sobre ella
+      if (toqueEnImagen && !iw0) return;
+
       if (toqueEnImagen) {
         // doble-toque: alterna entre acercar (al punto) y volver al ajuste
         var cerca = (Date.now() - ultimoToqueT) < 300 &&
                     Math.hypot(t[0].clientX - ultimoToqueX, t[0].clientY - ultimoToqueY) < 30;
         if (cerca) {
-          if (escala < 2) {
+          if (escala * iw / iw0 < 2) {            // zoom absoluto < 2
             var l = localBajo(t[0].clientX, t[0].clientY);
-            escala = Math.min(ESC_MAX, ESC_DOBLE);
+            escala = Math.min(ESC_MAX, ESC_DOBLE) * (iw0 / iw);  // ×2,6 del ajuste
             tx = t[0].clientX - ex - escala * l[0];
             ty = t[0].clientY - ey - escala * l[1];
             limitar(); aplicar();
           } else {
             centrar(ESC_MIN);                  // volver al ajuste centrado
           }
+          fijar();                             // al layout, para el re-raster nítido
           // Primer doble-toque hecho EN EL CRUCE (donde se muestra la pista):
           // el gesto ya se entendió y la pista no vuelve a aparecer en ninguna
           // sala. Se marca sólo aquí para que un doble-toque en otras salas
@@ -399,6 +440,7 @@
       if (punteros.size === 0) {
         modo = null; idArrastre = null;
         imgZoom.classList.remove('is-zooming');
+        if (escala !== 1 || iw !== iw0) fijar();
       }
     }
 
