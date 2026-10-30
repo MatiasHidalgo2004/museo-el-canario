@@ -1212,9 +1212,10 @@ html.con-skeleton:not(.listo) .card.is-leaving { animation-play-state: running; 
   /* Sólo mientras el usuario pellizca/arrastra (la clase alterna
      scripts/visor.js). Con will-change fijo, el navegador congelaba la
      rasterización de la capa a su tamaño inicial y al ampliar el SVG salía
-     borroso; al soltar los dedos se libera la capa y se re-rasteriza el
-     vector a resolución completa. Durante el gesto se conserva para que el
-     pan/zoom siga siendo fluido. */
+     borroso; al soltar los dedos se libera la capa y, además, visor.js
+     vuelca la escala al layout (fijar()) para forzar la re-rasterización a
+     resolución final. Durante el gesto se conserva para que el pan/zoom
+     siga siendo fluido. */
   .cr-zoom-img.is-zooming { will-change: transform; }
 
   /* Botón de cierre [-] flotando sobre el visor */
