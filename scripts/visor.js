@@ -135,7 +135,7 @@
 
     // Clave con versión: un valor guardado por una versión anterior no debe
     // bloquear la pista
-    var KEY_HINT = 'museo-canario:doble-toque-aprendido:v2';
+    var KEY_HINT = 'museo-canario:doble-toque-aprendido:v3';
     function yaAprendido() {
       try { return window.localStorage.getItem(KEY_HINT) === '1'; }
       catch (e) { return false; }        // sin storage: se vuelve a mostrar
