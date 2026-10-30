@@ -198,6 +198,8 @@
     // Mide la imagen al AJUSTE (layout sin transform) y la centra a la escala dada.
     function medirYCentrar(enEscala) {
       imgZoom.classList.remove('is-ready');
+      imgZoom.style.maxWidth = '';           // máximos del CSS (96vw/92vh)
+      imgZoom.style.maxHeight = '';
       imgZoom.style.width = '';              // caja auto: ajuste nativo (fit)
       imgZoom.style.transform = '';           // medir sin transform
       var r = imgZoom.getBoundingClientRect();
@@ -220,8 +222,12 @@
       var izq = ex + tx, arr = ey + ty;          // esquina visual actual
       imgZoom.style.transform = '';
       if (Math.abs(nivel - 1) < 0.0005) {
+        imgZoom.style.maxWidth = '';             // ajuste: máximos del CSS
+        imgZoom.style.maxHeight = '';
         imgZoom.style.width = '';                // ajuste: caja auto (fit)
       } else {
+        imgZoom.style.maxWidth = 'none';         // plegado: el layout manda
+        imgZoom.style.maxHeight = 'none';
         imgZoom.style.width = (iw0 * nivel) + 'px';
       }
       imgZoom.style.height = 'auto';              // proporción intacta
@@ -303,7 +309,11 @@
 
     function onTouchStart(e) {
       if (e.target === btnCerrar) return;   // dejar que el botón genere su click
-      e.preventDefault();                   // bloquear zoom/scroll nativo
+      // En iOS, preventDefault en el PRIMER toque hacía que el navegador no
+      // reconociera el pellizco (el touchmove ni llegaba y "no pasaba nada").
+      // Sólo se bloquea con DOS dedos; el scroll/zoom de un dedo ya lo cortan
+      // touch-action:none y el overflow del body.
+      if (e.touches.length >= 2) e.preventDefault();
 
       // will-change sólo mientras hay gesto: al soltar, la capa se libera y
       // el navegador re-rasteriza el SVG a resolución completa (con la
@@ -366,7 +376,10 @@
         }
         ultX = a.x; ultY = a.y;
       }
-      if (modo) e.preventDefault();
+      // sólo con DOS dedos: el de un dedo ya lo corta touch-action (y en
+      // iOS, prevenir el move de UN dedo estropeaba el reconocimiento del
+      // pellizco: el pinch no llegaba nunca)
+      if (modo && e.touches && e.touches.length >= 2) e.preventDefault();
     }
 
     function onTouchEnd(e) {
@@ -458,12 +471,48 @@
     // touchmove a nivel de documento (sólo con el visor abierto) garantiza
     // que el pellizco llegue entero a nuestro handler. Con el visor cerrado
     // no hace nada, así el scroll de la página sigue normal.
-    function guardGestos(e) { if (abierto()) e.preventDefault(); }
+    // Sólo se bloquea el gesto de DOS dedos: el de un dedo ya lo cortan
+    // touch-action y el overflow del body. En iOS, prevenir toques/moves de
+    // UN dedo hacía que el navegador no reconociera el pellizco (el move ni
+    // llegaba y "no pasaba nada").
+    function guardGestos(e) {
+      if (!abierto()) return;
+      if (e.type === 'touchmove' && e.touches && e.touches.length < 2) return;
+      e.preventDefault();
+    }
     document.addEventListener('touchmove', guardGestos, { passive: false });
     // iOS Safari: su pellizco de dos dedos usa eventos propios (gesture*) que
     // no siempre los cubre touch-action. Bloquearlos con el visor abierto.
     document.addEventListener('gesturestart', guardGestos, { passive: false });
     document.addEventListener('gesturechange', guardGestos, { passive: false });
+
+    // Respaldo de pellizco en iOS: si el de TOQUES no llegara (segundo toque
+    // no reconocido), el gesto nativo lleva el zoom con e.scale, anclado al
+    // centro del visor. Si el de toques ya está activo (modo 'pinch'), este
+    // respaldo no se entera y no duplica.
+    var gestoAct = false, gAbs = 1, gLx = 0, gLy = 0;
+    document.addEventListener('gesturestart', function (e) {
+      if (!abierto() || !iw0 || modo === 'pinch') return;
+      gestoAct = true;
+      gAbs = escala * (iw / iw0);
+      var c = localBajo(sx + sw / 2, sy + sh / 2);
+      gLx = c[0]; gLy = c[1];
+      imgZoom.classList.add('is-zooming');
+    });
+    document.addEventListener('gesturechange', function (e) {
+      if (!gestoAct) return;
+      var nivel = Math.min(ESC_MAX, Math.max(ESC_MIN, gAbs * (e.scale || 1)));
+      escala = nivel * (iw0 / iw);
+      tx = (sx + sw / 2) - ex - escala * gLx;
+      ty = (sy + sh / 2) - ey - escala * gLy;
+      limitar(); aplicar();
+    });
+    document.addEventListener('gestureend', function () {
+      if (!gestoAct) return;
+      gestoAct = false;
+      imgZoom.classList.remove('is-zooming');
+      if (escala !== 1 || iw !== iw0) fijar();
+    });
 
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && abierto()) cerrar();
