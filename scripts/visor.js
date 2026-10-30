@@ -123,8 +123,8 @@
     visor.appendChild(imgZoom);
 
     // Pista de doble-toque: sólo se muestra mientras el usuario no haya hecho
-    // aún su primer doble-toque. En cuanto lo hace, queda marcada en
-    // localStorage y no vuelve a aparecer en ninguna sala.
+    // aún su primer doble-toque. En cuanto lo hace, queda marcada en la
+    // sesión de la pestaña y no vuelve a aparecer hasta abrirla de nuevo.
     var hint = document.createElement('div');
     hint.className = 'cr-zoom-hint';
     hint.setAttribute('aria-hidden', 'true');
@@ -137,11 +137,11 @@
     // bloquear la pista
     var KEY_HINT = 'museo-canario:doble-toque-aprendido:v3';
     function yaAprendido() {
-      try { return window.localStorage.getItem(KEY_HINT) === '1'; }
+      try { return window.sessionStorage.getItem(KEY_HINT) === '1'; }
       catch (e) { return false; }        // sin storage: se vuelve a mostrar
     }
     function marcarAprendido() {
-      try { window.localStorage.setItem(KEY_HINT, '1'); } catch (e) { /* noop */ }
+      try { window.sessionStorage.setItem(KEY_HINT, '1'); } catch (e) { /* noop */ }
     }
 
     document.body.appendChild(visor);
@@ -260,7 +260,7 @@
 
       // La pista de doble-toque sólo aparece en la sala del CRUCE (la primera
       // del recorrido) y sólo mientras el usuario no haya hecho su primer
-      // doble-toque; en cuanto lo hace, no vuelve a aparecer (localStorage).
+      // doble-toque; en cuanto lo hace, no vuelve a aparecer (sessionStorage).
       hint.classList.toggle('is-on', sala === 'cruce' && !yaAprendido());
 
       // Objetos flotantes detrás de la imagen: montaje perezoso + reanudar
