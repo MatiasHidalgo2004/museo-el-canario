@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="1120" viewBox="0 0 1700 1120" font-family="Arial, Helvetica, sans-serif">
+  <title>Bodega · ficha Damajuana — diagrama de medidas · escritorio 1440×900</title>
+  <defs>
+    <linearGradient id="gHero" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7d8d69"/>
+      <stop offset=".55" stop-color="#5b6a4d"/>
+      <stop offset="1" stop-color="#3d4a37"/>
+    </linearGradient>
+    <linearGradient id="gBod" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e3c189"/>
+      <stop offset=".45" stop-color="#c39352"/>
+      <stop offset="1" stop-color="#8a5c2c"/>
+    </linearGradient>
+    <linearGradient id="gGlass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4e5a4a"/>
+      <stop offset="1" stop-color="#2f3a2e"/>
+    </linearGradient>
+    <marker id="arF" markerWidth="9" markerHeight="9" refX="8.5" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0.7 L9,4.5 L0,8.3 Z" fill="#b76261"/>
+    </marker>
+    <marker id="arB" markerWidth="9" markerHeight="9" refX="0.5" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M9,0.7 L0,4.5 L9,8.3 Z" fill="#b76261"/>
+    </marker>
+    <clipPath id="clipScene">
+      <rect x="280" y="202" width="1100" height="764" rx="20"/>
+    </clipPath>
+  </defs>
+
+  <style>
+    .d    { stroke:#b76261; stroke-width:1.3; fill:none; }
+    .ex   { stroke:#b76261; stroke-width:.9; stroke-dasharray:4 4; opacity:.6; fill:none; }
+    .tk   { stroke:#b76261; stroke-width:1.3; }
+    .chip { fill:#ffffff; stroke:#b76261; stroke-width:.7; }
+    .lb   { font-size:12px; fill:#292929; }
+    .an   { font-size:11.5px; fill:#7a3a38; }
+    .anl  { stroke:#7a3a38; stroke-width:1; fill:none; }
+    .and  { fill:#7a3a38; }
+    .bar  { fill:#cccccc; }
+    .pt   { fill:#ffffff; stroke:#5B8C5A; stroke-width:4; }
+    .ttl  { font-family:Georgia, "Times New Roman", serif; }
+  </style>
+
+  <!-- ===================== LÁMINA ===================== -->
+  <rect x="0" y="0" width="1700" height="1120" fill="#f6f3ea"/>
+  <text class="ttl" x="44" y="46" font-size="25" fill="#292929">Bodega · ficha «Damajuana» — Escritorio 1440×900</text>
+  <text x="44" y="68" font-size="12.5" fill="#6f6a5f">Diagrama vectorial fiel al CSS · cotas en px tomadas de styles.css y bodega.html · fragmentos de código en medidas-y-fragmentos.md</text>
+
+  <!-- ===================== PANTALLA ===================== -->
+  <rect x="118" y="100" width="1440" height="900" fill="#000000" opacity=".14"/>
+  <rect x="110" y="90" width="1440" height="900" fill="url(#gHero)" stroke="#292929" stroke-width="1.2"/>
+
+  <!-- ====== MENÚ FIJO (.site-header) ====== -->
+  <g>
+    <rect x="280" y="102" width="1100" height="76" rx="20" fill="#0e1813" fill-opacity=".42"
+          stroke="#ffffff" stroke-opacity=".22" stroke-width="1"/>
+    <!-- logo -->
+    <rect x="302" y="112" width="56" height="56" rx="10" fill="#f2ecdc"/>
+    <ellipse cx="329" cy="142" rx="15" ry="10" fill="#2f6b4f"/>
+    <path d="M343,140 L353,144 L343,147 Z" fill="#f4c542"/>
+    <circle cx="324" cy="138" r="2" fill="#f2ecdc"/>
+    <path d="M317,148 q8,8 18,4" stroke="#2f6b4f" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <!-- marca -->
+    <text class="ttl" x="370" y="134" font-size="21" font-weight="700" fill="#ffffff">MUSEO DE LA VIDA RURAL</text>
+    <text class="ttl" x="370" y="158" font-size="21" font-weight="700" fill="#ffffff">EL CANARIO</text>
+    <!-- navegación -->
+    <g font-size="15" font-weight="600" fill="#ffffff" text-anchor="middle">
+      <text x="737"  y="145">Cronograma</text>
+      <text x="858"  y="145">Imágenes</text>
+      <text x="974"  y="145">Biografía</text>
+      <text x="1090" y="145">Contacto</text>
+      <text x="1202" y="145">Catálogo</text>
+    </g>
+  </g>
+
+  <!-- ====== ESCENA (.cruce) ====== -->
+  <g clip-path="url(#clipScene)">
+    <!-- ilustración (fondo) -->
+    <rect x="280" y="202" width="1100" height="764" fill="url(#gBod)"/>
+
+    <!-- rótulo de la zona de ilustración -->
+    <rect x="880" y="640" width="386" height="52" rx="8" fill="#000000" opacity=".18"/>
+    <text x="1073" y="662" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">Ilustración — esquema</text>
+    <text x="1073" y="684" font-size="12.5" fill="#ffffff" fill-opacity=".92" text-anchor="middle">recorrido-bodega-fondo.png + recorrido-bodega-intermedio.png</text>
+
+    <!-- card blanco (.cruce-card) -->
+    <rect x="280" y="202" width="486.2" height="764" fill="#ffffff"/>
+    <text class="ttl" x="324" y="273" font-size="40" font-weight="700" fill="#292929">La bodega</text>
+
+    <!-- párrafo 1 (7 líneas) -->
+    <g class="bar">
+      <rect x="324" y="302"   width="398.2" height="9" rx="4.5"/>
+      <rect x="324" y="327.6" width="398.2" height="9" rx="4.5"/>
+      <rect x="324" y="353.2" width="372"   height="9" rx="4.5"/>
+      <rect x="324" y="378.8" width="398.2" height="9" rx="4.5"/>
+      <rect x="324" y="404.4" width="398.2" height="9" rx="4.5"/>
+      <rect x="324" y="430"   width="385"   height="9" rx="4.5"/>
+      <rect x="324" y="455.6" width="247"   height="9" rx="4.5"/>
+    </g>
+    <!-- párrafo 2 (6 líneas) -->
+    <g class="bar">
+      <rect x="324" y="495.2" width="398.2" height="9" rx="4.5"/>
+      <rect x="324" y="520.8" width="398.2" height="9" rx="4.5"/>
+      <rect x="324" y="546.4" width="398.2" height="9" rx="4.5"/>
+      <rect x="324" y="572"   width="360"   height="9" rx="4.5"/>
+      <rect x="324" y="597.6" width="398.2" height="9" rx="4.5"/>
+      <rect x="324" y="623.2" width="219"   height="9" rx="4.5"/>
+    </g>
+
+    <!-- acciones (.cruce-acciones) -->
+    <rect x="324" y="886" width="40" height="40" rx="12" fill="#2f6b4f" fill-opacity=".92"/>
+    <text x="344" y="913" font-size="20" fill="#ffffff" text-anchor="middle">‹</text>
+    <rect x="376" y="886" width="136" height="40" rx="12" fill="#2f6b4f" fill-opacity=".92"/>
+    <text x="444" y="911" font-size="15" font-weight="700" fill="#ffffff" text-anchor="middle">DAR PASO</text>
+
+    <!-- puntos codificados (.cruce-pt) -->
+    <g>
+      <circle class="pt" cx="802"  cy="387" r="6.5"/>
+      <circle class="pt" cx="778"  cy="453" r="6.5"/>
+      <circle class="pt" cx="821"  cy="480" r="6.5"/>
+      <circle class="pt" cx="916"  cy="432" r="6.5"/>
+      <circle class="pt" cx="943"  cy="383" r="6.5"/>
+      <circle class="pt" cx="916"  cy="605" r="6.5"/>
+      <circle class="pt" cx="1121" cy="771" r="6.5"/>
+      <circle class="pt" cx="1187" cy="789" r="6.5"/>
+      <circle class="pt" cx="1268" cy="743" r="6.5"/>
+      <circle class="pt" cx="1234" cy="843" r="6.5"/>
+    </g>
+
+    <!-- ====== VENTANA EMERGENTE (.cr-det) — damajuana ====== -->
+    <g>
+      <!-- panel del icono: flex 0 0 38% -->
+      <rect x="1038" y="224" width="121.6" height="163" fill="#5B8C5A"/>
+      <!-- icono (SVG del museo pasado a blanco) -->
+      <rect x="1084" y="234" width="26" height="13" rx="4" fill="#ffffff"/>
+      <rect x="1087" y="245" width="20" height="26" rx="4" fill="#ffffff"/>
+      <rect x="1068" y="266" width="58" height="96" rx="26" fill="#ffffff"/>
+      <path d="M1126,292 q24,20 0,44" stroke="#ffffff" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <g stroke="#5B8C5A" stroke-width="3" stroke-linecap="round" opacity=".9">
+        <line x1="1077" y1="297" x2="1117" y2="297"/>
+        <line x1="1075" y1="321" x2="1119" y2="321"/>
+        <line x1="1078" y1="345" x2="1116" y2="345"/>
+      </g>
+
+      <!-- cristal (.cr-det-glass) -->
+      <rect x="1159.6" y="224" width="198.4" height="163" fill="url(#gGlass)"/>
+      <text class="ttl" x="1177.6" y="255" font-size="17" font-weight="700" fill="#ffffff">Damajuana</text>
+      <g font-size="13.5" fill="#ffffff" fill-opacity=".92">
+        <text x="1177.6" y="281">Botella de vidrio</text>
+        <text x="1177.6" y="301.9">envuelta en mimbre con</text>
+        <text x="1177.6" y="322.8">mango y corcho para</text>
+        <text x="1177.6" y="343.7">contener licor de 15</text>
+        <text x="1177.6" y="364.6">litros.</text>
+      </g>
+      <!-- × de cierre: oculta en escritorio (display:none si hay hover) -->
+      <circle cx="1335" cy="245" r="15" fill="none" stroke="#ffffff" stroke-opacity=".45"
+              stroke-width="1.2" stroke-dasharray="3 3"/>
+      <text x="1335" y="253" font-size="22" fill="#ffffff" fill-opacity=".45" text-anchor="middle">×</text>
+    </g>
+  </g>
+
+  <!-- ===================== COTAS ===================== -->
+
+  <!-- · menú fijo y escena: ancho max-width container · -->
+  <path class="ex" d="M280,966 V1012 M1380,966 V1012"/>
+  <line class="d" x1="280" y1="1000" x2="1380" y2="1000" marker-start="url(#arB)" marker-end="url(#arF)"/>
+  <rect class="chip" x="687" y="991" width="287" height="18" rx="4"/>
+  <text class="lb" x="830.5" y="1004" text-anchor="middle">1100 px · menú fijo y escena (--container)</text>
+
+  <!-- · pantalla: ancho · -->
+  <path class="ex" d="M110,990 V1054 M1550,990 V1054"/>
+  <line class="d" x1="110" y1="1040" x2="1550" y2="1040" marker-start="url(#arB)" marker-end="url(#arF)"/>
+  <rect class="chip" x="763" y="1031" width="135" height="18" rx="4"/>
+  <text class="lb" x="830.5" y="1044" text-anchor="middle">1440 px · pantalla</text>
+
+  <!-- · pantalla: alto · -->
+  <path class="ex" d="M110,90 H52 M110,990 H52"/>
+  <line class="d" x1="60" y1="90" x2="60" y2="990" marker-start="url(#arB)" marker-end="url(#arF)"/>
+  <g transform="rotate(-90 60 540)">
+    <rect class="chip" x="-3" y="531" width="126" height="18" rx="4"/>
+    <text class="lb" x="60" y="544" text-anchor="middle">900 px · pantalla</text>
+  </g>
+
+  <!-- · menú fijo: alto 76 · -->
+  <path class="ex" d="M1380,102 H1428 M1380,178 H1428"/>
+  <line class="d" x1="1420" y1="102" x2="1420" y2="178" marker-start="url(#arB)" marker-end="url(#arF)"/>
+  <g transform="rotate(-90 1420 140)">
+    <rect class="chip" x="1388" y="131" width="64" height="18" rx="4"/>
+    <text class="lb" x="1420" y="144" text-anchor="middle">76 px</text>
+  </g>
+
+  <!-- · menú fijo: despegue superior · -->
+  <path class="anl" d="M1380,96 H1466"/>
+  <circle class="and" cx="1380" cy="96" r="3"/>
+  <rect class="chip" x="1472" y="87" width="84" height="18" rx="4"/>
+  <text class="an" x="1478" y="100">top: 12 px</text>
+
+  <!-- · escena: alto 764 · -->
+  <path class="ex" d="M280,202 H134 M280,966 H134"/>
+  <line class="d" x1="140" y1="202" x2="140" y2="966" marker-start="url(#arB)" marker-end="url(#arF)"/>
+  <g transform="rotate(-90 140 584)">
+    <rect class="chip" x="59.5" y="575" width="161" height="18" rx="4"/>
+    <text class="lb" x="140" y="588" text-anchor="middle">764 px · escena .cruce</text>
+  </g>
+
+  <!-- · escena: despegue desde arriba (112) · -->
+  <path class="ex" d="M110,90 H196 M110,202 H196"/>
+  <line class="d" x1="190" y1="90" x2="190" y2="202" marker-start="url(#arB)" marker-end="url(#arF)"/>
+  <g transform="rotate(-90 190 146)">
+    <rect class="chip" x="132.5" y="137" width="115" height="18" rx="4"/>
+    <text class="lb" x="190" y="150" text-anchor="middle">112 px · escena</text>
+  </g>
+
+  <!-- · card: ancho 486,2 (44,2%) · -->
+  <path class="ex" d="M280,202 V184 M766.2,202 V184"/>
+  <line class="d" x1="280" y1="190" x2="766.2" y2="190" marker-start="url(#arB)" marker-end="url(#arF)"/>
+  <rect class="chip" x="439" y="181" width="168" height="18" rx="4"/>
+  <text class="lb" x="523" y="194" text-anchor="middle">486,2 px · card (44,2%)</text>
+
+  <!-- · card: padding 44 / 40 · -->
+  <g class="tk">
+    <line x1="280" y1="239" x2="280" y2="253"/>
+    <line x1="324" y1="239" x2="324" y2="253"/>
+    <line x1="280" y1="246" x2="324" y2="246"/>
+  </g>
+  <rect class="chip" x="287" y="237" width="30" height="18" rx="4"/>
+  <text class="lb" x="302" y="250" text-anchor="middle">44</text>
+  <g class="tk">
+    <line x1="293" y1="202" x2="307" y2="202"/>
+    <line x1="293" y1="242" x2="307" y2="242"/>
+    <line x1="300" y1="202" x2="300" y2="242"/>
+  </g>
+  <g transform="rotate(-90 300 222)">
+    <rect class="chip" x="285" y="213" width="30" height="18" rx="4"/>
+    <text class="lb" x="300" y="226" text-anchor="middle">40</text>
+  </g>
+
+  <!-- · ventana: separación top/right 22 · -->
+  <path class="anl" d="M1038,213 H975"/>
+  <circle class="and" cx="1038" cy="213" r="3"/>
+  <rect class="chip" x="827" y="204" width="144" height="18" rx="4"/>
+  <text class="an" x="833" y="217">top: 22 · right: 22</text>
+
+  <!-- · ventana: ancho 320 · -->
+  <path class="ex" d="M1038,387 V408 M1358,387 V408"/>
+  <line class="d" x1="1038" y1="400" x2="1358" y2="400" marker-start="url(#arB)" marker-end="url(#arF)"/>
+  <rect class="chip" x="1111" y="391" width="174" height="18" rx="4"/>
+  <text class="lb" x="1198" y="404" text-anchor="middle">320 px · ventana .cr-det</text>
+
+  <!-- · ventana: alto · -->
+  <path class="ex" d="M1038,224 H1020 M1038,387 H1020"/>
+  <line class="d" x1="1026" y1="224" x2="1026" y2="387" marker-start="url(#arB)" marker-end="url(#arF)"/>
+  <g transform="rotate(-90 1026 305.5)">
+    <rect class="chip" x="989" y="296.5" width="74" height="18" rx="4"/>
+    <text class="lb" x="1026" y="309.5" text-anchor="middle">≈163 px</text>
+  </g>
+
+  <!-- · ventana: anotaciones interiores · -->
+  <path class="anl" d="M1098,387 V500"/>
+  <circle class="and" cx="1098" cy="387" r="3"/>
+  <rect class="chip" x="815" y="491" width="283" height="18" rx="4"/>
+  <text class="an" x="1092" y="504" text-anchor="end">panel del icono: 38% = 121,6 px · #5B8C5A</text>
+
+  <path class="anl" d="M1300,387 V528"/>
+  <circle class="and" cx="1300" cy="387" r="3"/>
+  <rect class="chip" x="998" y="519" width="302" height="18" rx="4"/>
+  <text class="an" x="1294" y="532" text-anchor="end">cristal: 198,4 px · padding 16 18 · radio 18</text>
+
+  <path class="anl" d="M1350,387 V556"/>
+  <circle class="and" cx="1350" cy="387" r="3"/>
+  <rect class="chip" x="1041" y="547" width="309" height="18" rx="4"/>
+  <text class="an" x="1344" y="560" text-anchor="end">título 17 · texto 13,5/1,55 · × oculta (hover)</text>
+
+  <!-- ===================== PIE ===================== -->
+  <text x="44" y="1082" font-size="11.5" fill="#6f6a5f">Fuentes: styles.css (.site-header, .hero, .card-*, .btn-primary) y bodega.html (.cruce, .cruce-card, .cr-det, .cr-det-card, .cr-det-glass, .cr-titulo, .cr-text, .cr-x).</text>
+  <text x="44" y="1099" font-size="11.5" fill="#6f6a5f">Alto de la ventana: variable según el número de líneas de texto (≈163 px con 5 líneas a 13,5/1,55 en un cristal de 198,4 px). Ver medidas-y-fragmentos.md.</text>
+</svg>
