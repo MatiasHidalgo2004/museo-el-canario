@@ -1192,6 +1192,9 @@ html.con-skeleton:not(.listo) .card.is-leaving { animation-play-state: running; 
     position: static;
     width: auto;
     height: auto;
+    flex-shrink: 0;            /* clave: al plegar la escala al layout
+                                  (visor.js fijar()), el flex del visor no
+                                  debe encoger la caja plegada */
     max-width: 96vw;
     max-height: 92vh;
     object-fit: contain;
