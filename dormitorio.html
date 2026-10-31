@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Baño y dormitorios — Museo de la vida rural El Canario</title>
+  <meta name="description" content="Baño y dormitorios del museo El Canario: el lugar más íntimo de la casa, con aguamanil, pelela, brasero y guatero." />
+  <meta name="theme-color" content="#0e1813" />
+  <link rel="icon" href="assets/svg/Logo.svg" type="image/svg+xml" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700;800;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles/styles.css" />
+  <script src="scripts/skeleton.js"></script>
+
+  <!-- Escena de dormitorio: banda al margen del menú fijo, card blanco en el
+       margen derecho y capas alineadas (lienzo 1440x1024) + puntos a la
+       izquierda -->
+  <style>
+    /* ---------- Banda de la escena: encaja con el menú fijo ---------- */
+    .cruce {
+      position: relative;
+      z-index: 2;
+      /* misma caja horizontal que .site-header: 24px de margen a cada
+         lado, con tope en --container y centrada */
+      width: calc(100% - 48px);
+      max-width: var(--container);
+      margin: 24px auto;        /* mismos márgenes verticales que la tarjeta del home */
+      /* alto disponible bajo el menú (24px arriba y 24px abajo, como la
+         tarjeta del home); sin estirarse más allá de la proporción 1440/1024 */
+      height: min(calc(100dvh - var(--header-height) - 60px),
+                  calc(min(100vw - 48px, var(--container)) * 1024 / 1440));
+      overflow: hidden;         /* redondea las esquinas de todo lo que hay dentro */
+      border-radius: var(--radius);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, .12);   /* sombra como la tarjeta del home */
+    }
+    .cruce-lienzo {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    .cruce-capa {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    /* La capa nítida se marca con la clase .cr-capa-int y los puntos van
+       dentro de .cruce-puntos. En ESCRITORIO la intermedio va un 10%
+       más pequeña (90% del lienzo) y corrida 5% a la izquierda, de modo
+       que al centrarla (5%) y restar el corrimiento queda su borde
+       izquierdo exactamente en 0 (inset: 5% auto 5% 0 + 90%): el fondo
+       difuminado asoma como marco de 5% arriba y abajo; las coordenadas
+       --x/--y de los puntos ya vienen recaladas con ese escalado y ese
+       corrimiento (x' = 0,9·x ; y' = 51,2 + 0,9·y) para que cada punto
+       siga sobre su objeto. El +5% del intermedio y el reubico de los
+       puntos son exclusivos del bloque de móvil (≤700px), más abajo.
+       Con z-index: 3 la capa nítida pinta POR ENCIMA del card (mismo
+       nivel, pero va después en el DOM): su contenido opaco llega hasta
+       x 817 y el card empieza en 804, así que la escena solo monta 13px
+       sobre el borde del card y no toca el texto (que empieza en 848).
+       En móvil no tiene efecto: el card es display: contents. */
+    .cr-capa-int {
+      position: absolute;
+      inset: 5% auto 5% 0;   /* centrada (5%) y corrida 5% a la izquierda */
+      width: 90%;
+      height: 90%;
+      z-index: 3;             /* por encima del card (mismo nivel, DOM posterior) */
+      pointer-events: none;   /* pero NO roba los clics: es una capa decorativa;
+                                 sin esto tapa los botones del card y no se
+                                 accionan DAR PASO ni el < de volver */
+    }
+    .cruce-puntos {
+      position: absolute;
+      inset: 0;               /* en escritorio: la caja del lienzo */
+    }
+
+    /* ---------- Card blanco, anclado al margen derecho del menú fijo ----------
+       Comparte la misma caja horizontal que .site-header: su borde derecho
+       cae exactamente en el margen derecho del menú fijo. Quedan redondeadas
+       las esquinas derechas (las del borde de la banda) y rectas las izquierdas
+       (borde interior). Cubre la derecha del lienzo y libera la izquierda,
+       donde están los puntos de recorrido-dormitorio-botones.svg. */
+    .cruce-card {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 44.2%;           /* misma caja, pero del otro lado */
+      border-radius: 0 var(--radius) var(--radius) 0;   /* derecha curveada, izquierda recta */
+      z-index: 3;
+      box-sizing: border-box;
+      overflow: hidden;
+      background: #fff;
+      padding: 40px 44px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+    }
+    /* Acciones al pie del card, como el CTA del home: volver (cuadrado) +
+       DAR PASO (sin funcionalidad por ahora) */
+    .cruce-acciones {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: auto;
+    }
+    .cruce-acciones .btn-primary {
+      height: 40px;
+      padding: 10px 28px;
+      box-sizing: border-box;
+    }
+    .cruce-acciones .cr-back {
+      width: 40px;             /* cuadrado: misma altura que DAR PASO */
+      padding: 0;
+      font-size: 20px;
+    }
+
+    /* ---------- Puntos codificados (mismo punto del cronograma) ---------- */
+    .cruce-pt {
+      position: absolute;
+      left: calc(var(--x) * 100% / 1440);
+      top: calc(var(--y) * 100% / 1024);
+      transform: translate(-50%, -50%);
+      width: 40px;                 /* área de toque (40x40 como el SVG) */
+      height: 40px;
+      padding: 0;
+      border: 0;
+      background: none;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 4;
+    }
+    .cruce-pt::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 17px;
+      height: 17px;
+      margin: -8.5px 0 0 -8.5px;
+      border-radius: 50%;
+      background: #fff;
+      border: 4px solid #77A6A5;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, .22);
+      box-sizing: border-box;
+      transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+    /* Pulsación: avisa que los puntos son pulsables */
+    .cruce-pt::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 25px;
+      height: 25px;
+      margin: -12.5px 0 0 -12.5px;
+      border-radius: 50%;
+      border: 2px solid #77A6A5;
+      opacity: 0;
+      animation: cr-pulse 2.2s ease-out infinite;
+      animation-delay: var(--pulse-delay, 0s);
+      pointer-events: none;
+    }
+    @keyframes cr-pulse {
+      0% { transform: scale(.7); opacity: .75; }
+      70% { transform: scale(2); opacity: 0; }
+      100% { transform: scale(2); opacity: 0; }
+    }
+    .cruce-pt:hover::before { transform: scale(1.25); }
+    .cruce-pt.is-on::before {
+      transform: scale(1.3);
+      box-shadow: 0 0 0 4px rgba(119, 166, 165, .3), 0 3px 8px rgba(0, 0, 0, .22);
+    }
+    .cruce-pt:focus-visible { outline: 3px solid #f4c542; outline-offset: 3px; }
+    /* Tras el primer toque la escena deja de pulsar */
+    .cruce-lienzo.no-pulse .cruce-pt::after { animation: none; opacity: 0; }
+
+    /* ---------- Ventana de prueba (tarjeta de color + cristal) ----------
+       En escritorio se abre en la esquina superior IZQUIERDA de la escena
+       (sobre los puntos, que en dormitorio están en la mitad izquierda y el
+       card blanco ocupa el margen derecho). En móvil la cubre toda la escena. */
+    .cr-det {
+      position: absolute;
+      z-index: 5;
+      display: flex;
+      width: min(320px, 80%);
+      box-sizing: border-box;
+      border-radius: 18px;
+      overflow: hidden;
+      top: 22px;
+      left: 22px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, .30);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 200ms ease, transform 200ms ease;
+    }
+    .cr-det[hidden] { display: none; }
+    .cr-det.is-open { opacity: 1; transform: translateY(0); }
+
+    .cr-det-card {
+      flex: 0 0 38%;
+      min-width: 0;
+      box-sizing: border-box;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #77A6A5;
+    }
+    /* Icono del objeto: los SVG del museo son rojos sobre transparente;
+       con este filtro se pasan a blanco conservando la silueta */
+    .cr-icono {
+      width: 100%;
+      max-width: 96px;
+      height: auto;
+      filter: brightness(0) invert(1);
+    }
+    .cr-titulo {
+      margin: 0 26px 6px 0;   /* aire a la derecha para el × */
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: 17px;
+      line-height: 1.2;
+      color: #fff;
+    }
+    .cr-det-glass {
+      position: relative;
+      flex: 1 1 auto;
+      min-width: 0;
+      padding: 16px 18px;
+      /* el mismo cristal del cronograma: fondo difuminate real */
+      background:
+        linear-gradient(rgba(14, 24, 19, .62), rgba(14, 24, 19, .62)),
+        url('assets/images/Menu-fondo.webp') center 32% / cover no-repeat;
+    }
+    .cr-text {
+      margin: 0;
+      font-family: var(--sans);
+      font-size: 13.5px;
+      line-height: 1.55;
+      color: rgba(255, 255, 255, .92);
+    }
+    .cr-x {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: rgba(255, 255, 255, .8);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+    .cr-x:hover, .cr-x:focus-visible { color: #fff; }
+    .cr-x:focus-visible { outline: 3px solid #f4c542; outline-offset: 2px; }
+    /* En escritorio la × es inalcanzable (al sacar el cursor del punto la
+       ficha se cierra sola), así que se oculta; en móvil sí se usa. */
+    @media (min-width: 701px) and (hover: hover) {
+      .cr-x { display: none; }
+    }
+
+    /* Móvil: un solo card blanco — el texto, la escena enmarcada dentro del
+       card y los botones al final de todo; la ventana de las fichas cubre
+       exactamente la imagen de la escena. */
+    @media (max-width: 700px) {
+      .cruce {
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        height: auto;
+        overflow: visible;
+        padding: 24px;
+        background: #fff;
+      }
+      .cruce-card { display: contents; }   /* el card blanco ahora es .cruce */
+      .cruce-lienzo {
+        order: 2;                  /* la escena va después del texto */
+        margin-top: 6px;
+        height: auto;
+        aspect-ratio: 1440 / 1024;
+        overflow: hidden;
+        border: 1px solid rgba(41, 41, 41, .16);   /* imagen enmarcada */
+        border-radius: 14px;
+        box-shadow: none;
+      }
+      .cruce-acciones {
+        order: 3;                  /* los botones, al final de todo */
+        align-self: center;
+        margin-top: 20px;
+      }
+      /* Puntos algo más pequeños: los grupos #2/#3/#4 quedan más separados.
+         OJO: en dormitorio --mx/--my hacen DOS trabajos a la vez:
+         1) alinear el punto con su objeto, porque en escritorio la escena
+            va al 90% desplazada y en móvil al 105% anclada abajo-derecha
+            (sin ese ajuste los puntos quedarían corridos respecto de la
+            imagen); y
+         2) separar los puntos entre sí para que no queden pegados. */
+      .cruce-pt {
+        width: 32px;
+        height: 32px;
+        left: calc((var(--x) + var(--mx, 0)) * 100% / 1440);
+        top: calc((var(--y) + var(--my, 0)) * 100% / 1024);
+      }
+      .cruce-pt::before {
+        width: 14px;
+        height: 14px;
+        margin: -7px 0 0 -7px;
+        border-width: 3px;
+      }
+      .cruce-pt::after {
+        width: 20px;
+        height: 20px;
+        margin: -10px 0 0 -10px;
+      }
+      /* Sólo en móvil: el intermedio crece un 5% y además se corre 10%
+         a la DERECHA (right: -10%) —su borde derecho queda 10% fuera del
+         lienzo y se recorta, mientras por izquierda queda una franja de
+         5% donde asoma el fondo difuminado— y los puntos lo siguen desde
+         un contenedor del 105% anclado a la misma esquina y con el MISMO
+         desplazamiento: se reubican, pero su marcador no crece. */
+      .cr-capa-int {
+        inset: auto -10% 0 auto;
+        width: 105%;
+        height: auto;
+      }
+      .cruce-puntos {
+        inset: auto -10% 0 auto;
+        width: 105%;
+        height: 105%;
+      }
+      /* La ventana de las fichas ocupa exactamente la imagen de la escena:
+         mismo alto y ancho que recorrido-cruce-fondo.png y en la misma
+         posición sobre todas las capas (radio igual que el marco). Al
+         tapar todos los puntos, se cierra con la × o tocando fuera de la
+         ventana. */
+      .cr-det {
+        inset: 0;
+        width: auto;
+        border-radius: 14px;
+        box-shadow: none;
+      }
+      /* Si la pantalla es muy estrecha, el texto baja con scroll dentro
+         del cristal en vez de salirse de la ventana */
+      .cr-det-glass { overflow-y: auto; min-height: 0; }
+      .cr-titulo { margin-right: 40px; }   /* aire para la × */
+      /* × de cierre cómoda al tacto: en móvil es el cierre principal */
+      .cr-x { width: 40px; height: 40px; font-size: 26px; }
+    }
+
+    /* Movimiento reducido: todo al instante */
+    @media (prefers-reduced-motion: reduce) {
+      .cr-det { transition: none; }
+      .cruce-pt::after { animation: none !important; opacity: 0; }
+      .cruce-pt::before { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="viewport-fixed">
+
+    <!-- Header fijo -->
+    <header class="site-header" role="banner">
+      <div class="header-inner">
+        <a class="brand" href="inicio.html">
+          <img src="assets/svg/Logo.svg" alt="Logo Museo El Canario" class="logo-img" />
+          <span class="brand-text"><span class="brand-tag">Museo de la vida rural<br></span>El Canario</span>
+        </a>
+
+        <nav class="main-nav" aria-label="Navegación principal">
+          <a href="cronograma.html" class="nav-link">Cronograma</a>
+          <a href="imagenes.html" class="nav-link">Imágenes</a>
+          <a href="biografia.html" class="nav-link">Biografía</a>
+          <a href="contacto.html" class="nav-link">Contacto</a>
+          <a href="catalogo.html" class="nav-link">Catálogo</a>
+        </nav>
+
+        <!-- Toggle móvil -->
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" type="button">
+          <svg class="menu-icon" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <circle class="menu-circle" cx="24" cy="24" r="20" fill="#c0392b" />
+            <g class="bars" stroke="#fff" stroke-linecap="round" stroke-width="3" stroke-linejoin="round">
+              <line class="bar top" x1="14" y1="18" x2="34" y2="18" />
+              <line class="bar bottom" x1="14" y1="30" x2="34" y2="30" />
+            </g>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Menú desplegable móvil -->
+    <aside class="floating-menu" id="floatingMenu" aria-hidden="true">
+      <div class="floating-inner">
+        <nav class="floating-nav" aria-label="Navegación flotante">
+          <a href="cronograma.html">Cronograma</a>
+          <a href="imagenes.html">Imágenes</a>
+          <a href="biografia.html">Biografía</a>
+          <a href="contacto.html">Contacto</a>
+          <a href="catalogo.html">Catálogo</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Hero: fondo difuminado del home abarcando toda la pantalla -->
+    <main class="hero" role="main" aria-label="Baño y dormitorios">
+      <div class="hero-overlay" aria-hidden="true"></div>
+
+      <!-- Escena: banda alineada con el menú fijo (mismos márgenes que la
+           tarjeta del home). A la derecha, anclado al margen derecho del
+           menú fijo, un card blanco sobre el fondo; a la izquierda, las
+           capas alineadas al lienzo 1440x1024 con sus puntos codificados.
+           Las coordenadas --x/--y de los puntos vienen del SVG de
+           referencia recorrido-dormitorio-botones.svg. -->
+      <section class="cruce" role="region" aria-label="Escena del dormitorio">
+        <!-- Card blanco (como el del home): anclado al margen derecho de la
+             banda (el del menú fijo), con las esquinas derechas redondeadas
+             por el recorte de la banda y las izquierdas rectas. -->
+        <div class="cruce-card">
+          <h1 class="card-title">Baño y dormitorios</h1>
+          <p class="card-lead">E ingresando desde el corredor, finalizamos este recorrido en el punto más alejado de la vista pública. La estancia destina a la familia, a su <strong>descanso, cobijo e higiene personal.</strong></p>
+          <p class="card-lead">Con objetos como <strong>el aguamanil, compuesto por jarra y palangana</strong>, que se podía encontrar en veladores como baño para lavarse en las mañanas, bajo las camas de los niños las <strong>pelelas</strong> para no caminar a oscuras al baño y un <strong>brasero</strong> podía ofrecer calor en las noches frías junto aún <strong>guatero</strong> a los pies.</p>
+          <p class="card-lead">Un espacio destinado al resguardo de la familia y el último de nuestro recorrido.</p>
+          <div class="cruce-acciones">
+            <a href="corredor.html" class="btn-primary cr-back" aria-label="Volver a la página anterior"> < </a>
+           <a id="cta-recorrer" class="btn-primary" href="final.html">DAR PASO FUERA</a>
+          </div>
+        </div>
+
+        <div class="cruce-lienzo">
+          <img class="cruce-capa" src="assets/images/recorrido-dormitorio-fondo.png" alt="" decoding="async" />
+          <img class="cruce-capa cr-capa-int" src="assets/images/recorrido-dormitorio-intermedio.png" alt="Vista del dormitorio: espacio de descanso" decoding="async" />
+
+          <!-- Los puntos van en un contenedor que en móvil crece un 105%
+               anclado abajo a la derecha (siguen el intermedio agrandado);
+               en escritorio es la caja del lienzo, sin cambios -->
+          <div class="cruce-puntos">
+            <button class="cruce-pt" type="button" style="--x:327; --y:499; --mx:36; --my:-2; --pulse-delay:0s" aria-label="Punto 1 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:526; --y:627; --mx:32; --my:2; --pulse-delay:.3s" aria-label="Punto 2 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:634; --y:517; --mx:64; --my:-33; --pulse-delay:.6s" aria-label="Punto 3 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:656; --y:647; --mx:102; --my:23; --pulse-delay:.9s" aria-label="Punto 4 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:458; --y:526; --mx:50; --my:-1; --pulse-delay:1.2s" aria-label="Punto 5 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:581; --y:645; --mx:63; --my:62; --pulse-delay:1.5s" aria-label="Punto 6 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:713; --y:525; --mx:92; --my:3; --pulse-delay:1.8s" aria-label="Punto 7 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:345; --y:612; --mx:38; --my:11; --pulse-delay:.15s" aria-label="Punto 8 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:609; --y:598; --mx:61; --my:-3; --pulse-delay:.45s" aria-label="Punto 9 de la escena" aria-expanded="false"></button>
+            <button class="cruce-pt" type="button" style="--x:215; --y:439; --mx:24; --my:-8; --pulse-delay:.75s" aria-label="Punto 10 de la escena" aria-expanded="false"></button>
+          </div><!-- /.cruce-puntos -->
+
+          <!-- Ventana de la ficha: icono del objeto + título y descripción -->
+          <div class="cr-det" id="crDet" hidden aria-live="polite">
+            <div class="cr-det-card">
+              <img class="cr-icono" id="crIcono" alt="" />
+            </div>
+            <div class="cr-det-glass">
+              <button type="button" class="cr-x" id="crX" aria-label="Cerrar la ventana">×</button>
+              <p class="cr-titulo" id="crTitulo"></p>
+              <p class="cr-text" id="crText"></p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <script src="scripts/menu.js"></script>
+  <script src="scripts/atmosfera.js"></script>
+
+  <script src="scripts/nav-transition.js"></script>
+
+  <script src="scripts/visor.js"></script>
+
+  <script src="scripts/puntos-vistos.js"></script>
+
+  <script>
+    // Puntos de la escena: al accionar uno (cursor en escritorio, toque en
+    // móvil) se abre su ficha con el icono del objeto; todas aparecen en el
+    // mismo punto (esquina superior izquierda en escritorio; en móvil la
+    // ventana cubre toda la escena). La ventana se cierra
+    // al salir del punto, con ×, Escape o tocando fuera.
+    (function () {
+      var lienzo = document.querySelector('.cruce-lienzo');
+      var pts = [].slice.call(document.querySelectorAll('.cruce-pt'));
+      var det = document.getElementById('crDet');
+      var icono = document.getElementById('crIcono');
+      var titulo = document.getElementById('crTitulo');
+      var texto = document.getElementById('crText');
+      var xBtn = document.getElementById('crX');
+      if (!lienzo || !det || !pts.length) return;
+
+      // Ficha de cada punto: icono (SVG del museo) + título + descripción
+      var datos = [
+        { svg: 'assets/svg/Pupitre.svg',   titulo: 'Pupitre escolar',           texto: 'Mueble de madera usado en colegios, con un apartado para guardar los cuadernos; su fabricación se impulsó con la reforma de 1965.' },
+        { svg: 'assets/svg/Brasero.svg',   titulo: 'Brasero calienta camas',     texto: 'Recipiente metálico con brasas que se colocaba para templar el lecho en noches frías; habitual hasta mediados del siglo XX.' },
+        { svg: 'assets/svg/Guatero.svg',   titulo: 'Guatero de goma',            texto: 'Botella de goma que se llenaba de agua caliente para dar calor; también se hacían de forma artesanal con botellas y piedras calientes.' },
+        { svg: 'assets/svg/Telefono.svg',  titulo: 'Teléfono de disco',          texto: 'Aparato fijo de comunicación doméstica de mediados del siglo XX, con un disco giratorio para marcar los números de forma secuencial.' },
+        { svg: 'assets/svg/Aguamanil.svg', titulo: 'Aguamanil',                  texto: 'Conjunto de jarra y palangana de cerámica o latón, usado para el aseo personal antes de la llegada del agua corriente.' },
+        { svg: 'assets/svg/Televisor.svg', titulo: 'Televisor de tubo catódico', texto: 'Aparato que mostraba la imagen mediante haces de luz que chocaban sobre una pantalla de fósforo; llegó a los hogares en los años 60.' },
+        { svg: 'assets/svg/Plancha.svg',   titulo: 'Plancha de brasas',          texto: 'Utensilio metálico con brasas para alisar la ropa; muy usado en la primera mitad del siglo XX, antes de las planchas eléctricas.' },
+        { svg: 'assets/svg/Silla-orinal.svg', titulo: 'Silla orinal para niño', texto: 'Mueble adaptado para la higiene infantil, usado en hogares hasta fines del siglo XX.' },
+        { svg: 'assets/svg/Pelela.svg',    titulo: 'Pélela',                     texto: 'Recipiente portátil para necesidades fisiológicas, usado en la habitación sobre todo de noche; también hay modelos desechables de cartón.' },
+        { svg: 'assets/svg/Radiador.svg',  titulo: 'Radiador eléctrico de aceite', texto: 'Aparato moderno de calefacción, introducido en la segunda mitad del siglo XX.' }
+      ];
+      // scripts/objetos.js (compartido): objetos flotantes detrás de la intermedia
+      window.escenaDatos = datos;
+
+      var abierto = -1;
+      var cerrarT = null;
+      // Escritorio (con hover): el punto se acciona pasando el cursor y la
+      // ficha se cierra al salir de él (el foco de teclado imita al cursor).
+      // Móvil (táctil o maqueta ≤700px): solo presionar; la ficha se cierra
+      // saliendo de la ventana (tocando fuera de ella), con la × o con Escape.
+      var sinHover = window.matchMedia('(hover: none)').matches ||
+                     window.matchMedia('(max-width: 700px)').matches;
+      // Si la ventana tapa el punto que la abrió, el punto queda debajo y
+      // ya no se puede tocar: en ese caso el cierre exige salir de la
+      // ventana —cualquier toque fuera de ella cierra, también si cae
+      // sobre otro punto—. Si no lo tapa, tocar otro punto cambia de ficha.
+      // Se mide en el momento del toque (la ventana ya está con su tamaño
+      // final: al abrir todavía no ha cargado el icono y mediría mal).
+
+      // ¿La ventana cubre actualmente el punto que la abrió?
+      function puntoCubierto() {
+        if (abierto < 0) return false;
+        var pr = pts[abierto].getBoundingClientRect();
+        var dr = det.getBoundingClientRect();
+        return !(pr.right < dr.left || pr.left > dr.right ||
+                 pr.bottom < dr.top || pr.top > dr.bottom);
+      }
+
+      function abrir(i) {
+        if (cerrarT) { clearTimeout(cerrarT); cerrarT = null; }
+        if (abierto === i) return;   // ya mostrada: no recargar
+        var pt = pts[i];
+        var d = datos[i];
+
+        if (abierto >= 0) {
+          pts[abierto].classList.remove('is-on');
+          pts[abierto].setAttribute('aria-expanded', 'false');
+        }
+        abierto = i;
+        // mientras hay ficha abierta, la escena deja de pulsar
+        lienzo.classList.add('no-pulse');
+
+        icono.src = d.svg;
+        titulo.textContent = d.titulo;
+        texto.textContent = d.texto;
+
+        pt.classList.add('is-on');
+        pt.setAttribute('aria-expanded', 'true');
+
+        det.hidden = false;
+        requestAnimationFrame(function () { det.classList.add('is-open'); });
+      }
+
+      function cerrar() {
+        if (abierto < 0) return;
+        pts[abierto].classList.remove('is-on');
+        pts[abierto].setAttribute('aria-expanded', 'false');
+        abierto = -1;
+        det.classList.remove('is-open');
+        lienzo.classList.remove('no-pulse');   // la escena vuelve a pulsar
+        // la ventana se oculta cuando termina el fundido de salida
+        var espera = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 200;
+        cerrarT = setTimeout(function () { det.hidden = true; }, espera);
+      }
+
+      pts.forEach(function (pt, i) {
+        if (sinHover) {
+          // tocar solo abre; con la ventana tapando su punto, cualquier
+          // toque fuera de la ventana la cierra (punto incluido)
+          pt.addEventListener('click', function () {
+            if (abierto >= 0 && puntoCubierto()) { cerrar(); return; }
+            abrir(i);
+          });
+        } else {
+          pt.addEventListener('mouseenter', function () { abrir(i); });
+          pt.addEventListener('mouseleave', function () { cerrar(); });
+          pt.addEventListener('focus', function () { abrir(i); });
+          pt.addEventListener('blur', function () { cerrar(); });
+        }
+      });
+      xBtn.addEventListener('click', cerrar);
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') cerrar();
+      });
+      // Tocar fuera de la ventana la cierra (y fuera de los puntos, para
+      // no cerrar al cambiar de ficha cuando la ventana no tapa el punto)
+      document.addEventListener('click', function (e) {
+        if (abierto < 0) return;
+        if (e.target.closest && (e.target.closest('.cr-det') || e.target.closest('.cruce-pt'))) return;
+        cerrar();
+      });
+    })();
+  </script>
+
+  <script src="scripts/objetos.js"></script>
+</body>
+</html>

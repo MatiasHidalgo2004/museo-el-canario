@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Museo de la vida rural El Canario</title>
+  <meta name="description" content="Museo de la vida rural El Canario en Longaví, Maule: conoce la casa, su historia y más de 1000 objetos de la vida campesina del siglo XX." />
+  <meta name="theme-color" content="#0e1813" />
+  <link rel="icon" href="assets/svg/Logo.svg" type="image/svg+xml" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700;800;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles/styles.css" />
+  <script src="scripts/skeleton.js"></script>
+</head>
+<body>
+  <div class="viewport-fixed">
+
+    <!-- Header fijo -->
+    <header class="site-header" role="banner">
+      <div class="header-inner">
+        <a class="brand" href="inicio.html">
+          <img src="assets/svg/Logo.svg" alt="Logo Museo El Canario" class="logo-img" />
+          <span class="brand-text"><span class="brand-tag">Museo de la vida rural<br></span>El Canario</span>
+        </a>
+
+        <nav class="main-nav" aria-label="Navegación principal">
+          <a href="cronograma.html" class="nav-link">Cronograma</a>
+          <a href="imagenes.html" class="nav-link">Imágenes</a>
+          <a href="biografia.html" class="nav-link">Biografía</a>
+          <a href="contacto.html" class="nav-link">Contacto</a>
+          <a href="catalogo.html" class="nav-link">Catálogo</a>
+        </nav>
+
+        <!-- Toggle móvil -->
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" type="button">
+          <svg class="menu-icon" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <circle class="menu-circle" cx="24" cy="24" r="20" fill="#c0392b" />
+            <g class="bars" stroke="#fff" stroke-linecap="round" stroke-width="3" stroke-linejoin="round">
+              <line class="bar top" x1="14" y1="18" x2="34" y2="18" />
+              <line class="bar bottom" x1="14" y1="30" x2="34" y2="30" />
+            </g>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Menú desplegable móvil -->
+    <aside class="floating-menu" id="floatingMenu" aria-hidden="true">
+      <div class="floating-inner">
+        <nav class="floating-nav" aria-label="Navegación flotante">
+          <a href="cronograma.html">Cronograma</a>
+          <a href="imagenes.html">Imágenes</a>
+          <a href="biografia.html">Biografía</a>
+          <a href="contacto.html">Contacto</a>
+          <a href="catalogo.html">Catálogo</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Hero -->
+    <main class="hero invertir-tarjeta" role="main" aria-label="Hero">
+      <div class="hero-overlay" aria-hidden="true"></div>
+
+      <section class="card container" role="region" aria-label="Tarjeta principal">
+        <div class="card-inner">
+          <div class="card-copy">
+            <h1 class="card-title">Museo de la vida rural y campesina El Canario</h1>
+            <p class="card-lead">
+              Bienvenido a la página del <strong>Museo de la vida rural El Canario</strong>, donde podrá saber un poco más de la casa, la historia y sus objetos.
+            </p>
+            <p class="card-lead-2">
+              Pudiendo adentrarse en lo que podrá encontrar en su visita, a través de ilustraciones del lugar, que le harán recorrer por los objetos que alguna vez fueron parte de nuestra historia.
+            </p>
+            <a id="cta-recorrer" class="btn-primary" href="recorrido.html">RECORRER</a>
+          </div>
+
+          <figure class="card-media">
+            <img src="assets/images/Imagen-Menu.webp" alt="Museo Vista Frontal" decoding="async" />
+            <figcaption class="card-caption">
+              <span class="caption-title">MUSEO: VISTA FRONTAL</span>
+              <time datetime="2026-06-20">20/06/26</time>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <script src="scripts/menu.js"></script>
+  <script src="scripts/atmosfera.js"></script>
+<script src="scripts/nav-transition.js"></script>
+</body>
+</html>

@@ -1,0 +1,1804 @@
+:root{
+  --brand-green: #2f6b4f;
+  --accent: #b76261;
+  --ink: #292929;
+  --paper: #ffffff;
+
+  --serif: "Lora", Georgia, serif;
+  --sans: "Lato", Arial, sans-serif;
+  --light-sans: "Montserrat", Arial, sans-serif;
+
+  --container: 1100px;
+  --transition: 160ms ease;
+  --radius: 20px;
+  --header-height: 76px;
+  --edge-padding: 22px;
+
+  /* Tamaño de las VENTANAS EMERGENTES (.cr-det) de las escenas.
+     1 = 100% (tamaño actual). Súbelo o bájalo —p. ej. 1.1 / 0.9— y todas
+     las páginas cambian juntas, para que siempre se vean como al 100% del
+     zoom del navegador sin repartir cambios por el sitio. */
+  --ventana-zoom: 1;
+}
+
+/* Reset / base */
+*{box-sizing:border-box}
+/* El ancho real de la barra de desplazamiento se mide con JS (--sbw, en
+   menu.js) y se suma al cálculo del header: así el menú fijo mide lo mismo
+   con y sin scroll, sin reservar hueco con scrollbar-gutter. */
+
+html,body{
+  margin:0;
+  height:100%;
+  font-family:var(--sans);
+  color:var(--ink);
+  background:#a4b682;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+/* El scroll vertical aparece sólo cuando algo desborda (en pantallas
+   normales no se genera barra) y el horizontal sigue bloqueado. body queda en
+   visible para que su contenido sobrante llegue al scroll del documento; si
+   body fuera scrollable tendríamos dos barras independientes y
+   desincronizadas. */
+html{overflow-x:hidden;overflow-y:auto}
+body{overflow:visible}
+.container{max-width:var(--container);margin:0 auto;padding:0 var(--edge-padding)}
+
+/* Viewport wrapper. Usa min-height (no height) para que el envoltorio crezca
+   con la tarjeta: con height:100vh el contenido que excedía la ventana se
+   pintaba fuera de la caja y quedaba inaccesible. */
+.viewport-fixed{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:stretch;}
+
+/* Header */
+.site-header{
+  position:fixed;
+  top:12px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:120;
+  /* + var(--sbw): en las páginas con scroll el viewport (100%) es 15px más
+     angosto; sumando el ancho de la barra el header mide exactamente lo mismo
+     con y sin scroll. --sbw la calcula menu.js (0 si no hay barra). */
+  width:calc(100% - 48px + var(--sbw, 0px));
+  max-width:var(--container);
+  height:var(--header-height);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  border-radius:20px;
+  /* Vidrio esmerilado oscuro (mismo efecto que la tarjeta de recorrido.html) */
+  background: rgba(14,24,19,0.42);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  color:var(--paper);
+  box-shadow:0 18px 40px rgba(0,0,0,0.30);
+  border:1px solid rgba(255,255,255,0.20);
+}
+.header-inner{width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 var(--edge-padding);height:100%}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+.logo-img{width:56px;height:56px;object-fit:contain}
+/* Título a DOS líneas: el <br> viene del HTML y así el bloque gana mucho
+   menos ancho horizontal, dejando espacio al botón CATÁLOGO. Interlineado
+   apretado para que las dos líneas no superen la altura de la barra. */
+.brand-text{font-family:var(--serif);font-weight:700;font-size:clamp(15px,2vw,22px);text-transform:uppercase;transition:color var(--transition);line-height:1.06}
+.brand:hover .brand-text{color:var(--accent)}
+
+/* Nav (escritorio visible) */
+.main-nav{display:flex;gap:20px;align-items:center}
+.nav-link{color:var(--paper);text-decoration:none;font-family:var(--light-sans);font-weight:600;padding:8px 12px;border-radius:8px;transition:color var(--transition)}
+.nav-link:hover{color:var(--accent)}
+
+/* CATÁLOGO: es un enlace más del nav (misma tipografía, mismo padding y
+   mismo hover que Cronograma/Imágenes/Biografía/Contacto) y va DENTRO de
+   .main-nav, así que respeta el gap de 20px de la lista y en ≤1100px
+   desaparece de la barra para aparecer en el menú desplegable (.floating-nav),
+   junto a Contacto. */
+
+/* ---------------- Navegación y detalles ---------------- */
+
+/* Scroll suave al saltar por anclas (índice del catálogo, volver arriba) */
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* Página activa en el menú fijo y en el desplegable: menu.js la marca sola
+   con aria-current="page" comparando la URL actual con cada href */
+.nav-link[aria-current="page"],
+.floating-nav a[aria-current="page"] { color: var(--accent); }
+
+/* El header gana presencia cuando la página empieza a desplazarse
+   (la clase is-scrolled la añade menu.js en el evento scroll) */
+.site-header {
+  transition: box-shadow 240ms ease, background-color 240ms ease;
+}
+.site-header.is-scrolled {
+  background: rgba(14, 24, 19, 0.62);
+  box-shadow: 0 22px 46px rgba(0, 0, 0, 0.42);
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header { transition: none; }
+}
+
+/* Toggle (solo móvil) */
+.menu-toggle{display:none;background:transparent;border:0;padding:6px;cursor:pointer}
+.menu-icon{display:block;width:44px;height:44px}
+.menu-circle{transition:fill 220ms ease}
+.menu-icon .bar{transform-origin:50% 50%;transform-box:fill-box;transition:transform 260ms cubic-bezier(.2,.9,.3,1),opacity 200ms ease;will-change:transform;stroke-width:3;stroke-linecap:round}
+
+/* Floating menu default (desktop fallback) */
+.floating-menu{
+  display:none;
+  position:fixed;
+  top:calc(var(--header-height) + 22px);
+  right:calc((100% - var(--container))/2 + var(--edge-padding));
+  width:240px;border-radius:14px;padding:12px;
+  background:#ffffff;
+  border:1px solid rgba(0,0,0,0.06);
+  box-shadow:0 18px 40px rgba(0,0,0,0.12);
+  z-index:110;opacity:0;visibility:hidden;transform:translateY(-12px) scale(0.98);pointer-events:none;transition:opacity 220ms ease,transform 220ms ease,visibility 220ms;
+}
+.floating-menu.open{opacity:1;visibility:visible;transform:translateY(0) scale(1);pointer-events:auto}
+.floating-inner{padding:6px}
+.floating-nav{display:flex;flex-direction:column;gap:10px}
+.floating-nav a{color:var(--ink);text-decoration:none;padding:10px;border-radius:8px;font-family:var(--light-sans);font-weight:900}
+.floating-nav a:hover{color:var(--accent)}
+
+/* Tamaño de las ventanas emergentes de las escenas (.cr-det): lo gobierna
+   --ventana-zoom. Se usa `zoom` y no `transform` para no pisar el fundido de
+   entrada/salida de la ventana, que vive en transform. En móvil la ventana
+   cubre toda la escena (inset: 0), así que ahí se queda en 1. */
+.cr-det { zoom: var(--ventana-zoom, 1); }
+@media (max-width: 700px) { .cr-det { zoom: 1; } }
+
+/* Hero */
+.hero{
+  flex:1 1 auto;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding-top:calc(var(--header-height) + 12px);
+  position:relative;
+  width:100%;
+  min-height: calc(100vh - var(--header-height) - 24px);
+  background-image: url('../assets/images/Menu-fondo.webp');
+  background-size:cover;background-position:center;color:var(--paper);
+}
+
+/* hero-overlay */
+.hero-overlay{
+  position:absolute;
+  inset:0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.48), rgba(0,0,0,0.18));
+  z-index:0;
+  pointer-events:none;
+}
+
+/* CARD */
+.card{
+  position:relative;
+  z-index:2;
+  background:#ffffff;
+  border-radius: var(--radius);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+  margin-top: 24px;
+  overflow:hidden;
+}
+
+/* Card inner */
+.card-inner{
+  display:flex;
+  gap:0;
+  align-items:stretch;
+  padding:0;
+  width:100%;
+  margin:0 auto;
+}
+
+/* Columna de texto - DESKTOP: flex column, botón al final */
+.card-copy{
+  padding:40px 48px;
+  width:57%;
+  box-sizing:border-box;
+  background:transparent;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+/* Botón RECORRER en escritorio */
+#cta-recorrer {
+  margin-top: auto;
+  align-self: flex-start;
+  padding: 10px 28px;
+  min-width: 0;
+}
+
+/* Tipografía */
+.card-title{font-family:var(--serif);font-weight:700;font-size:clamp(26px,3.6vw,40px);margin:0 0 12px;color:var(--ink)}
+.card-lead, .card-lead-2{font-family:var(--sans);font-weight:400;color:#333;margin:0 0 14px;line-height:1.6;font-size:16px}
+
+/* CTA base */
+.btn-primary{
+  display:inline-flex;align-items:center;justify-content:center;
+  /* background plano (antes un degradado de un solo tono) para que el hover
+     pueda interpolar suavemente el color */
+  background-color: rgba(47,107,79,0.92);
+  color:var(--paper);border-radius:12px;font-family:var(--light-sans);font-weight:700;font-size:15px;border:0;
+  box-shadow:0 10px 24px rgba(47,107,79,0.12);
+  transition:transform 200ms cubic-bezier(.2,.7,.3,1),
+             background-color 260ms ease,
+             box-shadow 260ms ease,
+             filter 200ms ease;
+  text-decoration:none;
+}
+.btn-primary:hover{
+  transform:translateY(-2px);
+  background-color:var(--accent);
+  box-shadow:0 14px 30px rgba(183,98,97,0.30);
+  filter:brightness(1.02);
+}
+.btn-primary:active{transform:translateY(0);transition-duration:80ms}
+
+/* Columna de imagen */
+.card-media{
+  width:43%;
+  min-width:320px;
+  display:block;
+  position:relative;
+  overflow:hidden;
+  margin:0;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: transparent;
+}
+.card-media img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  margin:0;
+  padding:0;
+  border:0;
+  vertical-align:middle;
+}
+
+/* Pie de imagen: vidrio oscuro con desenfoque de fondo (mismo efecto que el
+   menú fijo), pero con más opacidad para que el texto se lea sobre cualquier imagen */
+.card-caption{
+  position:absolute;
+  left:0;right:0;bottom:0;
+  display:flex;justify-content:space-between;align-items:center;
+  /* Si el texto no cabe en una sola línea (pies largos) pasa a la línea
+     siguiente en lugar de desbordar o comprimirse */
+  flex-wrap:wrap;gap:6px 14px;
+  padding:12px 16px;
+  background: rgba(14,24,19,0.62);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  border-top: 1px solid rgba(255,255,255,0.20);
+  color:var(--paper);font-family:var(--light-sans);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:0.6px;
+}
+
+/* Accessibility focus: el indicador de foco se define más abajo con :focus-visible */
+
+/* ------------------ MOBILE: icono animado, menú desplegable y card invertido ------------------ */
+@media (max-width:1100px) {
+
+  /* Mostrar toggle y ocultar nav de escritorio */
+  .menu-toggle{display:block}
+  .main-nav{display:none}
+
+  /* Icon animation: barras a X */
+  .menu-toggle.open .menu-circle { fill: #b03a2b; }
+  .menu-toggle.open .bar.top { transform: translateY(6px) rotate(45deg); }
+  .menu-toggle.open .bar.bottom { transform: translateY(-6px) rotate(-45deg); }
+
+  /* Menú desplegable: extensión visual del header
+     - Alineado exactamente con el header (centro y ancho)
+     - Cortina: baja con desplazamiento vertical desde arriba (translateY)
+     - Sin esquinas superiores redondeadas, solo inferiores */
+  .floating-menu {
+    display: block !important;
+    position: fixed;
+    top: calc(var(--header-height) - 6px); /* nace un poco más arriba para "estirarse" */
+    left: 50%;
+    transform: translateX(-50%) translateY(calc(-100% - 100px));   /* cortina: fuera de pantalla arriba */
+    width: calc(100% - 48px);           /* mismo ancho que el header */
+    max-width: var(--container);
+    background: rgba(14,24,19,0.42);   /* vidrio oscuro, igual que el menú fijo */
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
+    border: 1px solid rgba(255,255,255,0.20);
+    border-radius: 0 0 var(--radius) var(--radius); /* solo esquinas inferiores redondeadas */
+    box-shadow: 0 18px 40px rgba(0,0,0,0.30);
+    z-index: 110;
+    overflow: hidden;
+    pointer-events: none;
+    visibility: hidden;                 /* fuera del orden de Tab cuando está cerrado */
+    opacity: 0;
+    transition: transform 300ms cubic-bezier(.2,.9,.3,1), opacity 220ms ease, visibility 300ms;
+  }
+
+  /* Estado abierto */
+  .floating-menu.open {
+    pointer-events: auto;
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);   /* cortina: baja hasta su posición */
+  }
+
+  /* Inner list styling */
+  .floating-inner {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 12px 14px 12px;
+  }
+
+  .floating-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .floating-nav a {
+    color: #fff;                        /* texto blanco sobre fondo verde */
+    text-decoration: none;
+    font-family: var(--light-sans);
+    font-weight: 900;
+    padding: 12px 14px;
+    border-radius: 8px;
+    transition: background 160ms ease, color 160ms ease, transform 120ms ease;
+  }
+
+  .floating-nav a:hover {
+    background: rgba(255,255,255,0.08);
+    color: var(--accent);
+    transform: translateX(6px);
+  }
+
+  /* CARD (móvil): se separa en dos bloques redondeados —
+     la imagen arriba y el bloque blanco de texto abajo, con un margen
+     entre ellos y un margen inferior en toda la tarjeta.
+     El escritorio no se ve afectado (esto está dentro del media query móvil). */
+  .card {
+    border-radius: 0 !important;
+    margin: 18px 0 24px 0 !important;      /* margen inferior */
+    width: calc(100% - (var(--edge-padding) * 2)) !important;
+    max-width: var(--container);
+    overflow: visible !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    position: relative;
+    /* La clase .container inyecta padding:0 22px y, con border-box, eso
+       encogía .card-inner/.card-media a (ancho - 44px), dejando las imágenes
+       44px más angostas que el menú fijo. Se anula aquí igual que en
+       escritorio (.card.container en min-width:1101px), para que imágenes y
+       texto llenen el ancho igual que el header. */
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .card-inner {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;                  /* margen entre la imagen y el bloque */
+    align-items: stretch !important;
+    padding: 0 !important;
+  }
+
+  /* Imagen arriba, con esquinas redondeadas */
+  .card-media {
+    order: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    border-radius: var(--radius) !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    height: auto !important;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.12) !important;
+  }
+
+  .card-media img {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 42vh;
+    object-fit: cover !important;
+    display: block !important;
+    border-radius: var(--radius) !important;
+  }
+
+  /* Bloque blanco de texto debajo de la imagen, con esquinas redondeadas */
+  .card-copy {
+    order: 2 !important;
+    width: 100% !important;
+    padding: 20px 28px 28px 28px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-end !important;
+    gap: 12px;
+    background: #ffffff !important;
+    border-radius: var(--radius) !important;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.12) !important;
+    align-items: stretch !important;
+  }
+
+  /* botón centrado en móvil */
+  #cta-recorrer {
+    margin-top: 12px !important;
+    align-self: center !important;
+    padding: 10px 28px !important;
+    min-width: 0 !important;
+  }
+
+  html,body { overflow: auto !important; }
+}
+
+/* --- Desktop fixes: ensure image sits flush to right edge without affecting mobile --- */
+@media (min-width: 1101px) {
+  .card {
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .card-inner {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 0 !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .card-copy {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 40px 48px !important;
+    box-sizing: border-box !important;
+  }
+
+  .card-media {
+    flex: 0 0 43% !important;
+    width: 43% !important;
+    min-width: 320px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-radius: 0 var(--radius) var(--radius) 0 !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+  }
+
+  .card-media img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  .card.container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    max-width: var(--container) !important;
+    width: calc(100% - 48px) !important;
+  }
+}
+/* --- Ajustes de foco: quitar recuadro verde al hacer click/tap,
+       pero mantener indicador para navegación por teclado --- */
+
+/* Evita el recuadro por defecto en clicks/taps (puntero) */
+button:focus,
+a:focus,
+img:focus,
+.menu-toggle:focus,
+.brand:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Indicador de foco visible para usuarios de teclado (accesibilidad).
+   Se usa un color sólido de alto contraste en lugar del alfa 0.18,
+   que resultaba casi invisible. */
+button:focus-visible,
+a:focus-visible,
+.menu-toggle:focus-visible,
+.brand:focus-visible {
+  outline: 3px solid #f4c542;
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+/* Evita el highlight nativo en dispositivos táctiles (Android/Chrome) */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Si algún elemento tiene un borde visual aplicado por el navegador (ej. -webkit-focus-ring),
+   neutralízalo para clicks pero no para focus-visible */
+button::-moz-focus-inner { border: 0; padding: 0; }
+
+/* Opcional: si usas imágenes dentro de enlaces y quieres evitar el recuadro al tocarlas */
+a img { outline: none; }
+
+/* --- Forzar overlay full-viewport en móvil y tablet --- */
+@media (max-width:1100px) {
+  /* Asegura que el contenedor principal permita scroll y que el hero pueda ocupar toda la pantalla */
+  html, body {
+    height: 100%;
+    min-height: 100%;
+    overflow: auto !important;
+  }
+
+  /* Hacemos que el overlay sea fixed y cubra todo el viewport */
+  .hero-overlay {
+    position: fixed !important;
+    inset: 0 !important;               /* top:0; right:0; bottom:0; left:0 */
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;         /* altura visible real (con barra visible) */
+    z-index: 1 !important;             /* por debajo del card (card z-index:2) */
+    pointer-events: none !important;
+    background: linear-gradient(180deg, rgba(0,0,0,0.48), rgba(0,0,0,0.18)) !important;
+  }
+
+  /* Asegura que el hero no reduzca la altura del overlay en landscape.
+     100vh en móvil es la altura CON la barra del navegador oculta, mayor que la
+     pantalla visible: dejaba un tramo de scroll vacío (fondo verde) por debajo
+     del contenido. 100dvh sigue la altura visible en cada momento. */
+  .hero {
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    position: relative !important;
+    z-index: 0 !important;
+  }
+
+  /* Mantener el card por encima del overlay */
+  .card {
+    z-index: 2 !important;
+    position: relative !important;
+  }
+
+  /* Si el fondo de la página está en .hero, forzamos que la imagen cubra todo el viewport */
+  .hero {
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+  }
+
+  /* Evita que el header fijo cree un "gap" visual cuando el overlay es fixed */
+  .site-header {
+    z-index: 120 !important;
+    position: fixed !important;
+  }
+}
+
+/* Asegurar que el fondo ocupe toda la pantalla en móvil (aplica a todas las páginas) */
+html, body {
+  height: 100%;
+  min-height: 100%;
+}
+
+/* Si usas un contenedor principal (viewport-fixed), garantizar la altura del
+   viewport. 100dvh = altura visible real (en escritorio es igual a 100vh). */
+.viewport-fixed {
+  min-height: 100vh;
+  min-height: 100dvh;
+  box-sizing: border-box;
+}
+
+/* Si el fondo está en .hero o en body, asegurar cobertura y evitar background-attachment fijo en móvil */
+.hero,
+body {
+  background-size: cover !important;
+  background-position: center top !important;
+  background-repeat: no-repeat !important;
+  background-attachment: scroll !important; /* evita fixed en móviles */
+}
+
+/* ---------------- Transiciones sutiles entre ventanas ---------------- */
+/* Como el sitio es estático (cada ventana es un HTML aparte), la "transición"
+   se logra con una animación de entrada al cargar la página: fundido + leve
+   ascenso de la tarjeta, y fundido de opacidad del header. */
+
+@keyframes cardEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Texto del pie de imagen: cuando el carrusel avanza, el rótulo y el contador
+   reaparecen con un fundido y un leve ascenso para que el cambio se perciba.
+   scripts/ (carrusel de imagenes.html) reinicia esta animación en cada imagen.
+   Los elementos son hijos directos de .card-caption (flex), así que el
+   translateY sí les aplica. */
+@keyframes captionIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.card-caption .caption-title,
+.card-caption .caption-detail,
+.card-caption .caption-counter {
+  animation: captionIn 240ms ease both;
+}
+
+.card {
+  animation: cardEntrance 520ms cubic-bezier(.2,.7,.3,1) both;
+}
+
+/* El menú fijo NO se anima ni al llegar ni al salir: así la barra se lee
+   continua durante toda la transición entre páginas. */
+
+/* Salida entre páginas: al hacer clic en un enlace interno, el CONTENIDO se
+   difumina antes de navegar (lo dispara scripts/nav-transition.js). El fondo
+   de la página y el menú fijo se quedan visibles durante todo el cambio, para
+   que la transición se lea como un fundido del contenido y no como un salto. */
+@keyframes cardLeave {
+  to { opacity: 0; transform: translateY(-6px); }
+}
+.card.is-leaving {
+  animation: cardLeave 220ms ease forwards;
+}
+
+/* Contenido que se difumina: tarjeta (.card), banda de escena (.cruce),
+   maqueta de recorrido/final (.maqueta) y listado del catálogo (.cat-wrap).
+   nav-transition.js añade .is-leaving al <body>; pageshow lo retira por si el
+   usuario vuelve con "Atrás". */
+.card, .cruce, .cat-wrap, .maqueta { transition: opacity 220ms ease; }
+body.is-leaving .card,
+body.is-leaving .cruce,
+body.is-leaving .cat-wrap,
+body.is-leaving .maqueta { opacity: 0; }
+/* la escena sale de su animación de entrada (fill:both fijaría opacidad 1)
+   para poder desvanecerse */
+body.is-leaving .cruce { animation: none; }
+
+/* Entrada de las páginas de escena: la banda .cruce entra con fundido y un
+   leve ascenso, enlazando con el fundido de salida (460 ms, un punto más
+   lento que la salida para que la nueva página "asiente"). */
+@keyframes escenaEntrance {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+.cruce { animation: escenaEntrance 460ms cubic-bezier(.2, .7, .3, 1) both; }
+
+/* Con "menos movimiento": entrada y salida sin animación (se navega ya) */
+@media (prefers-reduced-motion: reduce) {
+  .card, .cruce, .cat-wrap, .maqueta { transition: none; }
+  .cruce { animation: none; }
+}
+
+/* ---------------- Skeleton de carga entre páginas ----------------
+   Al navegar con un enlace interno, el contenido saliente hace crossfade a
+   este skeleton (scripts/nav-transition.js vía MuseoSkeleton.mostrar) y la
+   página entrante pinta SU skeleton en el primer frame (scripts/skeleton.js
+   en <head>, condicionado por la marca sessionStorage "museo:carga"), así el
+   hueco de carga real queda cubierto con la misma forma a ambos lados. Se
+   retira en window.load y añade html.listo, que lanza las animaciones de
+   entrada. z-index 115: por encima del menú flotante (110) y por debajo del
+   header (120), que se queda visible como en el resto de la transición.
+   Carga directa (sin marca): no se crea nada, la página se ve como antes.
+
+   LA GEOMETRÍA CALZA CON EL ELEMENTO REAL, para que al revelar no haya
+   salto: el panel replica la caja de .card / .cruce / .cat-wrap (mismos
+   anchos, márgenes y altura, con la fórmula exacta de la escena) y el
+   interior de la tarjeta reutiliza las CLASES REALES (.card-inner,
+   .card-copy, .card-media), de modo que los breakpoints se aplican solos y
+   las barras caen donde van el texto y la imagen. El marcado vive en
+   scripts/skeleton.js. Ojo: el skeleton NO lleva la clase .card (la busca
+   nav-transition.js con querySelector y el skeleton va antes que <body>). */
+
+/* Las animaciones de entrada esperan a que el skeleton se retire... */
+html.con-skeleton:not(.listo) .card,
+html.con-skeleton:not(.listo) .cruce { animation-play-state: paused; }
+/* ...salvo al salir: el fundido de ida manda aunque la entrada no acabara */
+html.con-skeleton:not(.listo) .card.is-leaving { animation-play-state: running; }
+
+/* Contenedor: replica la caja del hero (mismo padding-top) y centra como él */
+.sk-carga {
+  position: fixed;
+  inset: 0;
+  z-index: 115;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  box-sizing: border-box;
+  padding-top: calc(var(--header-height) + 12px);  /* = padding-top del hero */
+  background: rgba(10, 18, 14, .45);     /* scrim: el fondo de la página sigue asomando */
+  animation: skEntrance 220ms ease both; /* calcado con EXIT_MS de nav-transition */
+}
+@keyframes skEntrance { from { opacity: 0; } to { opacity: 1; } }
+.sk-carga.se-va { animation: skSale 260ms ease forwards; }
+@keyframes skSale { from { opacity: 1; } to { opacity: 0; } }
+
+/* Caja base del panel = .card de escritorio (.card.container: ancho, tope,
+   margen superior, radio y sombra, valores idénticos) */
+.sk-panel {
+  position: relative;
+  box-sizing: border-box;
+  width: calc(100% - 48px);            /* = .card.container en todos los breakpoints */
+  max-width: var(--container);
+  margin-top: 24px;                    /* = margin-top de .card y de .cruce */
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .12);
+  overflow: hidden;                    /* esquinas recortadas y el haz confinado */
+}
+
+/* Haz de luz blanco cálido: barre los bloques de izquierda a derecha para
+   que se note que algo carga. Borde oscuro tenue + núcleo brillante, así se
+   lee sobre los bloques grises Y sobre el panel blanco. Un solo layer
+   compuesto (translate3d en GPU): 1,3s de barrido + 0,3s de reposo. */
+.sk-panel::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 60%;
+  background: linear-gradient(105deg,
+    rgba(0, 0, 0, 0),
+    rgba(0, 0, 0, .07) 34%,
+    rgba(255, 253, 246, .95) 50%,
+    rgba(0, 0, 0, .07) 66%,
+    rgba(0, 0, 0, 0));
+  transform: translate3d(-120%, 0, 0);
+  animation: skHaz 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes skHaz {
+  0%     { transform: translate3d(-120%, 0, 0); }
+  81.25% { transform: translate3d(250%, 0, 0); }   /* 1,3s de barrido */
+  100%   { transform: translate3d(250%, 0, 0); }   /* 0,3s de reposo */
+}
+
+/* ----- Bloques ----- */
+.sk-b {
+  display: block;
+  margin-bottom: 14px;
+  background: #d9ddd4;
+  border-radius: 8px;
+}
+.sk-titulo { width: 58%; height: 26px; margin-bottom: 18px; }
+.sk-linea { width: 100%; height: 16px; }
+.sk-corta { width: 66%; }
+.sk-boton { width: 150px; height: 44px; margin-top: auto; margin-bottom: 0; border-radius: 12px; }
+
+/* Relleno de la imagen (dentro de figure.card-media). La proporción la pone
+   skeleton.js en línea, medida del fichero real de CADA página: en escritorio
+   esa caja con aspect-ratio es la que TIRA de la altura del card (el alto
+   hipotético de la imagen manda sobre la columna de texto, igual que con el
+   img real); height:100% hace que, ya estirada la figura por la fila, el
+   relleno ocupe su caja como el img con object-fit:cover. */
+.sk-foto {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #d9ddd4;
+}
+
+/* área de la línea del tiempo (cronograma): réplica de .tl-area + .tl-stage
+   (las reglas reales viven en cronograma.html; se copian aquí para que el
+   skeleton calce aunque se abra desde otra página) */
+.sk-tl {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 30px 26px;               /* = .tl-area */
+}
+.sk-tl-crumb { width: 170px; height: 18px; margin-bottom: 0; }
+.sk-tl-stage {
+  min-height: 430px;                     /* = .tl-stage */
+  background: #eef0ea;
+  border-radius: 12px;
+}
+
+/* pie de foto (= .card-caption): barra oscura al pie de la imagen. Se ancla
+   igual que el figcaption real: a la figura en escritorio (position:relative
+   de .card-media) y al panel en móvil (la figura queda estática) */
+.sk-pie {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 12px 16px;
+  background: rgba(14, 24, 19, .62);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  border-top: 1px solid rgba(255, 255, 255, .20);
+}
+.sk-pie i { display: block; height: 11px; border-radius: 6px; background: rgba(255, 255, 255, .55); }
+.sk-pie i:first-child { width: 44%; }
+.sk-pie i:last-child { width: 15%; }
+
+/* ----- escena: la caja EXACTA de .cruce (ancho, márgenes y altura) ----- */
+.sk-carga[data-tipo="escena"] .sk-panel {
+  height: min(calc(100dvh - var(--header-height) - 60px),
+              calc(min(100vw - 48px, var(--container)) * 1024 / 1440));
+}
+/* placeholder de la ilustración: recubre la escena en escritorio */
+.sk-escena-fill {
+  position: absolute;
+  inset: 0;
+  background: #eef0ea;
+}
+/* tarjeta blanca de la escena (= .cruce-card) */
+.sk-escena-card {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 44.2%;
+  box-sizing: border-box;
+  padding: 40px 44px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+/* ...pero en comedor, corredor y dormitorio la tarjeta "se da vuelta" y va
+   al otro lado (.cruce-card con right:0 en esas páginas) */
+.sk-der .sk-escena-card { left: auto; right: 0; }
+.sk-escena-acciones { display: flex; gap: 12px; margin-top: auto; }
+.sk-volver { width: 40px; height: 40px; margin: 0; }
+.sk-paso { width: 120px; height: 40px; margin: 0; border-radius: 12px; }
+/* la escena enmarcada (aspect 1440/1024) es sólo de móvil; en escritorio
+   la representa el fill */
+.sk-escena-lienzo { display: none; }
+
+@media (max-width: 700px) {
+  /* .cruce en móvil es tarjeta blanca de alto auto, con el texto primero,
+     la escena enmarcada (order 2) y las acciones al final (order 3) */
+  .sk-carga[data-tipo="escena"] .sk-panel {
+    height: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+  }
+  .sk-carga[data-tipo="escena"] .sk-escena-fill { display: none; }
+  .sk-carga[data-tipo="escena"] .sk-escena-card { display: contents; }  /* = .cruce-card móvil */
+  .sk-carga[data-tipo="escena"] .sk-escena-lienzo {
+    display: block;
+    order: 2;
+    width: 100%;
+    margin-top: 6px;
+    aspect-ratio: 1440 / 1024;
+    box-sizing: border-box;
+    background: #eef0ea;
+    border: 1px solid rgba(41, 41, 41, .16);
+    border-radius: 14px;
+  }
+  .sk-carga[data-tipo="escena"] .sk-escena-acciones {
+    order: 3;
+    margin-top: 20px;
+    align-self: center;
+  }
+}
+
+/* ----- grid: la caja de .cat-wrap (intro + categorías) ----- */
+.sk-carga[data-tipo="grid"] .sk-panel {
+  margin-top: 0;                       /* .cat-wrap arranca en el padding del hero */
+  padding: 40px 0 64px;                /* = .cat-wrap */
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+/* tarjeta de entrada (mismo dibujo que .card) */
+.sk-intro {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .12);
+  overflow: hidden;
+}
+/* categorías: título con filete + lista de fichas de cristal
+   (= .cat-escena / .cat-sub / .cat-lista / .cat-ficha) */
+.sk-grupo { margin-top: 40px; }
+.sk-cat { padding-bottom: 8px; border-bottom: 2px solid rgba(255, 255, 255, .35); }
+.sk-cat-barra { width: 42%; height: 22px; margin: 0; border-radius: 6px; background: rgba(255, 255, 255, .8); }
+.sk-lista { display: flex; flex-direction: column; gap: 14px; margin-top: 14px; }
+.sk-ficha {
+  display: flex;
+  align-items: stretch;
+  height: 92px;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: rgba(14, 24, 19, .42);
+  border: 1px solid rgba(255, 255, 255, .20);
+  border-radius: 18px;
+}
+.sk-ficha-icono { flex: 0 0 92px; background: rgba(255, 255, 255, .14); }
+.sk-ficha-lineas {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 20px;
+}
+.sk-ficha-lineas i { display: block; height: 14px; background: rgba(255, 255, 255, .35); border-radius: 7px; }
+.sk-ficha-lineas i:first-child { width: 52%; }
+.sk-ficha-lineas i:last-child { width: 84%; }
+
+/* ----- Escritorio: reglas que en el sitio viven en los <style> inline de
+   las páginas y aquí se replican CENTRALMENTE (el skeleton de salida se
+   monta desde otra página y no ve esos estilos) ----- */
+@media (min-width: 1101px) {
+  /* recorrido y final: la tarjeta ocupa un poco menos de la mitad IZQUIERDA
+     sobre la maqueta (misma regla .card.container de esas páginas: más
+     cuadradita que la del resto del sitio) */
+  .sk-carga[data-pagina="recorrido"] .sk-panel,
+  .sk-carga[data-pagina="final"] .sk-panel {
+    width: min(44%, calc(var(--container) * 0.44));
+    max-width: none;
+    margin-left: max(24px, (100% - var(--container)) / 2);
+    margin-right: auto;
+  }
+  /* cronograma: columna (.card-inner de su página) y cabecera en FILA con
+     texto+botón, con la línea al 100% debajo (.card-copy.tl-top / .tl-area) */
+  .sk-carga[data-pagina="cronograma"] .card-inner { flex-direction: column !important; }
+  .card-copy.sk-tl-top {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 24px !important;
+    padding: 34px 36px 4px !important;
+  }
+  .sk-tl-texto { flex: 1 1 auto; min-width: 0; }
+  .sk-tl-top .sk-linea { max-width: 620px; }   /* = .tl-top .card-lead */
+  .sk-tl-top .sk-boton { margin-top: 0; align-self: center; }
+}
+
+/* ----- Ajustes de móvil (≤1100): replican las reglas de .card móvil ----- */
+@media (max-width: 1100px) {
+  /* .card móvil es transparente (el blanco lo pone .card-copy) y baja su
+     margen: el panel de la tarjeta replica ese comportamiento */
+  .sk-carga[data-tipo="tarjeta"] .sk-panel {
+    margin: 18px 0 24px;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+  /* la intro del catálogo es .card: mismo tratamiento */
+  .sk-carga[data-tipo="grid"] .sk-intro {
+    margin-top: 18px;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    overflow: visible;
+  }
+  /* botón centrado, como #cta-recorrer en móvil */
+  .sk-boton { align-self: center; margin: 12px auto 0; }
+  /* imagen de la tarjeta: tope de 42vh como el img real en móvil (la
+     proporción la pone el aspect-ratio en línea de skeleton.js) */
+  .sk-foto { max-height: 42vh; }
+  /* cronograma: en móvil el tl-area es un bloque blanco aparte, tras el
+     texto (order 3), como .tl-area real */
+  .sk-tl {
+    order: 3;
+    padding: 16px 14px 18px;
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .12);
+  }
+}
+
+@media (max-width: 700px) {
+  .sk-tl { padding: 14px 12px 16px; }         /* = .tl-area de cronograma */
+}
+/* pantallas bajas: la cabecera y el área se comprimen como en la página real
+   (@media max-height:780 de cronograma.html) */
+@media (max-height: 780px) {
+  .sk-tl { padding-top: 8px; gap: 8px; }
+}
+
+/* Con "menos movimiento": sin haz ni fundidos; el skeleton aparece y desaparece
+   seco (sigue siendo información de carga, no decoración) */
+@media (prefers-reduced-motion: reduce) {
+  .sk-carga,
+  .sk-carga.se-va { animation: none !important; }
+  .sk-panel::after { display: none; }
+}
+
+/* Respetar a usuarios que prefieren menos movimiento (accesibilidad) */
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .site-header {
+    animation: none !important;
+  }
+  .card-caption .caption-title,
+  .card-caption .caption-detail,
+  .card-caption .caption-counter {
+    animation: none !important;
+  }
+  .btn-primary,
+  .nav-link,
+  .floating-menu,
+  .floating-nav a,
+  .menu-circle,
+  .menu-icon .bar {
+    transition: none !important;
+  }
+}
+
+/* Ajustes específicos para móviles: la altura debe seguir a la pantalla real.
+   100vh equivale a la altura del viewport CON la barra del navegador oculta
+   (más alta que la pantalla visible), así que el contenido quedaba más alto que
+   lo que se veía y permitía seguir desplazando por debajo del final, con el
+   fondo verde del body a la vista. 100dvh usa la altura visible en cada
+   momento, con lo que el scroll termina justo donde acaba el contenido. */
+@media (max-width: 900px) {
+  .viewport-fixed,
+  .hero,
+  body {
+    height: auto;
+    min-height: 100vh;   /* respaldo para navegadores antiguos */
+    min-height: 100dvh;
+  }
+}
+
+/* --------------------------- Ajustes de móvil ---------------------------
+   Todo lo de este bloque aplica sólo a pantallas angostas: el escritorio no
+   cambia en nada. */
+
+/* Card e imágenes al MISMO ancho que el menú fijo (24px de margen por lado). */
+@media (max-width: 1100px) {
+  .card { width: calc(100% - 48px) !important; }
+}
+
+/* Escenas: la fila de botones (< y DAR PASO) siempre a la misma altura. El
+   #cta-recorrer global impone align-self/margin-top y, en cuanto la fila
+   crece (zoom de texto, fuente del sistema), el < se desalineaba. */
+@media (max-width: 700px) {
+  .cruce-acciones { align-items: center; }
+  .cruce-acciones #cta-recorrer {
+    /* !important: el #cta-recorrer global (móvil) impone margin-top:12px,
+       que desplazaba DAR PASO 6px respecto al < */
+    align-self: center !important;
+    margin-top: 0 !important;
+  }
+  .cruce-acciones .btn-primary {
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Ventana emergente: el cuerpo del texto en negrita — sobre los colores
+     nuevos de las tarjetas (oro, turquesa, marrón) el peso 400 se perdía. */
+  .cr-text { font-weight: 700; }
+}
+
+/* Invertir el orden de la tarjeta en móvil: card de texto arriba y imagen
+   abajo. Se activa con la clase .invertir-tarjeta en el <main> de las
+   páginas que la piden; el resto mantiene la imagen arriba. */
+@media (max-width: 1100px) {
+  .invertir-tarjeta .card-copy { order: 1 !important; }
+  .invertir-tarjeta .card-media { order: 2 !important; }
+}
+
+/* ------- Zoom de la ilustración en las salas del recorrido (solo móvil) -------
+   Botón [+] en la esquina superior de la escena. Al abrirlo, la capa
+   intermedia (.cr-capa-int) se despega del marco chico y se muestra casi a
+   pantalla completa dentro de un visor fijo; todo lo demás (fondo, texto,
+   header y puntos) queda difuminado detrás. Ese difuminado lleva su propia
+   copia de la atmósfera del sitio (estelas + polvo; ver la sección
+   "Atmósfera ambiental" más abajo) para que no se vea estático.
+   Se cierra con [-], Escape o tocando el fondo difuminado. La lógica vive en
+   scripts/visor.js, que sólo se instala en pantallas angostas. El botón y el
+   visor están ocultos por defecto (escritorio) y sólo se activan dentro de
+   este media query. */
+
+.cr-zoom-btn { display: none; }
+.cr-zoom { display: none; }
+
+@media (max-width: 700px) {
+
+  /* Botón de apertura: cristal oscuro como el header, sobre la escena */
+  .cr-zoom-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 4;                 /* por debajo del popup .cr-det (5): la ventana lo tape */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;              /* área de toque cómoda */
+    height: 44px;
+    padding: 0 10px;
+    border: 1px solid rgba(255, 255, 255, .28);
+    border-radius: 12px;
+    background: rgba(14, 24, 19, .55);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    backdrop-filter: blur(10px) saturate(140%);
+    color: #fff;
+    font-family: var(--light-sans);
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1;
+    letter-spacing: .5px;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .28);
+    transition: background-color var(--transition), transform var(--transition);
+  }
+  .cr-zoom-btn:hover { background: rgba(14, 24, 19, .7); }
+  .cr-zoom-btn:active { transform: scale(.96); }
+  .cr-zoom-btn:focus-visible { outline: 3px solid #f4c542; outline-offset: 2px; }
+
+  /* Mientras se amplía, los puntos de la escena dejan de verse */
+  .cruce-puntos { transition: opacity 220ms ease; }
+  .cruce-lienzo.zoom-activo .cruce-puntos { opacity: 0; }
+
+  /* Visor fijo: cubre la ventana y difumina/tiñe todo lo de detrás */
+  .cr-zoom {
+    position: fixed;
+    inset: 0;
+    z-index: 200;                /* por encima del header (120) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;            /* sin barras al ampliar; recorta en el borde */
+    padding: 3vh 3vw;
+    background: rgba(10, 18, 14, .5);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+    backdrop-filter: blur(10px) saturate(120%);
+    touch-action: none;          /* los gestos los maneja el JS */
+    overscroll-behavior: contain;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 240ms ease, visibility 240ms ease;
+  }
+  .cr-zoom.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  /* ------- Atmósfera del visor: estelas de luz + polvo flotante -------
+     Capa decorativa (inyectada por scripts/visor.js) detrás de la ilustración:
+     da vida al fondo difuminado sin restarle legibilidad. Sólo se animan
+     transform/opacity (GPU) y los bordes suaves vienen del propio degradado
+     (sin filter:blur, que en móvil sale caro); pointer-events:none para no
+     interferir con los gestos sobre la imagen ni con el toque de cierre. */
+  .cr-zoom-atm {
+    position: absolute;
+    inset: 0;
+    z-index: 0;                 /* imagen 1, [-] 2, pista 3: la atmósfera queda al fondo */
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  /* La ilustración recortada al contenido, ya dentro del visor: contenida y
+     lista para el zoom. Se carga desde un <img> propio (versión optimizada),
+     sin tocar la capa de la escena. */
+  .cr-zoom-img {
+    position: static;
+    width: auto;
+    height: auto;
+    flex-shrink: 0;            /* clave: al plegar la escala al layout
+                                  (visor.js fijar()), el flex del visor no
+                                  debe encoger la caja plegada */
+    max-width: 96vw;
+    max-height: 92vh;
+    object-fit: contain;
+    z-index: 1;
+    border-radius: 10px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, .45);
+    transform-origin: 0 0;       /* el JS calcula pan/zoom desde la esquina */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-user-drag: none;
+    touch-action: none;          /* clave: el navegador no intercepta pellizco/doble-toque */
+    opacity: 0;                  /* aparece cuando termina de cargar y se centra */
+    transition: opacity 200ms ease;
+  }
+  .cr-zoom-img.is-ready { opacity: 1; }
+
+  /* Sólo mientras el usuario pellizca/arrastra (la clase alterna
+     scripts/visor.js). Con will-change fijo, el navegador congelaba la
+     rasterización de la capa a su tamaño inicial y al ampliar el SVG salía
+     borroso; al soltar los dedos se libera la capa y, además, visor.js
+     vuelca la escala al layout (fijar()) para forzar la re-rasterización a
+     resolución final. Durante el gesto se conserva para que el pan/zoom
+     siga siendo fluido. */
+  .cr-zoom-img.is-zooming { will-change: transform; }
+
+  /* Botón de cierre [-] flotando sobre el visor */
+  .cr-zoom-close {
+    position: absolute;
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    left: 12px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    height: 44px;
+    padding: 0 10px;
+    border: 1px solid rgba(255, 255, 255, .3);
+    border-radius: 12px;
+    background: rgba(14, 24, 19, .7);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    backdrop-filter: blur(10px) saturate(140%);
+    color: #fff;
+    font-family: var(--light-sans);
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .35);
+  }
+  .cr-zoom-close:focus-visible { outline: 3px solid #f4c542; outline-offset: 2px; }
+
+  /* Pista de doble-toque: punto central con DOBLE latido (dos toques) y onda
+     que se expande, más un rótulo. Aparece al ampliar sólo si el usuario aún
+     no ha hecho un doble-toque; en cuanto lo hace, se guarda (localStorage)
+     y ya no vuelve a aparecer en ninguna sala. pointer-events:none para no
+     interferir con los gestos sobre la imagen. */
+  .cr-zoom-hint {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 300ms ease, visibility 300ms ease;
+  }
+  .cr-zoom-hint.is-on { opacity: 1; visibility: visible; }
+  .cr-zoom-hint .badge {
+    position: relative;
+    width: 16px;
+    height: 16px;
+  }
+  .cr-zoom-hint .dot,
+  .cr-zoom-hint .ring {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border-radius: 50%;
+    box-sizing: border-box;
+  }
+  .cr-zoom-hint .dot {
+    background: rgba(255, 255, 255, .95);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .45);
+    animation: crHintDot 1.6s ease-in-out infinite;
+  }
+  .cr-zoom-hint .ring {
+    border: 2px solid rgba(255, 255, 255, .85);
+    animation: crHintRing 1.6s ease-out infinite;
+  }
+  .cr-zoom-hint .cap {
+    font-family: var(--light-sans);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: .4px;
+    color: rgba(255, 255, 255, .95);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, .55);
+    white-space: nowrap;
+  }
+  /* Doble latido: dos golpes seguidos y luego reposo (≈1.6s por ciclo) */
+  @keyframes crHintDot {
+    0%, 100% { transform: scale(1); }
+    5%  { transform: scale(1.45); }
+    10% { transform: scale(1); }
+    18% { transform: scale(1.45); }
+    23% { transform: scale(1); }
+  }
+  @keyframes crHintRing {
+    0%   { transform: scale(1); opacity: .85; }
+    12%  { transform: scale(3); opacity: 0; }
+    16%  { transform: scale(1); opacity: 0; }
+    20%  { transform: scale(1); opacity: .85; }
+    32%  { transform: scale(3); opacity: 0; }
+    100% { transform: scale(3); opacity: 0; }
+  }
+
+}
+
+/* Menos movimiento: el visor aparece/desaparece sin fundido, la pista de
+   doble-toque queda fija (sin parpadeo), conservando el rótulo, y la
+   atmósfera del fondo (estelas y polvo) se congela como campo estático */
+@media (prefers-reduced-motion: reduce) {
+  .cr-zoom,
+  .cr-zoom-btn,
+  .cruce-puntos,
+  .cr-zoom-hint { transition: none !important; }
+  .cr-zoom-hint .dot,
+  .cr-zoom-hint .ring { animation: none !important; }
+  .cr-zoom-hint .ring { display: none; }
+  .atm-estela,
+  .atm-polvo,
+  .hoja { animation: none !important; }
+  .obj-flot img { animation: none !important; }
+  .obj-flot { transition: none !important; }
+}
+
+/* ---------------- Atmósfera ambiental del sitio: estelas + polvo ----------------
+   Decoración común a TODAS las páginas: estelas de luz cálida y motas de
+   polvo que flotan por encima del fondo de la ventana y por debajo de todo
+   el contenido (tarjetas, texto, puntos, menús). La capa la inyecta
+   scripts/atmosfera.js (clase .fondo-atm; en las salas del recorrido pasa
+   por delante de la ilustración: .fondo-atm-en-escena) y scripts/visor.js
+   clona otra dentro del overlay de zoom (.cr-zoom-atm, regla dentro del
+   media query de arriba). El marcado y las animaciones viven aquí (.atm-*).
+
+   Apilamiento: .hero es contexto de apilamiento aislado (isolation:isolate),
+   así su hijo .fondo-atm (z-index:-1) pinta SOBRE la imagen de fondo del
+   hero (Menu-fondo.webp o la del recorrido) y por DEBAJO de su contenido;
+   sin ese aislamiento la capa quedaría oculta tras los fondos.
+
+   Sólo se animan transform/opacity (GPU) y los bordes suaves vienen del
+   propio degradado (sin filter:blur, que en móvil sale caro);
+   pointer-events:none: no estorba a gestos ni a los toques de cierre.
+   En prefers-reduced-motion (regla anterior) todo queda congelado. */
+
+.hero { isolation: isolate; }
+
+.fondo-atm {
+  position: fixed;             /* siempre a la vista: en páginas largas el
+                                  polvo no se queda lejos del pliegue */
+  inset: 0;
+  z-index: -1;                 /* sobre el fondo del hero, por debajo de su contenido */
+  overflow: hidden;            /* recorta las estelas que sobresalen */
+  pointer-events: none;
+}
+/* Copia dentro de las escenas: ABSOLUTA (anclada a la escena, flota con ella
+   al hacer scroll) y por delante de las capas de la ilustración (mismo nivel
+   z, pero después en el árbol); por detrás de .cruce-puntos y las fichas
+   (posteriores en el DOM o con z-index mayor). */
+.fondo-atm-en-escena {
+  position: absolute;
+  z-index: 0;
+}
+
+.atm-estela,
+.atm-polvo {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+/* Estelas: manchas alargadas y rotadas de luz cálida (crema→dorado),
+   suaves pero ya notorias sobre el fondo. El transform base conserva la
+   inclinación si no hay animación. */
+.atm-estela {
+  border-radius: 50%;
+  background: radial-gradient(closest-side,
+    rgba(255, 238, 190, .24),
+    rgba(244, 197, 66, .12) 48%,
+    rgba(244, 197, 66, 0) 78%);
+}
+.atm-e1 {                       /* diagonal principal, desde arriba-izquierda */
+  width: 150vmax; height: 30vmax;
+  top: -12vmax; left: -38vmax;
+  transform: rotate(-26deg);
+  animation: atmEstela1 52s ease-in-out infinite alternate;
+}
+@keyframes atmEstela1 {
+  from { transform: rotate(-26deg) translate3d(0, 0, 0); }
+  to   { transform: rotate(-21deg) translate3d(14vmax, 6vmax, 0); }
+}
+.atm-e2 {                       /* más tenue, cruzando desde la derecha */
+  width: 130vmax; height: 22vmax;
+  top: 36%; left: -28vmax;
+  transform: rotate(16deg);
+  animation: atmEstela2 66s ease-in-out infinite alternate;
+}
+@keyframes atmEstela2 {
+  from { transform: rotate(16deg) translate3d(0, 0, 0); }
+  to   { transform: rotate(20deg) translate3d(-11vmax, 7vmax, 0); }
+}
+.atm-e3 {                       /* rasa, rozando el borde inferior */
+  width: 90vmax; height: 16vmax;
+  bottom: -6vmax; right: -32vmax;
+  transform: rotate(-10deg);
+  animation: atmEstela3 44s ease-in-out infinite alternate;
+}
+@keyframes atmEstela3 {
+  from { transform: rotate(-10deg) translate3d(0, 0, 0); }
+  to   { transform: rotate(-6deg) translate3d(10vmax, -5vmax, 0); }
+}
+
+/* Polvo/pelusa: 24 motas diminutas con el borde difuminado por el propio
+   degradado, a distintas alturas y con deriva ya perceptible (≈4px/s) y
+   parpadeo suave. Tres keyframes (A/B/C) reutilizados con duraciones y
+   retardos distintos para que nunca se muevan al unísono. Sin animación
+   queda un campo fijo. */
+.atm-polvo {
+  border-radius: 50%;
+  opacity: .4;
+  background: radial-gradient(circle,
+    rgba(255, 249, 232, .65),
+    rgba(255, 249, 232, 0) 70%);
+}
+.atm-p1 { top: 14%; left: 18%; width: 4px; height: 4px;
+          animation: atmPolvoA 28s ease-in-out infinite alternate; }
+.atm-p2 { top: 62%; left: 12%; width: 3px; height: 3px;
+          animation: atmPolvoB 36s ease-in-out -12s infinite alternate; }
+.atm-p3 { top: 28%; left: 74%; width: 5px; height: 5px;
+          animation: atmPolvoC 44s ease-in-out -24s infinite alternate; }
+.atm-p4 { top: 76%; left: 68%; width: 3px; height: 3px;
+          animation: atmPolvoA 32s ease-in-out -8s infinite alternate; }
+.atm-p5 { top: 46%; left: 40%; width: 3px; height: 3px;
+          animation: atmPolvoB 26s ease-in-out -18s infinite alternate; }
+.atm-p6 { top: 84%; left: 34%; width: 4px; height: 4px;
+          animation: atmPolvoC 40s ease-in-out -30s infinite alternate; }
+.atm-p7 { top: 8%; left: 52%; width: 3px; height: 3px;
+          animation: atmPolvoB 30s ease-in-out -5s infinite alternate; }
+.atm-p8 { top: 20%; left: 86%; width: 4px; height: 4px;
+          animation: atmPolvoC 35s ease-in-out -21s infinite alternate; }
+.atm-p9 { top: 36%; left: 26%; width: 3px; height: 3px;
+          animation: atmPolvoA 24s ease-in-out -14s infinite alternate; }
+.atm-p10 { top: 54%; left: 82%; width: 5px; height: 5px;
+           animation: atmPolvoC 46s ease-in-out -27s infinite alternate; }
+.atm-p11 { top: 68%; left: 54%; width: 3px; height: 3px;
+           animation: atmPolvoB 27s ease-in-out -9s infinite alternate; }
+.atm-p12 { top: 90%; left: 78%; width: 4px; height: 4px;
+           animation: atmPolvoA 38s ease-in-out -33s infinite alternate; }
+.atm-p13 { top: 40%; left: 8%; width: 3px; height: 3px;
+           animation: atmPolvoC 32s ease-in-out -17s infinite alternate; }
+.atm-p14 { top: 58%; left: 30%; width: 4px; height: 4px;
+           animation: atmPolvoB 42s ease-in-out -2s infinite alternate; }
+.atm-p15 { top: 33%; left: 58%; width: 3px; height: 3px;
+           animation: atmPolvoA 22s ease-in-out -25s infinite alternate; }
+.atm-p16 { top: 78%; left: 6%; width: 5px; height: 5px;
+           animation: atmPolvoC 48s ease-in-out -11s infinite alternate; }
+.atm-p17 { top: 6%; left: 70%; width: 4px; height: 4px;
+           animation: atmPolvoC 34s ease-in-out -6s infinite alternate; }
+.atm-p18 { top: 70%; left: 92%; width: 3px; height: 3px;
+           animation: atmPolvoA 40s ease-in-out -22s infinite alternate; }
+.atm-p19 { top: 94%; left: 18%; width: 4px; height: 4px;
+           animation: atmPolvoA 28s ease-in-out -16s infinite alternate; }
+.atm-p20 { top: 46%; left: 94%; width: 3px; height: 3px;
+           animation: atmPolvoB 24s ease-in-out -34s infinite alternate; }
+.atm-p21 { top: 24%; left: 62%; width: 3px; height: 3px;
+           animation: atmPolvoC 36s ease-in-out -10s infinite alternate; }
+.atm-p22 { top: 86%; left: 60%; width: 5px; height: 5px;
+           animation: atmPolvoA 44s ease-in-out -28s infinite alternate; }
+.atm-p23 { top: 50%; left: 14%; width: 3px; height: 3px;
+           animation: atmPolvoC 22s ease-in-out -4s infinite alternate; }
+.atm-p24 { top: 16%; left: 38%; width: 4px; height: 4px;
+           animation: atmPolvoB 30s ease-in-out -20s infinite alternate; }
+@keyframes atmPolvoA {
+  from { transform: translate3d(0, 0, 0); opacity: .15; }
+  to   { transform: translate3d(70px, -110px, 0); opacity: .6; }
+}
+@keyframes atmPolvoB {
+  from { transform: translate3d(0, 0, 0); opacity: .55; }
+  to   { transform: translate3d(-95px, 65px, 0); opacity: .12; }
+}
+@keyframes atmPolvoC {
+  from { transform: translate3d(0, 0, 0); opacity: .1; }
+  to   { transform: translate3d(60px, 95px, 0); opacity: .6; }
+}
+
+/* ----- Hojas al viento -----
+   Una sola hoja en tres colores de paleta —verde #5c8c59 (hoja.svg), ámbar
+   #f4c542 (hoja-ambar.svg) y café #b76261 (hoja-cafe.svg): mismos ficheros
+   con el relleno cambiado— repetida 10 veces dentro de .fondo-atm: vuelan de
+   un lado a otro con onda vertical y giro/aleteo, nunca sincronizadas. Sólo
+   background/transform (cada SVG se rasteriza una vez). Se inyectan en
+   scripts/atmosfera.js: en las páginas normales y en la portada siempre; en
+   las escenas, sólo en las de exterior (cruce, bodega, cancha y corredor).
+   En prefers-reduced-motion quedan quietas. */
+.hoja {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  opacity: .7;
+  background: url('../assets/svg/hoja.svg') center / contain no-repeat;
+}
+
+/* Trayectorias: -12vw → 116vw (los extremos quedan fuera de pantalla, así
+   el bucle no salta) con onda vertical; A se va volteando (360° en todo el
+   recorrido) y B aletea oscilando. Dos hojas usan animation-direction:reverse. */
+@keyframes hojaVuelaA {
+  0%   { transform: translate3d(-12vw, 0, 0) rotate(0deg); }
+  25%  { transform: translate3d(26vw, -4vh, 0) rotate(95deg); }
+  50%  { transform: translate3d(56vw, 3vh, 0) rotate(185deg); }
+  75%  { transform: translate3d(86vw, -3vh, 0) rotate(275deg); }
+  100% { transform: translate3d(116vw, 2vh, 0) rotate(360deg); }
+}
+@keyframes hojaVuelaB {
+  0%   { transform: translate3d(-12vw, 1vh, 0) rotate(-14deg); }
+  25%  { transform: translate3d(26vw, -3vh, 0) rotate(22deg); }
+  50%  { transform: translate3d(56vw, 3vh, 0) rotate(-10deg); }
+  75%  { transform: translate3d(86vw, -2vh, 0) rotate(26deg); }
+  100% { transform: translate3d(116vw, 1vh, 0) rotate(-8deg); }
+}
+
+/* Las 10: tamaño en la proporción real de la hoja (612:792), un pelín más
+   generoso para que se noten, cruces de 28 a 75s y retardos negativos para
+   que ya nazcan esparcidas. Las de color traen su fichero en background-image */
+.hoja-1  { top: 6%;  width: 26px; height: 34px;
+           animation: hojaVuelaA 54s ease-in-out -8s infinite; }
+.hoja-2  { top: 22%; width: 21px; height: 27px;
+           background-image: url('../assets/svg/hoja-ambar.svg'); opacity: .55;
+           animation: hojaVuelaB 38s ease-in-out -20s infinite; }
+.hoja-3  { top: 38%; width: 34px; height: 44px;
+           background-image: url('../assets/svg/hoja-cafe.svg'); opacity: .62;
+           animation: hojaVuelaA 68s ease-in-out -40s infinite;
+           animation-direction: reverse; }
+.hoja-4  { top: 12%; width: 18px; height: 23px;
+           animation: hojaVuelaB 32s ease-in-out -14s infinite; }
+.hoja-5  { top: 55%; width: 28px; height: 36px;
+           background-image: url('../assets/svg/hoja-ambar.svg'); opacity: .55;
+           animation: hojaVuelaA 47s ease-in-out -30s infinite; }
+.hoja-6  { top: 74%; width: 23px; height: 30px;
+           background-image: url('../assets/svg/hoja-cafe.svg'); opacity: .62;
+           animation: hojaVuelaB 44s ease-in-out -3s infinite; }
+.hoja-7  { top: 88%; width: 31px; height: 40px;
+           animation: hojaVuelaA 75s ease-in-out -55s infinite;
+           animation-direction: reverse; }
+.hoja-8  { top: 46%; width: 19px; height: 25px;
+           background-image: url('../assets/svg/hoja-ambar.svg'); opacity: .55;
+           animation: hojaVuelaB 29s ease-in-out -11s infinite; }
+.hoja-9  { top: 30%; width: 34px; height: 44px;
+           animation: hojaVuelaA 61s ease-in-out -36s infinite; }
+.hoja-10 { top: 64%; width: 22px; height: 28px;
+           background-image: url('../assets/svg/hoja-cafe.svg'); opacity: .62;
+           animation: hojaVuelaB 35s ease-in-out -24s infinite; }
+
+/* En móvil la escena es pequeña: sobre la ilustración NI estelas NI hojas
+   (estorban la lectura del dibujo); sólo queda el polvo. En escritorio y en
+   los fondos generales de la página siguen todas. */
+@media (max-width: 700px) {
+  .fondo-atm-en-escena .atm-estela,
+  .fondo-atm-en-escena .hoja { display: none; }
+}
+
+/* ----- Objetos flotantes del visor de zoom -----
+   4-5 de los 10 objetos de la estancia (los mismos de los puntos y del
+   catálogo), elegidos al azar por carga, en BLANCO y flotando DENTRO del
+   visor de zoom: DETRÁS de la imagen ampliada y junto a las partículas y
+   las estelas de su atmósfera. Los monta scripts/objetos.js (fábrica
+   MuseoObjetos) en la primera apertura y sólo existen en móvil, porque el
+   visor es móvil. Un poco grandes, girando suavemente sobre sí mismos y con
+   deriva MUY lenta; rebotan en los bordes y se atraviesan entre sí, sin
+   interacción de ningún tipo. Sin interactividad (heredan pointer-events:none
+   de la capa): al tocarlos el visor se cierra como con cualquier punto del
+   fondo. En prefers-reduced-motion quedan estáticos. */
+.cruce-objetos {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.obj-flot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 50px;                 /* base; el módulo varía el tamaño 44-58px */
+  height: 50px;
+  opacity: 0;                  /* entran escalonados (opacidad final vía --o) */
+  transition: opacity 900ms ease;
+}
+.cruce-objetos.is-in .obj-flot { opacity: var(--o, .7); }
+.obj-flot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: brightness(0) invert(1);   /* blancos, como el icono de las fichas */
+  animation: objGira 32s linear infinite;   /* duración y retardo por objeto (inline) */
+}
+@keyframes objGira {
+  to { transform: rotate(360deg); }
+}
+
+/* ---------------- Portada (index de entrada) ----------------
+   Pantalla de presentación: niebla blanca que se disuelve mientras la casa
+   isométrica baja desde arriba y se acerca (zoom progresivo); después
+   aparecen el nombre (Montserrat 800, mayúsculas) y, seguido, un botón
+   circular con pulso y sin texto (al ser lo único en pantalla se entiende
+   solo). Al pulsarlo: flag del skeleton + fundido de salida → inicio.html.
+   La secuencia la dispara html.listo (scripts/skeleton no participa: la
+   "carga" la cubre la propia niebla). La capa .fondo-atm (estelas, polvo y
+   hojas) se coloca SOBRE la imagen y la niebla la oculta hasta disolverse.
+   El .hero se adapta: sin padding de header, sin fondo propio. */
+
+.portada {
+  display: block;               /* no usa el reparto flex del hero */
+  padding-top: 0;
+  background-image: none;
+  background-color: #a4b682;    /* el verde del sitio: si algo del fondo llegara a asomar (o falla la imagen), queda en verde */
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  transition: opacity 420ms ease, filter 420ms ease;
+}
+/* salida al pulsar el botón: disolución con desenfoque (como el resto) */
+html.pt-saliendo .portada { opacity: 0; filter: blur(6px); }
+
+/* velo oscuro: el .hero-overlay del sitio, reforzado y simétrico, para que
+   partículas, estelas y título respiren sobre la ilustración */
+.portada .hero-overlay {
+  background: linear-gradient(180deg, rgba(0, 0, 0, .52), rgba(0, 0, 0, .30) 45%, rgba(0, 0, 0, .55));
+}
+
+/* la atmósfera inyectada (estelas/polvo/hojas) queda SOBRE la casa y el
+   velo, y DEBAJO de la niebla, que la descubre al disolverse */
+.portada .fondo-atm { z-index: 2; }
+
+/* Casa: la imagen YA ocupa la pantalla en su tamaño estándar (nunca se ven
+   los bordes ni el fondo) y el zoom la ACERCA (1 → 1.3); la sensación de
+   "nube que se atraviesa" la pone la niebla. Sólo transform/filter (GPU). */
+.pt-fondo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  user-select: none;
+  transform: scale(1);
+  filter: blur(5px);
+  transition: transform 3300ms cubic-bezier(.25, .6, .2, 1) 200ms,
+              filter 2600ms ease 400ms;
+}
+html.listo .pt-fondo { transform: scale(1.3); filter: blur(0); }
+
+/* Niebla: dos capas (rápida y lenta) para que la disolución sea continua;
+   también hace de pantalla de carga de la imagen */
+.pt-niebla {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(130% 100% at 50% 32%, #ffffff, #f3f7f4 58%, #e7ede8);
+  opacity: 1;
+  transition: opacity 1700ms ease;
+}
+.pt-niebla-lenta { transition-duration: 2900ms; transition-delay: 150ms; }
+html.listo .pt-niebla { opacity: 0; }
+
+/* Capa central: nombre + botón, centrados sobre la casa */
+.pt-capa {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 4.5vh, 44px);
+  padding: 0 24px;
+  box-sizing: border-box;
+  pointer-events: none;         /* sólo el botón es tocable */
+}
+
+/* Nombre del museo: Montserrat 800, blanco, mayúsculas */
+.pt-titulo {
+  margin: 0;
+  font-family: var(--light-sans);
+  font-weight: 800;
+  font-size: clamp(26px, 5vw, 52px);
+  line-height: 1.14;
+  letter-spacing: .06em;
+  text-align: center;
+  text-transform: uppercase;    /* el texto del DOM queda en minúsculas para lectores de pantalla */
+  color: #fff;
+  text-shadow: 0 4px 26px rgba(0, 0, 0, .5), 0 1px 4px rgba(0, 0, 0, .35);
+  opacity: 0;
+  translate: 0 16px;
+  transition: opacity 900ms ease 3100ms,
+              translate 900ms cubic-bezier(.2, .7, .3, 1) 3100ms;
+}
+html.listo .pt-titulo { opacity: 1; translate: 0 0; }
+
+/* Botón circular sin texto, con el pulso de los puntos de escena (cr-pulse):
+   anillo blanco que se expande y se desvanece en bucle de 2,2s */
+.pt-entra {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 0;
+  padding: 0;
+  background: rgba(47, 107, 79, .92);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .38), inset 0 0 0 2px rgba(255, 255, 255, .85);
+  cursor: pointer;
+  pointer-events: auto;
+  opacity: 0;
+  translate: 0 14px;
+  transition: opacity 800ms ease 3800ms,
+              translate 800ms cubic-bezier(.2, .7, .3, 1) 3800ms,
+              transform 220ms cubic-bezier(.2, .7, .3, 1),
+              background-color 220ms ease;
+}
+html.listo .pt-entra { opacity: 1; translate: 0 0; }
+.pt-entra::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, .85);
+  opacity: 0;
+  animation: ptPulso 2.2s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes ptPulso {
+  0%   { transform: scale(.7); opacity: .75; }
+  70%  { transform: scale(2); opacity: 0; }
+  100% { transform: scale(2); opacity: 0; }
+}
+@media (hover: hover) {
+  .pt-entra:hover { background: rgba(39, 91, 67, .95); transform: scale(1.06); }
+}
+.pt-entra:active { transform: scale(.95); }
+.pt-entra:focus-visible { outline: 3px solid #f4c542; outline-offset: 4px; }
+
+/* Pie: año y marca, pequeñitos y casi translúcidos */
+.pt-pie {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  z-index: 4;
+  margin: 0;
+  text-align: center;
+  font-family: var(--light-sans);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .5);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, .55);
+  opacity: 0;
+  transition: opacity 900ms ease 4400ms;
+}
+html.listo .pt-pie { opacity: 1; }
+
+/* Con "menos movimiento": estado final directo, sin niebla, sin zoom, sin
+   pulso; la portada navega sin fundido (el script lo detecta) */
+@media (prefers-reduced-motion: reduce) {
+  .portada { transition: none; }
+  html.pt-saliendo .portada { opacity: 1; filter: none; }
+  .pt-niebla { display: none; }
+  .pt-fondo { transform: scale(1.3); filter: none; transition: none; }
+  .pt-titulo, .pt-entra, .pt-pie {
+    opacity: 1 !important;
+    translate: none !important;
+    transition: none !important;
+  }
+  .pt-entra::after { animation: none !important; opacity: .45; transform: scale(1.3); }
+}
+
+/* ---------------- Puntos vistos del recorrido ----------------
+   Indicador de qué puntos ya abrió el visitante: dejan de pulsar y quedan
+   translúcidos (siguen funcionando igual). Sólo cambia la apariencia.
+   La clase .is-visto la pone scripts/puntos-vistos.js; el estado vive en
+   sessionStorage (se borra al cerrar la pestaña). Va en styles.css porque
+   gana especificidad sobre las reglas inline de las páginas, así no hay que
+   tocar sus estilos. */
+.cruce-pt.is-visto { opacity: .6; transition: opacity 220ms ease; }
+.cruce-pt.is-visto::after { animation: none; opacity: 0; }
+/* Con la ficha abierta, el punto activo vuelve a opacidad total para que se
+   lea bien cuál está abierto; al cerrar, vuelve a translúcido. */
+.cruce-pt.is-visto.is-on { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .cruce-pt.is-visto { transition: none; }
+}

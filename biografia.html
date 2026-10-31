@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Biografía — Museo de la vida rural El Canario</title>
+  <meta name="description" content="Casa patronal de adobe de 1952 a las afueras de Linares, hoy el museo El Canario, con más de 1000 objetos de la vida campesina del siglo XX." />
+  <meta name="theme-color" content="#0e1813" />
+  <link rel="icon" href="assets/svg/Logo.svg" type="image/svg+xml" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700;800;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles/styles.css" />
+  <script src="scripts/skeleton.js"></script>
+</head>
+<body>
+  <div class="viewport-fixed">
+
+    <!-- Header fijo -->
+    <header class="site-header" role="banner">
+      <div class="header-inner">
+        <a class="brand" href="inicio.html">
+          <img src="assets/svg/Logo.svg" alt="Logo Museo El Canario" class="logo-img" />
+          <span class="brand-text"><span class="brand-tag">Museo de la vida rural<br></span>El Canario</span>
+        </a>
+
+        <nav class="main-nav" aria-label="Navegación principal">
+          <a href="cronograma.html" class="nav-link">Cronograma</a>
+          <a href="imagenes.html" class="nav-link">Imágenes</a>
+          <a href="biografia.html" class="nav-link">Biografía</a>
+          <a href="contacto.html" class="nav-link">Contacto</a>
+          <a href="catalogo.html" class="nav-link">Catálogo</a>
+        </nav>
+
+        <!-- Toggle móvil -->
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" type="button">
+          <svg class="menu-icon" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <circle class="menu-circle" cx="24" cy="24" r="20" fill="#c0392b" />
+            <g class="bars" stroke="#fff" stroke-linecap="round" stroke-width="3" stroke-linejoin="round">
+              <line class="bar top" x1="14" y1="18" x2="34" y2="18" />
+              <line class="bar bottom" x1="14" y1="30" x2="34" y2="30" />
+            </g>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Menú desplegable móvil -->
+    <aside class="floating-menu" id="floatingMenu" aria-hidden="true">
+      <div class="floating-inner">
+        <nav class="floating-nav" aria-label="Navegación flotante">
+          <a href="cronograma.html">Cronograma</a>
+          <a href="imagenes.html">Imágenes</a>
+          <a href="biografia.html">Biografía</a>
+          <a href="contacto.html">Contacto</a>
+          <a href="catalogo.html">Catálogo</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Hero -->
+    <main class="hero invertir-tarjeta" role="main" aria-label="Hero">
+      <div class="hero-overlay" aria-hidden="true"></div>
+
+      <section class="card container" role="region" aria-label="Tarjeta principal">
+        <div class="card-inner">
+          <div class="card-copy">
+            <h1 class="card-title">Biografía
+            </h1>
+            <p class="card-lead">
+              Ubicado a <strong>18 kilómetros</strong> al sur de la ciudad de Linares, se encuentra una casa patronal de adobe que data de <strong>1952</strong>. 
+            </p>
+            <p class="card-lead-2">
+              Siendo en su momento una casa habitada por la familia <strong>Aravena</strong>, actualmente es un museo que 
+dispone de un catálogo de más de <strong>1000 objetos</strong> partícipes de la vida campesina del siglo 20, 
+desde: <em>Garrafones de vino, tocadiscos, hasta televisores de tubo.</em>
+            </p>
+            <p class="card-lead-2">
+              Puedes venir a visitarnos y poder recorrer un poco de los objetos que nos acompañaron en nuestra historia.  
+            </p>
+            <a id="cta-recorrer" class="btn-primary" href="inicio.html">VOLVER ATRÁS</a>
+          </div>
+
+          <figure class="card-media">
+            <img src="assets/images/Imagen-biografia.webp" alt="Museo Vista Frontal" width="95" height="120" decoding="async" />
+            <figcaption class="card-caption">
+              <span class="caption-title">MUSEO: LOCAL</span>
+              <span class="caption-detail">MÁQUINAS DE ESCRIBIR Y BOTAS PARA LLUVIA</span>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <script src="scripts/menu.js"></script>
+  <script src="scripts/atmosfera.js"></script>
+<script src="scripts/nav-transition.js"></script>
+</body>
+</html>

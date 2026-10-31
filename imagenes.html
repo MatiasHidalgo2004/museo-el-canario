@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Imágenes — Museo de la vida rural El Canario</title>
+  <meta name="description" content="Galería de imágenes del museo El Canario: aguamaniles, vajillas de cerámica, radios, televisores de tubo y otros objetos expuestos." />
+  <meta name="theme-color" content="#0e1813" />
+  <link rel="icon" href="assets/svg/Logo.svg" type="image/svg+xml" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700;800;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles/styles.css" />
+  <script src="scripts/skeleton.js"></script>
+
+  <!-- Escritorio: la tarjeta de Imágenes replica el alto de las demás páginas.
+       En el resto de secciones ese alto lo fija la foto vertical (relación 0.8)
+       que ocupa el 43% derecho; aquí las fotos del carrusel son cuadradas, así
+       que damos a la caja la misma proporción vertical (0.8) para igualar la
+       altura, y enmarcamos la imagen cuadrada con margen uniforme y redondeo
+       en las cuatro esquinas (no pegada a los bordes del card). -->
+  <style>
+    @media (min-width: 1101px) {
+      .card-media {
+        aspect-ratio: 0.8 !important;   /* misma proporción que las fotos del resto */
+        padding: 18px !important;        /* margen: la imagen no toca los bordes */
+        border-radius: 0 !important;     /* el redondeo exterior lo aporta el card */
+      }
+      .card-media img {
+        border-radius: var(--radius) !important;  /* curvatura en las 4 esquinas */
+      }
+      /* El pie se coloca sobre la foto, dentro del margen de 18px (no sobre el
+         fondo blanco de la caja), y replica el redondeo inferior de la imagen */
+      .card-caption {
+        left:18px;
+        right:18px;
+        bottom:18px;
+        border-radius: 0 0 var(--radius) var(--radius);
+      }
+    }
+
+    /* El pie del carrusel lleva contador a la derecha: el título puede ocupar
+       dos líneas, pero el contador nunca salta a la línea siguiente */
+    .card-caption {
+      flex-wrap: nowrap;
+    }
+    .card-caption .caption-counter {
+      flex: 0 0 auto;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <div class="viewport-fixed">
+
+    <!-- Header fijo -->
+    <header class="site-header" role="banner">
+      <div class="header-inner">
+        <a class="brand" href="inicio.html">
+          <img src="assets/svg/Logo.svg" alt="Logo Museo El Canario" class="logo-img" />
+          <span class="brand-text"><span class="brand-tag">Museo de la vida rural<br></span>El Canario</span>
+        </a>
+
+        <nav class="main-nav" aria-label="Navegación principal">
+          <a href="cronograma.html" class="nav-link">Cronograma</a>
+          <a href="imagenes.html" class="nav-link">Imágenes</a>
+          <a href="biografia.html" class="nav-link">Biografía</a>
+          <a href="contacto.html" class="nav-link">Contacto</a>
+          <a href="catalogo.html" class="nav-link">Catálogo</a>
+        </nav>
+
+        <!-- Toggle móvil -->
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" type="button">
+          <svg class="menu-icon" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <circle class="menu-circle" cx="24" cy="24" r="20" fill="#c0392b" />
+            <g class="bars" stroke="#fff" stroke-linecap="round" stroke-width="3" stroke-linejoin="round">
+              <line class="bar top" x1="14" y1="18" x2="34" y2="18" />
+              <line class="bar bottom" x1="14" y1="30" x2="34" y2="30" />
+            </g>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Menú desplegable móvil -->
+    <aside class="floating-menu" id="floatingMenu" aria-hidden="true">
+      <div class="floating-inner">
+        <nav class="floating-nav" aria-label="Navegación flotante">
+          <a href="cronograma.html">Cronograma</a>
+          <a href="imagenes.html">Imágenes</a>
+          <a href="biografia.html">Biografía</a>
+          <a href="contacto.html">Contacto</a>
+          <a href="catalogo.html">Catálogo</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Hero -->
+    <main class="hero invertir-tarjeta" role="main" aria-label="Hero">
+      <div class="hero-overlay" aria-hidden="true"></div>
+
+      <section class="card container" role="region" aria-label="Tarjeta principal">
+        <div class="card-inner">
+          <div class="card-copy">
+            <h1 class="card-title">Imágenes
+            </h1>
+            <p class="card-lead">
+              Una pequeña selección de imagenes del lugar.
+            </p>
+            <a id="cta-recorrer" class="btn-primary" href="inicio.html">VOLVER ATRÁS</a>
+          </div>
+
+          <figure class="card-media">
+            <img id="carouselImage" src="assets/images/Imagen-1.webp" alt="AGUAMANIL/PÉLELAS" fetchpriority="high" decoding="async" />
+            <figcaption class="card-caption">
+              <span class="caption-title" id="carouselCaption">AGUAMANIL/PÉLELAS</span>
+              <span class="caption-counter" id="carouselCounter">1 / 10</span>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <script src="scripts/menu.js"></script>
+  <script src="scripts/atmosfera.js"></script>
+
+  <!-- Carousel script: solo actúa sobre #carouselImage, su pie #carouselCaption
+       y su contador #carouselCounter; no modifica nada más -->
+  <script>
+  (function(){
+    // --- Configuración: ruta de la imagen y su pie de foto ---
+    const images = [
+      { src:'assets/images/Imagen-1.webp',  caption:'AGUAMANIL/PÉLELAS' },
+      { src:'assets/images/Imagen-2.webp',  caption:'LATA GALLETAS' },
+      { src:'assets/images/Imagen-3.webp',  caption:'VAJILLAS DE CERÁMICA FANALOZA' },
+      { src:'assets/images/Imagen-4.webp',  caption:'BIDONES LECHEROS' },
+      { src:'assets/images/Imagen-5.webp',  caption:'RADIOS' },
+      { src:'assets/images/Imagen-6.webp',  caption:'DAMAJUANAS/GARRAFAS Y CHUICAS' },
+      { src:'assets/images/Imagen-7.webp',  caption:'TELEVISORES DE TUBO' },
+      { src:'assets/images/Imagen-8.webp',  caption:'BÁSCULA DE COCINA' },
+      { src:'assets/images/Imagen-9.webp',  caption:'CUERDA PARA SALTAR Y PELOTA' },
+      { src:'assets/images/Imagen-10.webp', caption:'PORUÑAS' }
+    ];
+
+    const intervalMs = 2000;   // 2 segundos
+
+    // Selecciona únicamente el elemento objetivo
+    const imgEl = document.getElementById('carouselImage');
+    if (!imgEl) return; // si no existe, no hace nada
+
+    // Pie de foto y contador que acompañan a la imagen mostrada
+    const capEl = document.getElementById('carouselCaption');
+    const cntEl = document.getElementById('carouselCounter');
+
+    // Precarga "justo antes": la imagen siguiente se pide mientras se muestra
+    // la actual. La 0 ya viene marcada porque la trae el propio <img> del HTML.
+    const requested = images.map((item, i) => i === 0);
+
+    function preload(position) {
+      const i = ((position % images.length) + images.length) % images.length;
+      if (requested[i]) return;
+      requested[i] = true;
+      const im = new Image();
+      im.decoding = 'async';
+      im.src = images[i].src;
+    }
+
+    let index = 0;
+
+    // Reinicia la animación de entrada del texto (styles.css: @captionIn).
+    // Sin esto, al cambiar el textContent la animación ya había terminado y
+    // no se volvería a ejecutar.
+    function replayText(el) {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      el.style.animation = 'none';
+      void el.offsetWidth; // fuerza reflujo: el navegador "olvida" el estado previo
+      el.style.animation = '';
+    }
+
+    // Actualiza pie, contador y texto alternativo de la imagen en uso
+    function updateCaption(item, position, animate) {
+      imgEl.alt = item.caption;
+      if (capEl) {
+        capEl.textContent = item.caption;
+        if (animate) replayText(capEl);
+      }
+      if (cntEl) {
+        cntEl.textContent = (position + 1) + ' / ' + images.length;
+        if (animate) replayText(cntEl);
+      }
+    }
+
+    // Muestra una imagen junto con su pie y su texto alternativo
+    function showNext() {
+      // Solo actualiza src, alt y pie; no toca clases ni estructura
+      const item = images[index];
+      imgEl.src = item.src;
+      updateCaption(item, index, true);
+      index = (index + 1) % images.length;
+      preload(index); // la próxima imagen, mientras el visitante mira la actual
+    }
+
+    // Inicializa con la primera entrada del array
+    if (images.length > 0) {
+      const first = images[0];
+      if (imgEl.src.indexOf(first.src) === -1) {
+        imgEl.src = first.src;
+      }
+      updateCaption(first, 0, false); // la animación inicial ya la hace CSS
+      preload(1);                    // siguiente imagen lista antes de que toque
+    }
+
+    // Un único gestor del temporizador: centraliza las distintas causas de
+    // pausa y evita duplicarlo si el script se ejecuta más de una vez.
+    let hovered = false;
+
+    function stopTimer() {
+      if (imgEl._carouselTimer) {
+        clearInterval(imgEl._carouselTimer);
+        imgEl._carouselTimer = null;
+      }
+    }
+    function startTimer() {
+      if (imgEl._carouselTimer) return;
+      imgEl._carouselTimer = setInterval(showNext, intervalMs);
+    }
+
+    stopTimer();
+    if (!document.hidden) startTimer();
+
+    // Zona de pausa: la tarjeta de imagen completa (foto + pie), porque el pie
+    // tapa la parte baja de la foto
+    const mediaEl = imgEl.closest('figure') || imgEl;
+
+    // Pausa al pasar el cursor, solo en dispositivos con hover real: en táctil
+    // el "hover" sintético queda pegado al tocar la foto y el carrusel se
+    // detenía para siempre.
+    if (window.matchMedia('(hover: hover)').matches) {
+      mediaEl.addEventListener('mouseenter', () => { hovered = true; stopTimer(); });
+      mediaEl.addEventListener('mouseleave', () => { hovered = false; startTimer(); });
+    }
+
+    // Con la pestaña oculta no tiene sentido seguir gastando batería y CPU
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stopTimer();
+      else if (!hovered) startTimer();
+    });
+
+    // Limpieza al salir de la página
+    window.addEventListener('beforeunload', stopTimer);
+  })();
+  </script>
+<script src="scripts/nav-transition.js"></script>
+</body>
+</html>

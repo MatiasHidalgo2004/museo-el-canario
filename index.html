@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Museo de la vida rural El Canario</title>
+  <meta name="description" content="Museo de la vida rural El Canario en Longaví, Maule: conoce la casa, su historia y más de 1000 objetos de la vida campesina del siglo XX." />
+  <meta name="theme-color" content="#0e1813" />
+  <link rel="icon" href="assets/svg/Logo.svg" type="image/svg+xml" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Montserrat:wght@300;400;700;800;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles/styles.css" />
+  <!-- La portada NO lleva skeleton.js: nada enlaza a ella (solo la URL raíz),
+       su "pantalla de carga" es la propia niebla, que se disuelve al cargar
+       la imagen de introducción (con respaldo al PNG si el webp aún no existe). -->
+  <link rel="preload" as="image" href="assets/images/fondo-intro.webp" />
+</head>
+<body>
+  <!-- .hero para que atmosfera.js inyecte la atmósfera (estelas, polvo y
+       hojas); .portada adapta el hero a pantalla completa sin header -->
+  <main class="hero portada" role="main" aria-label="Portada del Museo El Canario">
+    <!-- Casa isométrica: empieza lejos y desenfocada, baja y se acerca -->
+    <img class="pt-fondo" id="ptFondo" src="assets/images/fondo-intro.webp"
+         alt="Ilustración isométrica de la casa del Museo El Canario"
+         fetchpriority="high" decoding="async" />
+
+    <!-- Velo oscuro (clase global .hero-overlay): da contraste a las
+         partículas, a las estelas y al título sobre la ilustración -->
+    <div class="hero-overlay" aria-hidden="true"></div>
+
+    <!-- Capa central: nombre del museo + botón circular de entrada -->
+    <div class="pt-capa">
+      <h1 class="pt-titulo">Museo de la vida rural<br>El Canario</h1>
+      <a class="pt-entra" id="ptEntra" href="inicio.html" aria-label="Entrar al sitio"></a>
+    </div>
+
+    <!-- Niebla: dos capas que se disuelven (también ocultan la carga) -->
+    <div class="pt-niebla pt-niebla-rapida" aria-hidden="true"></div>
+    <div class="pt-niebla pt-niebla-lenta" aria-hidden="true"></div>
+
+    <p class="pt-pie">© 2026 Museo El Canario</p>
+  </main>
+
+  <script src="scripts/atmosfera.js"></script>
+  <script>
+    // Portada: la secuencia (niebla → descenso/zoom de la casa → nombre →
+    // botón → pie) arranca cuando la imagen carga; la niebla hace de
+    // pantalla de carga y hay tope de 6s por si la red falla. El botón marca
+    // el flag del skeleton, se despide con fundido y entra en inicio.html.
+    // Con "menos movimiento" se navega al instante y todo queda en estado final.
+    (function () {
+      'use strict';
+      var img = document.getElementById('ptFondo');
+      var btn = document.getElementById('ptEntra');
+      var listo = false;
+      var reduce = !!(window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+      function marcarListo() {
+        if (listo) return;
+        listo = true;
+        window.setTimeout(function () {
+          document.documentElement.classList.add('listo');
+        }, 300);                 // pequeño respiro para que el primer frame sea de niebla
+      }
+
+      img.addEventListener('load', marcarListo);
+      img.addEventListener('error', function cae() {
+        img.removeEventListener('error', cae);  // un solo respaldo (PNG), sin bucle
+        img.src = 'assets/images/Fondo-introducción.png';
+      });
+      if (img.complete) {
+        // cacheada (o ya fallada) antes de que corriera este script
+        if (img.naturalWidth) marcarListo();
+        else img.src = 'assets/images/Fondo-introducción.png';
+      }
+      window.setTimeout(marcarListo, 6000);     // tope: nunca pantalla vacía
+
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        // La página de destino (inicio.html) mostrará su skeleton al cargar
+        try { window.sessionStorage.setItem('museo:carga', '1'); }
+        catch (err) { /* sin storage: sin skeleton, todo lo demás igual */ }
+        if (reduce) { window.location.href = btn.href; return; }
+        document.documentElement.classList.add('pt-saliendo');
+        window.setTimeout(function () { window.location.href = btn.href; }, 450);
+      });
+    })();
+  </script>
+</body>
+</html>
