@@ -242,6 +242,21 @@ html { scroll-behavior: smooth; }
 }
 .btn-primary:active{transform:translateY(0);transition-duration:80ms}
 
+/* Símbolo "<" del botón de volver de las escenas (.cr-back): al pasar el
+   cursor (escritorio) o al presionarlo (móvil) se desplaza unos píxeles a la
+   izquierda y crece levemente —gesto que sugiere "volver atrás"— sin salirse
+   de su marco. El < va envuelto en un <span class="cr-back-ico"> para
+   animarlo sin mover el botón; overflow:hidden en .cr-back garantiza que el
+   símbolo siempre quede encuadrado. */
+.cruce-acciones .cr-back { overflow: hidden; }
+.cr-back-ico {
+  transition: transform 220ms cubic-bezier(.2,.7,.3,1);
+}
+.cruce-acciones .cr-back:hover .cr-back-ico,
+.cruce-acciones .cr-back:active .cr-back-ico {
+  transform: translateX(-4px) scale(1.2);
+}
+
 /* Columna de imagen */
 .card-media{
   width:43%;
@@ -1028,6 +1043,7 @@ html.con-skeleton:not(.listo) .card.is-leaving { animation-play-state: running; 
     animation: none !important;
   }
   .btn-primary,
+  .cr-back-ico,
   .nav-link,
   .floating-menu,
   .floating-nav a,
