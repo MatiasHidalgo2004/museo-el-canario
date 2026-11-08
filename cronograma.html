@@ -147,7 +147,8 @@
       to { opacity: 1; transform: translateX(var(--tx, 0px)) scale(1); }
     }
 
-    /* Horizontal: la línea verde de fondo */
+    /* Horizontal: la línea de fondo, teñida con el color de la época
+       (--seg-bg, que fija renderBand con b.color; verde de marca de respaldo) */
     .tl-rail.h { height: 250px; }
     /* 210px: la línea maestra queda a la misma altura que en las épocas
        (44px de cabecera + 148.5px de carril en los dos niveles) */
@@ -160,7 +161,7 @@
       bottom: 100px;
       height: 3px;
       border-radius: 3px;
-      background: linear-gradient(90deg, rgba(47,107,79,.25), var(--brand-green) 12%, var(--brand-green) 88%, rgba(47,107,79,.25));
+      background: linear-gradient(90deg, color-mix(in srgb, var(--seg-bg, var(--brand-green)) 25%, transparent), var(--seg-bg, var(--brand-green)) 12%, var(--seg-bg, var(--brand-green)) 88%, color-mix(in srgb, var(--seg-bg, var(--brand-green)) 25%, transparent));
     }
     /* La línea maestra se dibuja con tramos del color de cada época */
     .tl-rail.h.tm::after { display: none; }
@@ -313,7 +314,7 @@
       bottom: 18px;
       width: 3px;
       border-radius: 3px;
-      background: linear-gradient(180deg, rgba(47,107,79,.25), var(--brand-green) 12%, var(--brand-green) 88%, rgba(47,107,79,.25));
+      background: linear-gradient(180deg, color-mix(in srgb, var(--seg-bg, var(--brand-green)) 25%, transparent), var(--seg-bg, var(--brand-green)) 12%, var(--seg-bg, var(--brand-green)) 88%, color-mix(in srgb, var(--seg-bg, var(--brand-green)) 25%, transparent));
     }
     .vrow {
       display: flex;
@@ -693,7 +694,7 @@
         </a>
 
         <nav class="main-nav" aria-label="Navegación principal">
-          <a href="cronograma.html" class="nav-link">Cronograma</a>
+          <a href="cronograma.html" class="nav-link">Línea de tiempo</a>
           <a href="imagenes.html" class="nav-link">Imágenes</a>
           <a href="biografia.html" class="nav-link">Biografía</a>
           <a href="contacto.html" class="nav-link">Contacto</a>
@@ -717,7 +718,7 @@
     <aside class="floating-menu" id="floatingMenu" aria-hidden="true">
       <div class="floating-inner">
         <nav class="floating-nav" aria-label="Navegación flotante">
-          <a href="cronograma.html">Cronograma</a>
+          <a href="cronograma.html">Línea de tiempo</a>
           <a href="imagenes.html">Imágenes</a>
           <a href="biografia.html">Biografía</a>
           <a href="contacto.html">Contacto</a>
@@ -735,7 +736,7 @@
           <!-- Cabecera: texto a la izquierda, botón a la derecha (en escritorio) -->
           <div class="card-copy tl-top">
             <div class="cc-text">
-              <h1 class="card-title">Cronograma</h1>
+              <h1 class="card-title">Línea de tiempo</h1>
               <p class="card-lead">
                 En la siguiente línea verá la evolución de la vida rural y agrícola en Chile.
               </p>
