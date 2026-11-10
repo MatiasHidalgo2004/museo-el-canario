@@ -1,0 +1,17 @@
+# Sistema operativo
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editores / IDEs
+.vscode/
+.idea/
+*.swp
+
+# Dependencias (por si se añade herramienta Node al proyecto)
+node_modules/
+
+# Temporales y logs
+*.tmp
+*.log
+~$*
