@@ -476,16 +476,16 @@
 
       // Ficha de cada punto: icono (SVG del museo) + título + descripción
       var datos = [
-        { svg: 'assets/svg/Arado.svg',     titulo: 'Arado de mancera',          texto: 'Herramienta agrícola tradicional tirada por animales para preparar la tierra; su hoja curva removía el suelo para sembrar.' },
-        { svg: 'assets/svg/Pala.svg',      titulo: 'Pala cuadrada',             texto: 'Para remover tierra, cargar compost o limpiar corrales. Muy usada en las zonas agrícolas durante la primera mitad del siglo XX.' },
-        { svg: 'assets/svg/Tina.svg',      titulo: 'Tina de lavar',             texto: 'Recipiente grande para lavar ropa a mano, presente en patios y lavaderos; se usaba a la intemperie, junto al tendedero.' },
-        { svg: 'assets/svg/Escoba.svg',    titulo: 'Escoba de quila o colihue', texto: 'Fabricada con fibras naturales, servía para barrer el polvo en interiores, como corredores y patio.' },
-        { svg: 'assets/svg/Palangana.svg', titulo: 'Palangana de barbero',      texto: 'Recipiente de cerámica o metal que usaban los barberos para el lavado y la preparación del afeitado.' },
-        { svg: 'assets/svg/Yunque.svg',    titulo: 'Yunque zapatero',           texto: 'Pieza de hierro forjado también conocida como bigornia o pie de zapatero; se usaba para sostener los zapatos durante su reparación.' },
-        { svg: 'assets/svg/Radio-transistores.svg', titulo: 'Radio de transistores', texto: 'Radio compacta que reproducía noticias o música gracias a los transistores, pequeños receptores electrónicos.' },
-        { svg: 'assets/svg/Balde.svg',     titulo: 'Balde de pozo',             texto: 'Recipiente metálico o de madera para extraer agua del pozo; vital en la vida rural antes de la llegada del agua corriente.' },
-        { svg: 'assets/svg/Hacha.svg',     titulo: 'Hacha de mano',             texto: 'Herramienta con hoja metálica y mango de madera para cortar troncos y ramas; fuente principal de energía en hogares sin electricidad.' },
-        { svg: 'assets/svg/Mecedora.svg',  titulo: 'Mecedora de mimbre',        texto: 'Silla liviana y flexible con base en forma de arco; su meneo ligero y suave ayudaba al reposo.' }
+        { svg: 'assets/svg/Arado.svg',     titulo: 'Arado de mancera',          texto: 'Herramienta agrícola tradicional, tirada por animales, usada para preparar la tierra de cultivo.' },
+        { svg: 'assets/svg/Pala.svg',      titulo: 'Pala cuadrada',             texto: 'Utilizada para remover tierra, cargar compost o limpiar corrales.' },
+        { svg: 'assets/svg/Tina.svg',      titulo: 'Tina de lavar',             texto: 'Recipiente grande para lavar ropa a mano, presente en patios y lavaderos.' },
+        { svg: 'assets/svg/Escoba.svg',    titulo: 'Escoba de quila', texto: 'Fabricada con fibras vegetales, servía para barrer y mantener la limpieza del polvo.' },
+        { svg: 'assets/svg/Palangana.svg', titulo: 'Palangana de barbero',      texto: 'Recipiente de cerámica o metálico utilizado por barberos para lavar y preparar el afeitado.' },
+        { svg: 'assets/svg/Yunque.svg',    titulo: 'Yunque zapatero',           texto: 'Pieza de hierro forjado utilizaba para sostener los zapatos durante su reparación o fabricación.' },
+        { svg: 'assets/svg/Radio-transistores.svg', titulo: 'Radio de transistores', texto: 'Reproductor de ondas de radio, música o noticias por medio de transistores.' },
+        { svg: 'assets/svg/Balde.svg',     titulo: 'Balde de pozo',             texto: 'Recipiente metálico o de madera usado para extraer agua del pozo.' },
+        { svg: 'assets/svg/Hacha.svg',     titulo: 'Hacha de mano',             texto: 'Herramienta formada por una hoja metálica y un mango, usada para cortar madera.' },
+        { svg: 'assets/svg/Mecedora.svg',  titulo: 'Mecedora de mimbre',        texto: 'Silla con un movimiento oscilante por su base arqueada para menearse ligeramente, ayudando al reposo.' }
       ];
       // scripts/objetos.js (compartido): objetos flotantes detrás de la intermedia
       window.escenaDatos = datos;
@@ -530,7 +530,7 @@
 
         icono.src = d.svg;
         titulo.textContent = d.titulo;
-        texto.textContent = d.texto;
+        texto.innerHTML = d.texto;
 
         pt.classList.add('is-on');
         pt.setAttribute('aria-expanded', 'true');
