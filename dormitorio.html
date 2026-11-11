@@ -499,16 +499,16 @@
 
       // Ficha de cada punto: icono (SVG del museo) + título + descripción
       var datos = [
-        { svg: 'assets/svg/Pupitre.svg',   titulo: 'Pupitre escolar',           texto: 'Mueble de madera usado en colegios, con un apartado para guardar los cuadernos; su fabricación se impulsó con la reforma de 1965.' },
-        { svg: 'assets/svg/Brasero.svg',   titulo: 'Brasero calienta camas',     texto: 'Recipiente metálico con brasas que se colocaba para templar el lecho en noches frías; habitual hasta mediados del siglo XX.' },
-        { svg: 'assets/svg/Guatero.svg',   titulo: 'Guatero de goma',            texto: 'Botella de goma que se llenaba de agua caliente para dar calor; también se hacían de forma artesanal con botellas y piedras calientes.' },
-        { svg: 'assets/svg/Telefono.svg',  titulo: 'Teléfono de disco',          texto: 'Aparato fijo de comunicación doméstica de mediados del siglo XX, con un disco giratorio para marcar los números de forma secuencial.' },
-        { svg: 'assets/svg/Aguamanil.svg', titulo: 'Aguamanil',                  texto: 'Conjunto de jarra y palangana de cerámica o latón, usado para el aseo personal antes de la llegada del agua corriente.' },
-        { svg: 'assets/svg/Televisor.svg', titulo: 'Televisor de tubo catódico', texto: 'Aparato que mostraba la imagen mediante haces de luz que chocaban sobre una pantalla de fósforo; llegó a los hogares en los años 60.' },
-        { svg: 'assets/svg/Plancha.svg',   titulo: 'Plancha de brasas',          texto: 'Utensilio metálico con brasas para alisar la ropa; muy usado en la primera mitad del siglo XX, antes de las planchas eléctricas.' },
-        { svg: 'assets/svg/Silla-orinal.svg', titulo: 'Silla orinal para niño', texto: 'Mueble adaptado para la higiene infantil, usado en hogares hasta fines del siglo XX.' },
-        { svg: 'assets/svg/Pelela.svg',    titulo: 'Pélela',                     texto: 'Recipiente portátil para necesidades fisiológicas, usado en la habitación sobre todo de noche; también hay modelos desechables de cartón.' },
-        { svg: 'assets/svg/Radiador.svg',  titulo: 'Radiador eléctrico de aceite', texto: 'Aparato moderno de calefacción, introducido en la segunda mitad del siglo XX.' }
+        { svg: 'assets/svg/Pupitre.svg',   titulo: 'Pupitre escolar',           texto: 'Mueble de madera utilizado para el estudio. Impulsado su fabricación en 1965 tras reformas.' },
+        { svg: 'assets/svg/Brasero.svg',   titulo: 'Brasero calienta camas',     texto: 'Recipiente metálico con brasas que se colocaba para templar el lecho en noches frías.' },
+        { svg: 'assets/svg/Guatero.svg',   titulo: 'Guatero de goma',            texto: 'Botella de goma que se llenaba de agua caliente para dar calor. Hechos también con botellas, piedras o ladrillos calientes.' },
+        { svg: 'assets/svg/Telefono.svg',  titulo: 'Teléfono de disco',          texto: 'Aparato fijo de comunicación doméstica, con un disco giratorio para marcar los números telefónicos.' },
+        { svg: 'assets/svg/Aguamanil.svg', titulo: 'Aguamanil',                  texto: 'Conjunto de jarra y palangana de cerámica o latón, usado para el aseo.' },
+        { svg: 'assets/svg/Televisor.svg', titulo: 'Televisor de tubo', texto: 'Aparato de visualización mediante el choque de haces de luz sobre una pantalla.' },
+        { svg: 'assets/svg/Plancha.svg',   titulo: 'Plancha de brasas',          texto: 'Utensilio metálico donde se colocaban brasas para alisar la ropa.' },
+        { svg: 'assets/svg/Silla-orinal.svg', titulo: 'Silla orinal de niño', texto: 'Mueble adaptado para la higiene infantil, usado en hogares hasta fines del siglo XX.' },
+        { svg: 'assets/svg/Pelela.svg',    titulo: 'Pélela',                     texto: 'Recipiente portátil para necesidades fisiológicas, Viendo modelos desechables de cartón.' },
+        { svg: 'assets/svg/Radiador.svg',  titulo: 'Radiador eléctrico', texto: 'Aparato moderno de calefacción, introducido en la segunda mitad del siglo XX.' }
       ];
       // scripts/objetos.js (compartido): objetos flotantes detrás de la intermedia
       window.escenaDatos = datos;
@@ -553,7 +553,7 @@
 
         icono.src = d.svg;
         titulo.textContent = d.titulo;
-        texto.textContent = d.texto;
+        texto.innerHTML = d.texto;
 
         pt.classList.add('is-on');
         pt.setAttribute('aria-expanded', 'true');
